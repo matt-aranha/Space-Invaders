@@ -1,0 +1,29 @@
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: black;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+#menu {
+  text-align: center;
+}
+
+#play-btn {
+  font-size: 24px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #0f0;
+  cursor: pointer;
+}
+
+canvas {
+  background: #111;
+  display: block;
+  margin: auto;
+}

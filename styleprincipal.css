@@ -1,0 +1,66 @@
+body {
+    background: linear-gradient(135deg, #181c24 0%, #232946 100%);
+    color: #eaeaea;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background: rgba(30, 34, 54, 0.85);
+    border-bottom: 2px solid #393e60;
+    box-shadow: 0 4px 24px 0 #181c24;
+    padding: 40px 0 30px 0;
+    text-align: center;
+}
+
+header h1 {
+    color: #ff5470;
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 12px #232946;
+}
+
+header p {
+    color: #eaeaea;
+    font-size: 1.2rem;
+    margin: 8px 0;
+    text-shadow: 0 1px 8px #232946;
+}
+
+button {
+    display: block;
+    margin: 40px auto 0 auto;
+    padding: 16px 36px;
+    background: linear-gradient(90deg, #232946 60%, #393e60 100%);
+    color: #ff5470;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    box-shadow: 0 2px 16px 0 #181c24;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+
+button:hover {
+    background: linear-gradient(90deg, #393e60 60%, #232946 100%);
+    color: #fff;
+    transform: scale(1.05);
+}
+
+@media (max-width: 600px) {
+    header h1 {
+        font-size: 1.5rem;
+    }
+    header p {
+        font-size: 1rem;
+    }
+    button {
+        font-size: 1rem;
+        padding: 12px 20px;
+    }
+}
