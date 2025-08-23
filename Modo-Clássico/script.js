@@ -15,6 +15,10 @@ const enemyImg3 = new Image();
 enemyImg3.src = "assets/Alien3(192x192)_0001.png";
 const baseImg = new Image();
 baseImg.src = "assets/base.avif"
+const vidaImg = new Image();
+vidaImg.src = "assets/vida(192x192).png"
+const semvidaImg = new Image();
+semvidaImg.src = "assets/sem-vida(192x192).png"
 
 // Função que carrega as informações de cada entidade do game
 const state = {
@@ -24,7 +28,7 @@ const state = {
   enemyBullets: [],
   bullets: [],
   wave: 1,
-  enemyFireRate: 0.0015,
+  enemyFireRate: 0.0002,
   enemies: (function spawn() { const cols = 9, rows = 4;
      return Array.from({ length: cols * rows },
      (_, i) => ({ x: 300 + (i % cols) * 60,
@@ -39,6 +43,28 @@ const state = {
      y: 550 + Math.floor(i / cols) * 40, w: 100, h: 35, hp: 10, hpMax: 10, hit: 0, alive: true })); })()
 };
 
+// -----VIDA------
+// Função que recebe o número de vidas e devolve as imagens corretas
+const renderLives = (lives, maxLives = 3) => 
+  Array.from({ length: maxLives }, (_, i) =>
+    i < lives ? "assets/vida(192x192).png" : "assets/sem-vida(192x192).png"
+  );
+
+// Função que transforma a lista de imagens em DOM (strings) HTML
+const livesToHTML = (lives) =>
+  renderLives(lives)
+    .map(src => `<img src="${src}" width="30" height="30" />`)
+    .join("");
+
+// Função que atualiza o DOM
+const updateLivesUI = (state) => {
+  const container = document.getElementById("lives-container");
+  container.innerHTML = livesToHTML(state.player.lives);
+};
+
+
+
+// ------ KEYS -----
 // Função que recebe os input da interação teclado do usuário e game
 const keys = {};
 document.addEventListener("keydown", e => { keys[e.code] = true; if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) e.preventDefault(); });
@@ -243,6 +269,7 @@ const update = (dt) => {
 const drawRect = (x, y, w, h, color) => { ctx.fillStyle = color; ctx.fillRect(x, y, w, h); };
 const render = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  updateLivesUI(state);
 
   // Player
   if (state.player.invincible > 0) {
