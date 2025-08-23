@@ -23,7 +23,7 @@ const state = {
   player: { x: (canvas.width / 2) - 25, y: canvas.height - 80, w: 90, h: 70, speed: 450, cooldown: 0, lives: 3 },
   enemyBullets: [],
   bullets: [],
-  enemies: (function spawn() { const cols = 8, rows = 3; return Array.from({ length: cols * rows }, (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 80) / cols), y: 40 + Math.floor(i / cols) * 40, w: 36, h: 28, alive: true })); })(),
+  enemies: (function spawn() { const cols = 8, rows = 3; return Array.from({ length: cols * rows }, (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 80) / cols), y: 40 + Math.floor(i / cols) * 40, w: 64, h: 64, alive: true })); })(),
   enemyDir: 1, enemySpeed: 30, score: 0, audio: { ctx: null, masterGain: null, bgOscs: [] },
   base: (function spawn() { const cols = 3, rows = 1; return Array.from({ length: cols * rows }, (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols), y: 550 + Math.floor(i / cols) * 40, w: 100, h: 35, alive: true })); })()
 };
@@ -182,13 +182,13 @@ const update = (dt) => {
   const alive = state.enemies.filter(e => e.alive);
   if (alive.length === 0) {
     // respawn e aumenta velocidade
-    state.enemies = (function spawn() { const cols = 8, rows = 4; return Array.from({ length: cols * rows }, (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 80) / cols), y: 40 + Math.floor(i / cols) * 40, w: 36, h: 18, alive: true })); })();
+    state.enemies = (function spawn() { const cols = 8, rows = 4; return Array.from({ length: cols * rows }, (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 80) / cols), y: 40 + Math.floor(i / cols) * 40, w: 64, h: 64, alive: true })); })();
     state.enemySpeed += 8;
-    state.enemies = (function spawn() { const cols = 9, rows = 4; return Array.from({ length: cols * rows }, (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 80) / cols), y: 40 + Math.floor(i / cols) * 40, w: 36, h: 18, alive: true })); })();
+    state.enemies = (function spawn() { const cols = 9, rows = 4; return Array.from({ length: cols * rows }, (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 80) / cols), y: 40 + Math.floor(i / cols) * 40, w: 64, h: 64, alive: true })); })();
     state.enemySpeed += 9;
-    state.enemies = (function spawn() { const cols = 8, rows = 5; return Array.from({ length: cols * rows }, (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 80) / cols), y: 40 + Math.floor(i / cols) * 40, w: 36, h: 18, alive: true })); })();
+    state.enemies = (function spawn() { const cols = 8, rows = 5; return Array.from({ length: cols * rows }, (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 80) / cols), y: 40 + Math.floor(i / cols) * 40, w: 64, h: 64, alive: true })); })();
     state.enemySpeed += 9.5;
-    state.enemies = (function spawn() { const cols = 9, rows = 6; return Array.from({ length: cols * rows }, (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 80) / cols), y: 40 + Math.floor(i / cols) * 40, w: 36, h: 18, alive: true })); })();
+    state.enemies = (function spawn() { const cols = 9, rows = 6; return Array.from({ length: cols * rows }, (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 80) / cols), y: 40 + Math.floor(i / cols) * 40, w: 64, h: 64, alive: true })); })();
     state.enemySpeed += 9.5;
 
   } else {
@@ -329,6 +329,6 @@ playBtn.addEventListener("click", () => {
   state.player.lives = 3;
   state.enemyBullets = [];
   state.bullets = [];
-  state.enemies = (function spawn() { const cols = 8, rows = 3; return Array.from({ length: cols * rows }, (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 80) / cols), y: 40 + Math.floor(i / cols) * 40, w: 36, h: 18, alive: true })); })();
+  state.enemies = (function spawn() { const cols = 8, rows = 3; return Array.from({ length: cols * rows }, (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 80) / cols), y: 40 + Math.floor(i / cols) * 40, w: 64, h: 64, alive: true })); })();
   requestAnimationFrame(loop);
 });
