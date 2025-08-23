@@ -23,7 +23,8 @@ body {
 }
 
 canvas {
-  background: #111;
+  background-image: url(/Modo-Clássico/assets/Espaço\(1200x720\).png);
+  background-size: cover;
   display: block;
   margin: auto;
 }
