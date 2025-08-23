@@ -17,6 +17,7 @@ const baseImg = new Image();
 baseImg.src = "assets/base(escudo).png"
 
 
+
 const state = {
   running: false,
   lastTime: 0,
