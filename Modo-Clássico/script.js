@@ -40,7 +40,7 @@ const state = {
   base: (function spawn() { const cols = 3, rows = 1;
      return Array.from({ length: cols * rows },
      (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
-     y: 550 + Math.floor(i / cols) * 40, w: 100, h: 35, hp: 10, hpMax: 10, hit: 0, alive: true })); })()
+     y: 550 + Math.floor(i / cols) * 40, w: 50, h: 50, hp: 10, hpMax: 10, hit: 0, alive: true })); })()
 };
 
 // -----VIDA------
