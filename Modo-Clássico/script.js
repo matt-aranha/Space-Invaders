@@ -1,10 +1,10 @@
-
+//inports brabos
 const canvas = document.querySelector("#space-invaders");
 const ctx = canvas.getContext("2d");
 const playBtn = document.querySelector("#play-btn");
 const menu = document.querySelector("#menu");
 
-// images dos jogadores e dos inimigos
+// images dos jogadores e dos inimigos, suas respectivas bases, cenário...
 const playerImg = new Image();
 playerImg.src = "assets/nave.png";
 const enemyImg1 = new Image();
@@ -16,30 +16,32 @@ enemyImg3.src = "assets/Alien3(192x192)_0001.png";
 const baseImg = new Image();
 baseImg.src = "assets/base.avif"
 
-
-
+// Função que carrega as informações de cada entidade do game
 const state = {
   running: false,
   lastTime: 0,
   player: { x: (canvas.width / 2) - 25, y: canvas.height - 80, w: 90, h: 70, speed: 450, cooldown: 0, lives: 3, invincible: 0 },
   enemyBullets: [],
   bullets: [],
-  enemies: (function spawn() { const cols = 8, rows = 3;
+  wave: 1,
+  enemyFireRate: 0.0015,
+  enemies: (function spawn() { const cols = 9, rows = 4;
      return Array.from({ length: cols * rows },
-     (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 80) / cols),
+     (_, i) => ({ x: 300 + (i % cols) * 60,
      y: 40 + Math.floor(i / cols) * 40, w: 64, h: 64, alive: true, type: 1 })); })(),
   enemyDir: 1, enemySpeed: 30, score: 0, audio: { ctx: null, masterGain: null, bgOscs: [] },
   base: (function spawn() { const cols = 3, rows = 1;
      return Array.from({ length: cols * rows },
      (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
-     y: 550 + Math.floor(i / cols) * 40, w: 100, h: 35, hp: 8, hpMax: 8, hit: 0, alive: true })); })()
+     y: 550 + Math.floor(i / cols) * 40, w: 100, h: 35, hp: 10, hpMax: 10, hit: 0, alive: true })); })()
 };
 
+// Função que recebe os input da interação teclado do usuário e game
 const keys = {};
 document.addEventListener("keydown", e => { keys[e.code] = true; if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) e.preventDefault(); });
 document.addEventListener("keyup", e => { keys[e.code] = false; });
 
-// --- Áudio (WebAudio) ---
+// --- Áudio (WebAudio), mecanica de audio exportada ---
 const ensureAudio = () => {
   if (state.audio.ctx) return;
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -51,8 +53,7 @@ const ensureAudio = () => {
   state.audio.masterGain.connect(a.destination);
 };
 
-
-// Função para tocar um tom com frequência, duração e tipo especificados
+// Função para fazer tocar um tom com frequência, duração e tipo especificados
 const playTone = (freq, duration = 0.08, type = "square", vol = 0.12) => {
   const a = state.audio.ctx;
   if (!a) return;
@@ -76,15 +77,14 @@ const tiro = () => {
   playTone(1000, 0.06, "square", 0.08);
 };
 
-
-// Função recursiva para processar colisões entre balas e inimigos
+// Função para processar colisões entre balas e inimigos
 function processBullets(bullets, enemies, idx = 0) {
   if (idx >= bullets.length) return;
   const b = bullets[idx];
   processEnemies(b, enemies, 0);
   processBullets(bullets, enemies, idx + 1);
 }
-
+// Função que relaciona os inimigos com os tiros que produzem assim também como se posicionam no canva
 function processEnemies(bullet, enemies, idx) {
   if (idx >= enemies.length) return;
   const e = enemies[idx];
@@ -92,7 +92,7 @@ function processEnemies(bullet, enemies, idx) {
     bullet.x < e.x + e.w && bullet.x + bullet.w > e.x &&
     bullet.y < e.y + e.h && bullet.y + bullet.h > e.y) {
     e.alive = false;
-    bullet.y = -9999; // marca pra remoção
+    bullet.y = -9999; // marca pra remoção, saem do plano
     state.score += 10;
     playTone(220 + Math.random() * 200, 0.12, "sawtooth", 0.06);
     return; // Para após a primeira colisão
@@ -118,7 +118,7 @@ function processBulletBase(bullet, base, idx) {
   processBulletBase(bullet, base, idx + 1);
 }
 
-// Função recursiva para verificar se algum inimigo chegou na base
+// Função para verificar se algum inimigo chegou na base
 function checkEnemyBase(enemies, idx = 0) {
   if (idx >= enemies.length) return;
   const e = enemies[idx];
@@ -130,12 +130,11 @@ function checkEnemyBase(enemies, idx = 0) {
   checkEnemyBase(enemies, idx + 1);
 }
 
-
-//verefica se esta respeitando os paradigmas funcinal
+// Função tiro dos inimigos, chablau
 function enemyShoot() {
   // Escolhe inimigos vivos aleatoriamente para atirar
   state.enemies.forEach(e => {
-    if (e.alive && Math.random() < 0.002) { // ajuste a chance como quiser
+    if (e.alive && Math.random() < state.enemyFireRate) {
       state.enemyBullets.push({
         x: e.x + e.w / 2 - 2,
         y: e.y + e.h,
@@ -148,9 +147,7 @@ function enemyShoot() {
   });
 }
 
-
-
-
+//função que retorna as modificações do state inicial
 const update = (dt) => {
   if (state.player.invincible > 0) {
   state.player.invincible -= dt;
@@ -186,7 +183,6 @@ const update = (dt) => {
 // atualiza timer de flash da base
   state.base = state.base.map(br => br.alive ? { ...br, hit: Math.max(0, (br.hit || 0) - dt) } : br);
 
-
   // movimento do jogador
   const dir = (keys["ArrowLeft"] || keys["KeyA"] ? -0.5 : 0) + (keys["ArrowRight"] || keys["KeyD"] ? 0.5 : 0);
   state.player.x += dir * state.player.speed * dt;
@@ -202,11 +198,13 @@ const update = (dt) => {
   // mover inimigos e tratar troca de direção / queda
   const alive = state.enemies.filter(e => e.alive);
   if (alive.length === 0) {
-  state.enemySpeed += 8; // sobe a dificuldade
+  state.wave += 1;
+  state.enemySpeed += 9;
+  state.enemyFireRate *= 1,11; // sobe a dificuldade
   state.enemies = (function spawn() { 
     const cols = 9, rows = 4; 
     return Array.from({ length: cols * rows }, (_, i) => ({ 
-      x: 40 + (i % cols) * ((canvas.width - 40) / cols), 
+      x: 300 + (i % cols) * 60, 
       y: 40 + Math.floor(i / cols) * 40, 
       w: 64, h: 64, 
       alive: true, 
@@ -233,9 +231,8 @@ const update = (dt) => {
   checkEnemyBase(state.enemies);
 };
 
-// --- Render ---
+// --- Render --- (mostrar,criar e desenhar na tela)
 const drawRect = (x, y, w, h, color) => { ctx.fillStyle = color; ctx.fillRect(x, y, w, h); };
-
 const render = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -278,7 +275,6 @@ state.base.forEach(b => {
   state.enemyBullets.forEach(b => drawRect(b.x, b.y, b.w, b.h, "#ff5470"));
 
   // Enemies
-
   state.enemies.forEach(e => {
    if (!e.alive) return;
    if (e.type === 1) ctx.drawImage(enemyImg1, e.x, e.y, e.w, e.h);
@@ -286,11 +282,8 @@ state.base.forEach(b => {
    if (e.type === 3) ctx.drawImage(enemyImg3, e.x, e.y, e.w, e.h);
   });
   
-
   ctx.fillStyle = "#fff"; ctx.font = "16px monospace"; ctx.fillText("Score: " + state.score, 10, 20);
 
-
-  //verefica se esta respeitando os paradigmas funcinal
   if (!state.running) {
     ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#ff5470"; ctx.font = "34px monospace"; ctx.textAlign = "center";
@@ -314,7 +307,7 @@ state.base.forEach(b => {
   }
 };
 
-// --- Detecta clique no botão de reiniciar ---
+// --- Detecta clique no botão de reiniciar, como um evento de retorno ---
 canvas.addEventListener("click", function (e) {
   if (state.running) return;
   const rect = canvas.getBoundingClientRect();
@@ -338,13 +331,13 @@ canvas.addEventListener("click", function (e) {
     state.player.lives = 3;
     state.enemyBullets = [];
     state.bullets = [];
-    state.enemies = (function spawn() { const cols = 8, rows = 3; return Array.from({ length: cols * rows }, (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 40) / cols), 
+    state.enemies = (function spawn() { const cols = 8, rows = 3; return Array.from({ length: cols * rows }, (_, i) => ({ x: 300 + (i % cols) *60, 
       y: 40 + Math.floor(i / cols) * 40, w: 64, h: 64, alive: true, type: Math.floor(Math.random() * 3) + 1 })); })();
     requestAnimationFrame(loop);
   }
     state.base = (function spawn() { const cols = 3, rows = 1; return Array.from({ length: cols * rows }, (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
     y: 550 + Math.floor(i / cols) * 40, 
-    w: 100, h: 35, hp: 8, hpMax: 8, hit: 0,alive: true 
+    w: 100, h: 35, hp: 10, hpMax: 10, hit: 0,alive: true 
   })); 
 })();
 });
@@ -371,11 +364,11 @@ playBtn.addEventListener("click", () => {
   state.player.lives = 3;
   state.enemyBullets = [];
   state.bullets = [];
-  state.enemies = (function spawn() { const cols = 8, rows = 3; return Array.from({ length: cols * rows }, (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 40) / cols),
+  state.enemies = (function spawn() { const cols = 8, rows = 3; return Array.from({ length: cols * rows }, (_, i) => ({ x: 300 + (i % cols) * 60,
      y: 40 + Math.floor(i / cols) * 40, w: 64, h: 64, alive: true, type: Math.floor(Math.random() * 3) + 1 })); })();
   requestAnimationFrame(loop);
   state.base = (function spawn() { const cols = 3, rows = 1; return Array.from({ length: cols * rows }, (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
-    y: 550 + Math.floor(i / cols) * 40, w: 100, h: 35, hp: 8, hpMax: 8, hit: 0,alive: true 
+    y: 550 + Math.floor(i / cols) * 40, w: 100, h: 35, hp: 10, hpMax: 10, hit: 0,alive: true 
   })); 
 })();
 });
