@@ -28,7 +28,7 @@ const state = {
   enemyBullets: [],
   bullets: [],
   wave: 1,
-  enemyFireRate: 0.0002,
+  enemyFireRate: 0.002,
   enemies: (function spawn() { const cols = 9, rows = 4;
      return Array.from({ length: cols * rows },
      (_, i) => ({ x: 300 + (i % cols) * 60,
@@ -233,8 +233,8 @@ const update = (dt) => {
   const alive = state.enemies.filter(e => e.alive);
   if (alive.length === 0) {
   state.wave += 1;
-  state.enemySpeed += 9;
-  state.enemyFireRate *= 1,11; // sobe a dificuldade
+  state.enemySpeed += 10;
+  state.enemyFireRate *= 1,12; // sobe a dificuldade
   state.enemies = (function spawn() { 
     const cols = 9, rows = 4; 
     return Array.from({ length: cols * rows }, (_, i) => ({ 
