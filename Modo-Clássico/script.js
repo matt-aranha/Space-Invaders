@@ -24,7 +24,7 @@ const state = {
   enemyBullets: [],
   bullets: [],
   wave: 1,
-  enemyFireRate: 0.0015,
+  enemyFireRate: 0.0002,
   enemies: (function spawn() { const cols = 9, rows = 4;
      return Array.from({ length: cols * rows },
      (_, i) => ({ x: 300 + (i % cols) * 60,
