@@ -29,7 +29,10 @@ const state = {
      return Array.from({ length: cols * rows },
      (_, i) => ({ x: 300 + (i % cols) * 60,
      y: 40 + Math.floor(i / cols) * 40, w: 64, h: 64, alive: true, type: 1 })); })(),
-  enemyDir: 1, enemySpeed: 30, score: 0, audio: { ctx: null, masterGain: null, bgOscs: [] },
+  enemyDir: 1, 
+  enemySpeed: 30, 
+  score: 0, 
+  audio: { ctx: null, masterGain: null, bgOscs: [] },
   base: (function spawn() { const cols = 3, rows = 1;
      return Array.from({ length: cols * rows },
      (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
@@ -98,7 +101,7 @@ function processEnemies(bullet, enemies, idx) {
     bullet.y < e.y + e.h && bullet.y + bullet.h > e.y) {
     e.alive = false;
     bullet.y = -9999; // marca pra remoção, saem do plano
-    state.score += enemyPoints[enemies.type];
+    state.score += enemyPoints[e.type];
     playTone(220 + Math.random() * 200, 0.12, "sawtooth", 0.06);
     return; // Para após a primeira colisão
   }
