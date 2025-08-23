@@ -302,7 +302,7 @@ canvas.addEventListener("click", function (e) {
     state.player.lives = 3;
     state.enemyBullets = [];
     state.bullets = [];
-    state.enemies = (function spawn() { const cols = 8, rows = 3; return Array.from({ length: cols * rows }, (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 80) / cols), y: 40 + Math.floor(i / cols) * 40, w: 36, h: 18, alive: true })); })();
+    state.enemies = (function spawn() { const cols = 8, rows = 3; return Array.from({ length: cols * rows }, (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 80) / cols), y: 40 + Math.floor(i / cols) * 40, w: 64, h: 64, alive: true })); })();
     requestAnimationFrame(loop);
   }
 });
