@@ -7,8 +7,12 @@ const menu = document.querySelector("#menu");
 // images dos jogadores e dos inimigos
 const playerImg = new Image();
 playerImg.src = "assets/nave.png";
-const enemyImg = new Image();
-enemyImg.src = "assets/invader2.png";
+const enemyImg1 = new Image();
+enemyImg1.src = "assets/Alien1(192x192).png";
+const enemyImg2 = new Image();
+enemyImg2.src = "assets/Alien2(192x192)_0001.png";
+const enemyImg3 = new Image();
+enemyImg3.src = "assets/Alien3(192x192)_0001.png";
 const baseImg = new Image();
 baseImg.src = "assets/base(escudo).png"
 
@@ -244,7 +248,7 @@ const render = () => {
 
   // Enemies
   state.enemies.forEach(e => {
-    if (e.alive) ctx.drawImage(enemyImg, e.x, e.y, e.w, e.h);
+    if (e.alive) ctx.drawImage(enemyImg1, e.x, e.y, e.w, e.h);
   });
 
   ctx.fillStyle = "#fff"; ctx.font = "16px monospace"; ctx.fillText("Score: " + state.score, 10, 20);
