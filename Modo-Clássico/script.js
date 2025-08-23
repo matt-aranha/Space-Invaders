@@ -14,7 +14,7 @@ enemyImg2.src = "assets/Alien2(192x192)_0001.png";
 const enemyImg3 = new Image();
 enemyImg3.src = "assets/Alien3(192x192)_0001.png";
 const baseImg = new Image();
-baseImg.src = "assets/base.avif"
+baseImg.src = "assets/escudo(192x192).png"
 const vidaImg = new Image();
 vidaImg.src = "assets/vida(192x192).png"
 const semvidaImg = new Image();
@@ -40,7 +40,7 @@ const state = {
   base: (function spawn() { const cols = 3, rows = 1;
      return Array.from({ length: cols * rows },
      (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
-     y: 550 + Math.floor(i / cols) * 40, w: 100, h: 35, hp: 10, hpMax: 10, hit: 0, alive: true })); })()
+     y: 550 + Math.floor(i / cols) * 40, w: 50, h: 50, hp: 10, hpMax: 10, hit: 0, alive: true })); })()
 };
 
 // -----VIDA------
