@@ -14,19 +14,25 @@ enemyImg2.src = "assets/Alien2(192x192)_0001.png";
 const enemyImg3 = new Image();
 enemyImg3.src = "assets/Alien3(192x192)_0001.png";
 const baseImg = new Image();
-baseImg.src = "assets/base(escudo).png"
+baseImg.src = "assets/base.avif"
 
 
 
 const state = {
   running: false,
   lastTime: 0,
-  player: { x: (canvas.width / 2) - 25, y: canvas.height - 80, w: 90, h: 70, speed: 450, cooldown: 0, lives: 3 },
+  player: { x: (canvas.width / 2) - 25, y: canvas.height - 80, w: 90, h: 70, speed: 450, cooldown: 0, lives: 3, invincible: 0 },
   enemyBullets: [],
   bullets: [],
-  enemies: (function spawn() { const cols = 8, rows = 3; return Array.from({ length: cols * rows }, (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 80) / cols), y: 40 + Math.floor(i / cols) * 40, w: 64, h: 64, alive: true })); })(),
+  enemies: (function spawn() { const cols = 8, rows = 3;
+     return Array.from({ length: cols * rows },
+     (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 80) / cols),
+     y: 40 + Math.floor(i / cols) * 40, w: 64, h: 64, alive: true, type: 1 })); })(),
   enemyDir: 1, enemySpeed: 30, score: 0, audio: { ctx: null, masterGain: null, bgOscs: [] },
-  base: (function spawn() { const cols = 3, rows = 1; return Array.from({ length: cols * rows }, (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols), y: 550 + Math.floor(i / cols) * 40, w: 100, h: 35, alive: true })); })()
+  base: (function spawn() { const cols = 3, rows = 1;
+     return Array.from({ length: cols * rows },
+     (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
+     y: 550 + Math.floor(i / cols) * 40, w: 100, h: 35, hp: 8, hpMax: 8, hit: 0, alive: true })); })()
 };
 
 const keys = {};
@@ -99,15 +105,18 @@ function processBulletBase(bullet, base, idx) {
   if (idx >= base.length) return;
   const e = base[idx];
   if (e.alive &&
-    bullet.x < e.x + e.w && bullet.x + bullet.w > e.x &&
-    bullet.y < e.y + e.h && bullet.y + bullet.h > e.y) {
-    e.alive = false;
-    bullet.y = -9999; // marca pra remoção // Para após a primeira colisão
+      bullet.x < e.x + e.w && bullet.x + bullet.w > e.x &&
+      bullet.y < e.y + e.h && bullet.y + bullet.h > e.y) {
+    e.hp -= 1;             // perde vida
+    e.hit = 0.12;          // flash rápido ao ser atingida
+    bullet.y = canvas.height + 100; // remove o tiro (filtro pega)
+    if (e.hp <= 0) {
+      e.alive = false;
+    }
+    return; // evita múltiplos acertos no mesmo frame
   }
   processBulletBase(bullet, base, idx + 1);
-
 }
-
 
 // Função recursiva para verificar se algum inimigo chegou na base
 function checkEnemyBase(enemies, idx = 0) {
@@ -143,29 +152,40 @@ function enemyShoot() {
 
 
 const update = (dt) => {
-  //verefica se esta respeitando os paradigmas funcinal
-
+  if (state.player.invincible > 0) {
+  state.player.invincible -= dt;
+}
   // movimento e tiro dos inimigos
-
   enemyShoot();
   state.enemyBullets = state.enemyBullets.map(b => ({ ...b, y: b.y + b.dy * dt })).filter(b => b.y < canvas.height + 20);
-
+  //colisões dos tiros inimigos com player e com a base
   state.enemyBullets.forEach(b => {
     const p = state.player;
+    //player
     if (
       b.x < p.x + p.w &&
       b.x + b.w > p.x &&
       b.y < p.y + p.h &&
       b.y + b.h > p.y
     ) {
-      b.y = canvas.height + 100; // remove o tiro
-      state.player.lives -= 1;
-      playTone(80, 0.2, "sawtooth", 0.15);
-      if (state.player.lives <= 0) {
-        state.running = false;
-      }
+      if (p.invincible <= 0) { // só leva dano se não estiver invencível
+        p.lives -= 1;
+        p.invincible = 1.5; // 1.5 segundos de invencibilidade
+        playTone(80, 0.2, "sawtooth", 0.15);
+        if (p.lives <= 0) {
+          state.running = false;
     }
-  });
+  }
+    b.y = canvas.height + 100; // remove o tiro
+    return;   //já bateu no player, cabou-se
+  };
+
+  // contra a base (escudo)
+  processBulletBase(b, state.base, 0);
+});
+// atualiza timer de flash da base
+  state.base = state.base.map(br => br.alive ? { ...br, hit: Math.max(0, (br.hit || 0) - dt) } : br);
+
 
   // movimento do jogador
   const dir = (keys["ArrowLeft"] || keys["KeyA"] ? -0.5 : 0) + (keys["ArrowRight"] || keys["KeyD"] ? 0.5 : 0);
@@ -182,42 +202,37 @@ const update = (dt) => {
   // mover inimigos e tratar troca de direção / queda
   const alive = state.enemies.filter(e => e.alive);
   if (alive.length === 0) {
-    // respawn e aumenta velocidade
-    state.enemies = (function spawn() { const cols = 8, rows = 4; return Array.from({ length: cols * rows }, (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 40) / cols), y: 40 + Math.floor(i / cols) * 40, w: 64, h: 64, alive: true })); })();
-    state.enemySpeed += 8;
-    state.enemies = (function spawn() { const cols = 9, rows = 4; return Array.from({ length: cols * rows }, (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 40) / cols), y: 40 + Math.floor(i / cols) * 40, w: 64, h: 64, alive: true })); })();
-    state.enemySpeed += 8.5;
-
+  state.enemySpeed += 8; // sobe a dificuldade
+  state.enemies = (function spawn() { 
+    const cols = 9, rows = 4; 
+    return Array.from({ length: cols * rows }, (_, i) => ({ 
+      x: 40 + (i % cols) * ((canvas.width - 40) / cols), 
+      y: 40 + Math.floor(i / cols) * 40, 
+      w: 64, h: 64, 
+      alive: true, 
+      type: Math.floor(Math.random() * 3) + 1 
+    })); 
+  })();
+} else {
+  const minX = Math.min(...alive.map(e => e.x));
+  const maxX = Math.max(...alive.map(e => e.x + e.w));
+  const willHit = (state.enemyDir > 0 && maxX + state.enemyDir * state.enemySpeed * dt > canvas.width - 10) ||
+                  (state.enemyDir < 0 && minX + state.enemyDir * state.enemySpeed * dt < 10);
+  if (willHit) {
+    state.enemyDir *= -1;
+    state.enemies = state.enemies.map(e => ({ ...e, y: e.y + 12 }));
   } else {
-    const minX = Math.min(...alive.map(e => e.x));
-    const maxX = Math.max(...alive.map(e => e.x + e.w));
-    const willHit = (state.enemyDir > 0 && maxX + state.enemyDir * state.enemySpeed * dt > canvas.width - 10) ||
-      (state.enemyDir < 0 && minX + state.enemyDir * state.enemySpeed * dt < 10);
-    if (willHit) {
-      state.enemyDir *= -1;
-      state.enemies = state.enemies.map(e => ({ ...e, y: e.y + 12 }));
-    } else {
-      state.enemies = state.enemies.map(e => ({ ...e, x: e.x + state.enemyDir * state.enemySpeed * dt }));
-    }
+    state.enemies = state.enemies.map(e => ({ ...e, x: e.x + state.enemyDir * state.enemySpeed * dt }));
   }
-  //Definir base (escudo)
- 
-
-
-
-
-
-
-
+}
   // colisões balas x inimigos
   processBullets(state.bullets, state.enemies);
   state.bullets = state.bullets.filter(b => b.y > -50);
 
-
   // inimigo chega na base -> game over
   checkEnemyBase(state.enemies);
 };
-//oi
+
 // --- Render ---
 const drawRect = (x, y, w, h, color) => { ctx.fillStyle = color; ctx.fillRect(x, y, w, h); };
 
@@ -225,28 +240,52 @@ const render = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // Player
+  if (state.player.invincible > 0) {
+  if (Math.floor(Date.now() / 100) % 2 === 0) {
+    ctx.drawImage(playerImg, state.player.x, state.player.y, state.player.w, state.player.h);
+  }
+} else {
   ctx.drawImage(playerImg, state.player.x, state.player.y, state.player.w, state.player.h);
+}
 
-  //verefica se esta respeitando os paradigmas funcinal
   // Player lives
   ctx.fillStyle = "#fff";
   ctx.font = "16px monospace";
   ctx.fillText("Vidas: " + state.player.lives, canvas.width - 100, 20);
 
+
   // Bullets
   state.bullets.forEach(b => drawRect(b.x, b.y, b.w, b.h, "#58a6ff"));
 
-  // Escudo(base) 
+  // Escudos (base)
+state.base.forEach(b => {
+  if (!b.alive) return;
 
-  // state.base.forEach(b => drawRect(b.x, b.y, b.w, b.h, "#721e04ff"));
+  // flash quando hit > 0
+  if (b.hit > 0) ctx.globalAlpha = 0.6;
+  ctx.drawImage(baseImg, b.x, b.y, b.w, b.h);
+  ctx.globalAlpha = 1;
+
+  // barra de vida (fundo + frente)
+  const barY = b.y - 10;
+  ctx.fillStyle = "red";
+  ctx.fillRect(b.x, barY, b.w, 5); // fundo
+  ctx.fillStyle = "lime";
+  ctx.fillRect(b.x, barY, (b.hp / b.hpMax) * b.w, 5); // vida proporcional
+});
 
   // Enemy bullets
   state.enemyBullets.forEach(b => drawRect(b.x, b.y, b.w, b.h, "#ff5470"));
 
   // Enemies
+
   state.enemies.forEach(e => {
-    if (e.alive) ctx.drawImage(enemyImg1, e.x, e.y, e.w, e.h);
+   if (!e.alive) return;
+   if (e.type === 1) ctx.drawImage(enemyImg1, e.x, e.y, e.w, e.h);
+   if (e.type === 2) ctx.drawImage(enemyImg2, e.x, e.y, e.w, e.h);
+   if (e.type === 3) ctx.drawImage(enemyImg3, e.x, e.y, e.w, e.h);
   });
+  
 
   ctx.fillStyle = "#fff"; ctx.font = "16px monospace"; ctx.fillText("Score: " + state.score, 10, 20);
 
@@ -274,7 +313,7 @@ const render = () => {
     ctx.textAlign = "start";
   }
 };
-//verefica se esta respeitando os paradigmas funcinal
+
 // --- Detecta clique no botão de reiniciar ---
 canvas.addEventListener("click", function (e) {
   if (state.running) return;
@@ -299,9 +338,15 @@ canvas.addEventListener("click", function (e) {
     state.player.lives = 3;
     state.enemyBullets = [];
     state.bullets = [];
-    state.enemies = (function spawn() { const cols = 8, rows = 3; return Array.from({ length: cols * rows }, (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 40) / cols), y: 40 + Math.floor(i / cols) * 40, w: 64, h: 64, alive: true })); })();
+    state.enemies = (function spawn() { const cols = 8, rows = 3; return Array.from({ length: cols * rows }, (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 40) / cols), 
+      y: 40 + Math.floor(i / cols) * 40, w: 64, h: 64, alive: true, type: Math.floor(Math.random() * 3) + 1 })); })();
     requestAnimationFrame(loop);
   }
+    state.base = (function spawn() { const cols = 3, rows = 1; return Array.from({ length: cols * rows }, (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
+    y: 550 + Math.floor(i / cols) * 40, 
+    w: 100, h: 35, hp: 8, hpMax: 8, hit: 0,alive: true 
+  })); 
+})();
 });
 
 // --- Loop principal ---
@@ -326,6 +371,11 @@ playBtn.addEventListener("click", () => {
   state.player.lives = 3;
   state.enemyBullets = [];
   state.bullets = [];
-  state.enemies = (function spawn() { const cols = 8, rows = 3; return Array.from({ length: cols * rows }, (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 40) / cols), y: 40 + Math.floor(i / cols) * 40, w: 64, h: 64, alive: true })); })();
+  state.enemies = (function spawn() { const cols = 8, rows = 3; return Array.from({ length: cols * rows }, (_, i) => ({ x: 40 + (i % cols) * ((canvas.width - 40) / cols),
+     y: 40 + Math.floor(i / cols) * 40, w: 64, h: 64, alive: true, type: Math.floor(Math.random() * 3) + 1 })); })();
   requestAnimationFrame(loop);
+  state.base = (function spawn() { const cols = 3, rows = 1; return Array.from({ length: cols * rows }, (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
+    y: 550 + Math.floor(i / cols) * 40, w: 100, h: 35, hp: 8, hpMax: 8, hit: 0,alive: true 
+  })); 
+})();
 });
