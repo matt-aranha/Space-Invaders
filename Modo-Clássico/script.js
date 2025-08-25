@@ -106,6 +106,20 @@ const tiro = () => {
   playTone(1000, 0.06, "square", 0.08);
 };
 
+// Função para processar as colisões do tiro do jogador com a base
+function processPlayerBulletBase(bullet, base, idx) {
+  if (idx >= base.length) return;
+  const b = base[idx];
+  if (b.alive &&
+      bullet.x < b.x + b.w && bullet.x + bullet.w > b.x &&
+      bullet.y < b.y + b.h && bullet.y + bullet.h > b.y) {
+    bullet.y = -9999; // Remove o tiro do jogador
+    return;
+  }
+  processPlayerBulletBase(bullet, base, idx + 1);
+}
+
+
 // Função para processar colisões entre balas e inimigos
 function processBullets(bullets, enemies, idx = 0) {
   if (idx >= bullets.length) return;
@@ -181,7 +195,7 @@ function enemyShoot() {
   });
 }
 
-//função que retorna as modificações do state inicial
+// Função (GIGANTE!!) que retorna as modificações do state inicial
 const update = (dt) => {
   if (state.player.invincible > 0) {
   state.player.invincible -= dt;
@@ -257,13 +271,19 @@ const update = (dt) => {
     state.enemies = state.enemies.map(e => ({ ...e, x: e.x + state.enemyDir * state.enemySpeed * dt }));
   }
 }
-  // colisões balas x inimigos
-  processBullets(state.bullets, state.enemies);
+  // colisões (balas x inimigos) & (balas x base)
+  state.bullets.forEach(bullet => {
+    processEnemies(bullet, state.enemies, 0);
+    processPlayerBulletBase(bullet, state.base, 0);
+  });
+  
   state.bullets = state.bullets.filter(b => b.y > -50);
 
-  // inimigo chega na base -> game over
+    // inimigo chega na base -> game over
   checkEnemyBase(state.enemies);
 };
+
+
 
 // --- Render --- (mostrar,criar e desenhar na tela)
 const drawRect = (x, y, w, h, color) => { ctx.fillStyle = color; ctx.fillRect(x, y, w, h); };
