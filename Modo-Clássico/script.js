@@ -59,7 +59,7 @@ const state = {
   wave: 1,
   enemyFireRate: 0.0005,
   enemies: (function spawn() {
-  const cols = 9, rows = 4;
+  const cols = 12, rows = 4;
   return Array.from({ length: cols * rows }, (_, i) => {
     const row = Math.floor(i / cols);
     // Mapeia cada linha para um tipo de inimigo (clássico)
@@ -365,7 +365,7 @@ const update = (dt) => {
   state.enemyFireRate *= 1.12; // sobe a dificuldade
   state.base = regenerateBases(state.base);
   state.enemies = (function spawn() {
-  const cols = 9, rows = 4;
+  const cols = 11, rows = 4;
   return Array.from({ length: cols * rows }, (_, i) => {
     const row = Math.floor(i / cols);
     // Mapeia cada linha para um tipo de inimigo (clássico)
@@ -506,7 +506,7 @@ state.base.forEach(b => {
    ctx.drawImage(img, e.x, e.y, e.w, e.h)
   });
   
-  ctx.fillStyle = "#fff"; ctx.font = "16px monospace"; ctx.fillText("Score: " + state.score, 10, 20);
+  ctx.fillStyle = "#fff"; ctx.font = "16px monospace"; ctx.fillText("Score: " + state.score, 600, 20);
 
   if (!state.running) {
     ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
