@@ -7,7 +7,12 @@ const muteBtn = document.querySelector("#mute-btn")
 
 // arquivos dos jogadores e dos inimigos, suas respectivas bases, cenário... :D
 const playerImg = new Image();
-playerImg.src = "assets/nave.png";
+playerImg.src = "assets/SpaceShip(192x192)_0001.png";
+const playerImg_frame2 = new Image();
+playerImg_frame2.src = "assets/SpaceShip(192x192)_0002.png"
+const playerImg_frame3 = new Image();
+playerImg_frame3.src = "assets/SpaceShip(192x192)_0003.png"
+const playerFrames = [playerImg, playerImg_frame2, playerImg_frame3]      // array para facilitar a chamada dos frames na nave pew pew
 
 const enemyImg1 = new Image();
 enemyImg1.src = "assets/Alien1(192x192).png";
@@ -34,14 +39,21 @@ semvidaImg.src = "assets/sem-vida(192x192).png";
 
 const playerShotSound = new Audio();
 playerShotSound.src = "assets/tiro-nave.mp3";
-playerShotSound.volume = 0.2     //ajustar se precisar
+playerShotSound.volume = 0.1     //ajustar se precisar
 
 // Função que carrega as informações de cada entidade do game (atributos e mecânicas)
 const state = {
   running: false,
   lastTime: 0,
   isMuted: false,
-  player: { x: (canvas.width / 2) - 25, y: canvas.height - 80, w: 90, h: 70, speed: 450, cooldown: 0, lives: 3, invincible: 0 },
+  player: { 
+      x: (canvas.width / 2) - 25, y: canvas.height - 80, w: 90, h: 70,
+      speed: 450,
+      cooldown: 0, 
+      lives: 3, 
+      invincible: 0,
+      animationFrame: 0,          // essas duas propriedades (AnimationFrame e lastAnimationFrameTime) são para atualizar os sprites da nave, p/ fazer a animação
+      lastAnimationFrameTime: 0 },
   enemyBullets: [],
   bullets: [],
   wave: 1,
@@ -73,8 +85,8 @@ const state = {
      return Array.from({ length: cols * rows },
      (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
      y: 550 + Math.floor(i / cols) * 40, w: 100, h: 80, hp: 30, hpMax: 30, hit: 0, alive: true })); })(),
-  frame: 0,          // essas duas propriedades (frame e lastFrameTime) são para atualizar os sprites dos bichins, p/ fazer a animação
-  lastFrameTime: 0 
+  enemyAnimationFrame: 0,          // essas duas propriedades (frame e lastFrameTime) são para atualizar os sprites dos bichins, p/ fazer a animação
+  lastEnemyFrameTime: 0 
 };
 
 // -----VIDA------
@@ -262,11 +274,38 @@ function enemyShoot() {
   });
 }
 
-// Função (GIGANTE!! MT msm) que retorna as modificações do state inicial
+// Função que calcula o próximo estado de animação da nave
+const updatePlayerAnimation = (playerState, dt, fps) => {
+  const interval = 1 / fps; // 2.5 FPS -> intervalo de 0.4s
+  const newLastAnimationFrameTime = playerState.lastAnimationFrameTime + dt;
+
+  if (newLastAnimationFrameTime >= interval) {
+    const newFrame = (playerState.animationFrame + 1) % 3; // 3 frames (0, 1, 2)
+    return {
+      animationFrame: newFrame,
+      lastAnimationFrameTime: newLastAnimationFrameTime - interval
+    };
+  }
+  
+  return {
+    animationFrame: playerState.animationFrame,
+    lastAnimationFrameTime: newLastAnimationFrameTime
+  };
+};
+
+// Função para selecionar a imagem correta da nave
+const getPlayerImage = (animationFrame) => playerFrames[animationFrame];
+
+
+// Função (theu: GIGANTE!! edu: MT msm) que retorna as modificações do state inicial
 const update = (dt) => {
   if (state.player.invincible > 0) {
   state.player.invincible -= dt;
 }
+  // lógica da animação do jogador
+  const newAnimationState = updatePlayerAnimation(state.player, dt, 2.5);
+  state.player = {...state.player, ...newAnimationState};
+
   // movimento e tiro dos inimigos
   enemyShoot();
   state.enemyBullets = state.enemyBullets.map(b => ({ ...b, y: b.y + b.dy * dt })).filter(b => b.y < canvas.height + 20);
@@ -347,11 +386,11 @@ const update = (dt) => {
 }
 
   // Lógica da animação dos invasores/aliens
-  state.lastFrameTime += dt;
+  state.lastEnemyFrameTime += dt;
   const animationInterval = 0.5; // Intervalo de 0.5 segundos para a animação
-  if (state.lastFrameTime >= animationInterval) {
-    state.frame = (state.frame + 1) % 2; // Alterna entre 0 e 1
-    state.lastFrameTime -= animationInterval;
+  if (state.lastEnemyFrameTime >= animationInterval) {
+    state.enemyAnimationFrame = (state.enemyAnimationFrame + 1) % 2; // Alterna entre 0 e 1
+    state.lastEnemyFrameTime -= animationInterval;
 }
 
   // colisões (balas x inimigos) & (balas x base)
@@ -407,18 +446,20 @@ muteBtn.addEventListener("click", () => {
 
 // --- Render --- (mostrar,criar e desenhar na tela)
 const drawRect = (x, y, w, h, color) => { ctx.fillStyle = color; ctx.fillRect(x, y, w, h); };
+
 const render = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   updateLivesUI(state);
 
   // Player
+  const currentPlayerImg = getPlayerImage(state.player.animationFrame);
   if (state.player.invincible > 0) {
-  if (Math.floor(Date.now() / 100) % 2 === 0) {
-    ctx.drawImage(playerImg, state.player.x, state.player.y, state.player.w, state.player.h);
+    if (Math.floor(Date.now() / 100) % 2 === 0) {
+      ctx.drawImage(currentPlayerImg, state.player.x, state.player.y, state.player.w, state.player.h);
+    }
+  } else {
+    ctx.drawImage(currentPlayerImg, state.player.x, state.player.y, state.player.w, state.player.h);
   }
-} else {
-  ctx.drawImage(playerImg, state.player.x, state.player.y, state.player.w, state.player.h);
-}
 
   // Player lives
   ctx.fillStyle = "#fff";
@@ -452,7 +493,7 @@ state.base.forEach(b => {
   // Enemies
   state.enemies.forEach(e => {
    if (!e.alive) return;
-   const img = getEnemyImage(e.type, state.frame);
+   const img = getEnemyImage(e.type, state.enemyAnimationFrame);
    ctx.drawImage(img, e.x, e.y, e.w, e.h)
   });
   
