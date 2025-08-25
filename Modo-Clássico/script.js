@@ -108,7 +108,7 @@ const updateLivesUI = (state) => {
   container.innerHTML = livesToHTML(state.player.lives);
 };
 
-// ------ KEYS -----
+// ------ KEYS (teclas ;) ) -----
 // Função que recebe os input da interação teclado do usuário e game
 const keys = {};
 document.addEventListener("keydown", e => { keys[e.code] = true;
@@ -304,7 +304,6 @@ const updatePlayerAnimation = (playerState, dt, fps) => {
 
 // Função para selecionar a imagem correta da nave
 const getPlayerImage = (animationFrame) => playerFrames[animationFrame];
-
 
 // Função (theu: GIGANTE!! edu: MT msm) que retorna as modificações do state inicial
 const update = (dt) => {
