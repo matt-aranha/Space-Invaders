@@ -22,18 +22,6 @@ body {
   cursor: pointer;
 }
 
-#mute-btn {
-    background-color: #232946; /* Cor de fundo escura, igual ao botão "Reiniciar" */
-    color: #ff5470;           /* Cor do texto, igual ao botão "Reiniciar" */
-    border: 2px solid #ff5470; /* Borda na mesma cor do texto */
-    padding: 5px 10px;         /* Espaçamento interno */
-    font-family: monospace;    /* Fonte consistente com o resto do jogo */
-    font-size: 16px;
-    cursor: pointer;
-    width: 120px;              /* Largura fixa para o texto não alterar o tamanho */
-    transition: opacity 0.2s;  /* Transição suave para o efeito hover */
-}
-
 #lives-container {
   position: absolute;
   top: 10px;

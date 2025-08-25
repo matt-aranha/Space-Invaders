@@ -3,7 +3,6 @@ const canvas = document.querySelector("#space-invaders");
 const ctx = canvas.getContext("2d");
 const playBtn = document.querySelector("#play-btn");
 const menu = document.querySelector("#menu");
-const muteBtn = document.querySelector("#mute-btn")
 
 // arquivos dos jogadores e dos inimigos, suas respectivas bases, cenário... :D
 const playerImg = new Image();
@@ -36,33 +35,19 @@ const playerShotSound = new Audio();
 playerShotSound.src = "assets/tiro-nave.mp3";
 playerShotSound.volume = 0.2     //ajustar se precisar
 
-// Função que carrega as informações de cada entidade do game (atributos e mecânicas)
+// Função que carrega as informações de cada entidade do game
 const state = {
   running: false,
   lastTime: 0,
-  isMuted: false,
   player: { x: (canvas.width / 2) - 25, y: canvas.height - 80, w: 90, h: 70, speed: 450, cooldown: 0, lives: 3, invincible: 0 },
   enemyBullets: [],
   bullets: [],
   wave: 1,
   enemyFireRate: 0.0005,
-  enemies: (function spawn() {
-  const cols = 9, rows = 4;
-  return Array.from({ length: cols * rows }, (_, i) => {
-    const row = Math.floor(i / cols);
-    // Mapeia cada linha para um tipo de inimigo (clássico)
-    const typeMapping = [3, 2, 2, 1]; // Topo: tipo 3, Meio: tipo 2, Baixo: tipo 1
-    const enemyType = typeMapping[row];
-    
-    return {
-      x: 300 + (i % cols) * 60,
-      y: 40 + row * 40,
-      w: 64, h: 64,
-      alive: true,
-      type: enemyType // Usa o tipo mapeado
-    };
-  });
-})(),
+  enemies: (function spawn() { const cols = 9, rows = 4;
+     return Array.from({ length: cols * rows },
+     (_, i) => ({ x: 300 + (i % cols) * 60,
+     y: 40 + Math.floor(i / cols) * 40, w: 64, h: 64, alive: true, type: 1 })); })(),
   enemyDir: 1, 
   enemySpeed: 40, 
   score: 0, 
@@ -99,8 +84,7 @@ const updateLivesUI = (state) => {
 // ------ KEYS -----
 // Função que recebe os input da interação teclado do usuário e game
 const keys = {};
-document.addEventListener("keydown", e => { keys[e.code] = true;
-  if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) e.preventDefault(); });
+document.addEventListener("keydown", e => { keys[e.code] = true; if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) e.preventDefault(); });
 document.addEventListener("keyup", e => { keys[e.code] = false; });
 
 // --- Áudio (WebAudio), mecanica de audio exportada ---
@@ -118,7 +102,6 @@ const ensureAudio = () => {
 // Função para tocar o som do tiro. (para evitar reiniciar o audio, ela clona o audio sempre que o jogador atirar)
 const playAudioTiro = (audioElement) => {
   const soundToPlay = audioElement.cloneNode();
-  soundToPlay.muted = audioElement.muted;
   soundToPlay.play().catch(e => console.error("Audio do Tiro Falhou:", e));
 };
 
@@ -184,13 +167,14 @@ function processPlayerBulletBase(bullet, base, idx) {
   processPlayerBulletBase(bullet, base, idx + 1);
 };
 
+
 // Função para processar colisões entre balas e inimigos
 function processBullets(bullets, enemies, idx = 0) {
   if (idx >= bullets.length) return;
   const b = bullets[idx];
   processEnemies(b, enemies, 0);
   processBullets(bullets, enemies, idx + 1);
-}
+};
 
 // Função que relaciona os inimigos com os tiros que produzem assim também como se posicionam no canva
 const enemyPoints = {
@@ -199,7 +183,6 @@ const enemyPoints = {
   3: 30    // inimigo de cima
 };
 
-// fUnção que processa inimigos
 function processEnemies(bullet, enemies, idx) {
   if (idx >= enemies.length) return;
   const e = enemies[idx];
@@ -213,7 +196,7 @@ function processEnemies(bullet, enemies, idx) {
     return; // Para após a primeira colisão
   }
   processEnemies(bullet, enemies, idx + 1);
-}
+};
 
 // Função para processar colisão entre balas do inimigo e a base
 function processBulletBase(bullet, base, idx) {
@@ -231,7 +214,7 @@ function processBulletBase(bullet, base, idx) {
     return; // evita múltiplos acertos no mesmo frame
   };
   processBulletBase(bullet, base, idx + 1);
-}
+};
 
 // Função para verificar se algum inimigo chegou na base
 function checkEnemyBase(enemies, idx = 0) {
@@ -262,7 +245,7 @@ function enemyShoot() {
   });
 }
 
-// Função (GIGANTE!! MT msm) que retorna as modificações do state inicial
+// Função (GIGANTE!!) que retorna as modificações do state inicial
 const update = (dt) => {
   if (state.player.invincible > 0) {
   state.player.invincible -= dt;
@@ -314,25 +297,18 @@ const update = (dt) => {
   const alive = state.enemies.filter(e => e.alive);
   if (alive.length === 0) {
   state.wave += 1;
-  state.enemySpeed += 10.5;
-  state.enemyFireRate *= 1.12; // sobe a dificuldade
-  state.enemies = (function spawn() {
-  const cols = 9, rows = 4;
-  return Array.from({ length: cols * rows }, (_, i) => {
-    const row = Math.floor(i / cols);
-    // Mapeia cada linha para um tipo de inimigo (clássico)
-    const typeMapping = [3, 2, 2, 1]; // Topo: tipo 3, Meio: tipo 2, Baixo: tipo 1
-    const enemyType = typeMapping[row];
-    
-    return {
-      x: 300 + (i % cols) * 60,
-      y: 40 + row * 40,
-      w: 64, h: 64,
-      alive: true,
-      type: enemyType // Usa o tipo mapeado
-    };
-  });
-})()
+  state.enemySpeed += 10;
+  state.enemyFireRate *= 1,12; // sobe a dificuldade
+  state.enemies = (function spawn() { 
+    const cols = 9, rows = 4; 
+    return Array.from({ length: cols * rows }, (_, i) => ({ 
+      x: 300 + (i % cols) * 60, 
+      y: 40 + Math.floor(i / cols) * 40, 
+      w: 64, h: 64, 
+      alive: true, 
+      type: Math.floor(Math.random() * 3) + 1 
+    })); 
+  })();
 } else {
   const minX = Math.min(...alive.map(e => e.x));
   const maxX = Math.max(...alive.map(e => e.x + e.w));
@@ -384,26 +360,6 @@ const getEnemyImage = (enemyType, currentFrame) => {
   }
 };
 
-//Evento muted, cancelar o som (a cada click, altera o boolean definido no state, invertendo seu valor lógico
-muteBtn.addEventListener("click", () => {
-  state.isMuted = !state.isMuted; // Inverte o estado (true/false)
-
-  if (state.isMuted) {
-    // Se estiver mutado, zera o volume de tudo
-    if (state.audio.masterGain) {
-      state.audio.masterGain.gain.value = 0; // Zera o volume do Web Audio (SFX, fundo)
-    }
-    playerShotSound.muted = true; // Muta o som de tiro do HTML Audio
-    muteBtn.textContent = "Desmutar"; // Muda o texto do botão
-  } else {
-    // Se não estiver mutado, restaura o volume
-    if (state.audio.masterGain) {
-      state.audio.masterGain.gain.value = 0.9; // Restaura o volume do Web Audio
-    }
-    playerShotSound.muted = false; // Desmuta o som de tiro
-    muteBtn.textContent = "Mutar Som"; // Restaura o texto do botão
-  }
-});
 
 // --- Render --- (mostrar,criar e desenhar na tela)
 const drawRect = (x, y, w, h, color) => { ctx.fillStyle = color; ctx.fillRect(x, y, w, h); };
@@ -505,30 +461,14 @@ canvas.addEventListener("click", function (e) {
     state.player.lives = 3;
     state.enemyBullets = [];
     state.bullets = [];
-    state.enemies = (function spawn() {
-      const cols = 9, rows = 4;
-      return Array.from({ length: cols * rows }, (_, i) => {
-        const row = Math.floor(i / cols);
-        const typeMapping = [3, 2, 2, 1];
-        const enemyType = typeMapping[row];
-        return {
-          x: 300 + (i % cols) * 60,
-          y: 40 + row * 40,
-          w: 64, h: 64,
-          alive: true,
-          type: enemyType
-        };
-      });
-    })();
-
-    state.base = (function spawn() { const cols = 3, rows = 1; return Array.from({ length: cols * rows }, (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
-      y: 550 + Math.floor(i / cols) * 40, w: 100, h: 80, hp: 30, hpMax: 30, hit: 0, alive: true
-    }));
-    })();
-    
-    // O requestAnimationFrame deve estar dentro do IF para iniciar o loop
-    requestAnimationFrame(loop); 
+    state.enemies = (function spawn() { const cols = 8, rows = 3; return Array.from({ length: cols * rows }, (_, i) => ({ x: 300 + (i % cols) *60, 
+      y: 40 + Math.floor(i / cols) * 40, w: 64, h: 64, alive: true, type: Math.floor(Math.random() * 3) + 1 })); })();
+    requestAnimationFrame(loop);
   }
+    state.base = (function spawn() { const cols = 3, rows = 1; return Array.from({ length: cols * rows }, (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
+    y: 550 + Math.floor(i / cols) * 40, w: 100, h: 80, hp: 30, hpMax: 30, hit: 0, alive: true 
+  })); 
+})();
 });
 
 // --- Loop principal ---
@@ -553,26 +493,11 @@ playBtn.addEventListener("click", () => {
   state.player.lives = 3;
   state.enemyBullets = [];
   state.bullets = [];
-  state.enemies = (function spawn() {
-    const cols = 9, rows = 4;
-    return Array.from({ length: cols * rows }, (_, i) => {
-      const row = Math.floor(i / cols);
-      const typeMapping = [3, 2, 2, 1];
-      const enemyType = typeMapping[row];
-      return {
-        x: 300 + (i % cols) * 60,
-        y: 40 + row * 40,
-        w: 64, h: 64,
-        alive: true,
-        type: enemyType
-      };
-    });
-  })();
-  state.base = (function spawn() { const cols = 3, rows = 1; return Array.from({ length: cols * rows }, (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
-    y: 550 + Math.floor(i / cols) * 40, w: 100, h: 80, hp: 30, hpMax: 30, hit: 0,alive: true
-  }));
-  })();
-  
-  // O requestAnimationFrame inicia o loop do jogo
+  state.enemies = (function spawn() { const cols = 8, rows = 3; return Array.from({ length: cols * rows }, (_, i) => ({ x: 300 + (i % cols) * 60,
+     y: 40 + Math.floor(i / cols) * 40, w: 64, h: 64, alive: true, type: Math.floor(Math.random() * 3) + 1 })); })();
   requestAnimationFrame(loop);
+  state.base = (function spawn() { const cols = 3, rows = 1; return Array.from({ length: cols * rows }, (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
+    y: 550 + Math.floor(i / cols) * 40, w: 100, h: 80, hp: 30, hpMax: 30, hit: 0,alive: true 
+  })); 
+})();
 });

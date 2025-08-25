@@ -3,9 +3,6 @@ const ctx = canvas.getContext("2d");
 const playBtn = document.querySelector("#play-btn");
 const menu = document.querySelector("#menu");
 
-const bgImg = new Image();
-bgImg.src = "sprites/planodefundo.png"; 
-
 const playerImg = new Image();
 playerImg.src = "sprites/nave.png";
 const enemyImg = new Image();
@@ -26,30 +23,7 @@ const tocarDano = () => {
   s.play();
 };
 
-// Ajuste funcional do tamanho do canvas
-const calcularCanvasSize = (largura, altura, proporcao) => {
-  const ratio = largura / altura;
-  return ratio > proporcao
-    ? { width: altura * proporcao, height: altura }
-    : { width: largura, height: largura / proporcao };
-};
 
-const ajustarCanvas = () => {
-  const proporcao = 1880/ 1220;
-  const screenWidth = window.innerWidth;
-  const screenHeight = window.innerHeight;
-
-  const { width, height } =
-    screenWidth / screenHeight > proporcao
-      ? { width: screenHeight * proporcao, height: screenHeight }
-      : { width: screenWidth, height: screenWidth / proporcao };
-
-  canvas.width = width;
-  canvas.height = height;
-};
-
-window.addEventListener("resize", ajustarCanvas);
-ajustarCanvas();
 
 // funções para tocar música e som de tiro
 const tocarMusica = () => {
@@ -311,32 +285,6 @@ const nextState = (state, keys, dt, canvas, ts) => {
 const render = (state) => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // 🔹 Função funcional para desenhar fundo sem let
-  const drawBackground = (ctx, img, canvas) => {
-    const imgRatio = img.width / img.height;
-    const canvasRatio = canvas.width / canvas.height;
-
-    const { drawWidth, drawHeight, offsetX, offsetY } =
-      canvasRatio > imgRatio
-        ? {
-            drawWidth: canvas.width,
-            drawHeight: canvas.width / imgRatio,
-            offsetX: 0,
-            offsetY: (canvas.height - canvas.width / imgRatio) / 2
-          }
-        : {
-            drawHeight: canvas.height,
-            drawWidth: canvas.height * imgRatio,
-            offsetX: (canvas.width - canvas.height * imgRatio) / 2,
-            offsetY: 0
-          };
-
-    ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
-  };
-
-  // Se quiser usar fundo, descomente:
-   drawBackground(ctx, bgImg, canvas);
-
   const invulneravel = state.lastTime < state.player.invulneravelAte;
   const deveDesenhar = !invulneravel || Math.floor(state.lastTime / 100) % 2 === 0;
 
@@ -344,58 +292,44 @@ const render = (state) => {
     ctx.save();
     ctx.translate(state.player.x, state.player.y);
     ctx.rotate(degToRad(state.player.angle) + Math.PI / 2);
-    ctx.drawImage(
-      playerImg,
-      -state.player.w / 2,
-      -state.player.h / 2,
-      state.player.w,
-      state.player.h
-    );
+    ctx.drawImage(playerImg, -state.player.w / 2, -state.player.h / 2, state.player.w, state.player.h);
     ctx.restore();
   }
-
-  // 🔹 Balas
+ // desenha balas
   state.bullets.forEach(b => drawRect(b.x, b.y, b.w, b.h, "#58a6ff"));
   state.enemyBullets.forEach(b => drawRect(b.x, b.y, b.w, b.h, "#ff5470"));
 
-  // 🔹 Inimigos
   state.enemies.forEach(e => {
     if (e.alive) ctx.drawImage(enemyImg, e.x, e.y, e.w, e.h);
   });
 
-  // 🔹 HUD
   ctx.fillStyle = "#fff";
   ctx.font = "16px monospace";
   ctx.fillText("Vidas: " + state.player.lives, 10, 20);
   ctx.fillText("Score: " + state.score, 10, 40);
 
-  // 🔹 Tela de Game Over + Botão
   if (!state.running) {
     ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#54f4ffff";
+    ctx.fillStyle = "#ff5470";
     ctx.font = "34px monospace";
     ctx.textAlign = "center";
     ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 10);
     ctx.font = "16px monospace";
     ctx.fillStyle = "#fff";
-    ctx.fillText(
-      "Clique no botão para reiniciar",
-      canvas.width / 2,
-      canvas.height / 2 + 20
-    );
+    ctx.fillText("Clique em Play para reiniciar", canvas.width / 2, canvas.height / 2 + 20);
 
-    const btnWidth = 180,
-      btnHeight = 44;
+    // Desenha botão de reiniciar
+    const btnWidth = 180, btnHeight = 44;
     const btnX = canvas.width / 2 - btnWidth / 2;
     const btnY = canvas.height / 2 + 40;
     ctx.fillStyle = "#232946";
-    ctx.strokeStyle = "#19fddfff";
+    ctx.strokeStyle = "#ff5470";
     ctx.lineWidth = 3;
     ctx.fillRect(btnX, btnY, btnWidth, btnHeight);
     ctx.strokeRect(btnX, btnY, btnWidth, btnHeight);
     ctx.font = "20px monospace";
-    ctx.fillStyle = "#54ebffff";
+    ctx.fillStyle = "#ff5470";
     ctx.fillText("Reiniciar", canvas.width / 2, btnY + 29);
     ctx.textAlign = "start";
   }
@@ -407,26 +341,32 @@ function drawRect(x, y, w, h, color) {
 }
 
 // --- Loop funcional ---
-const loop = (state, ts) => {
+function loop(state, ts) {
+  if (!state.running) {
+    pararMusica();
+    return;
+  }
   const dt = Math.min(0.05, (ts - (state.lastTime || ts)) / 1000);
-  const newState = state.running
-    ? nextState(state, keys, dt, canvas, ts)
-    : { ...state, lastTime: ts };
-
+  const newState = nextState(state, keys, dt, canvas, ts);
+  
   render(newState);
 
-  if (!newState.running) {
-    pararMusica();
+  // sons
+  if (state.player.cooldown === 0 && keys["Space"]) {
+    tocarTiro();
   }
-  if (newState.running) {
-    if (state.player.cooldown === 0 && keys["Space"]) tocarTiro();
-    if (newState.inimigosAtiraram) tocarTiro();
-    if (newState.foiAcertado) tocarDano();
-    if (newState.inimigoAcertado) tocarDano();
+  if (newState.inimigosAtiraram) {
+    tocarTiro();
+  }
+  if (newState.foiAcertado) {
+    tocarDano();
+  }
+  if (newState.inimigoAcertado) {
+    tocarDano();
   }
 
   requestAnimationFrame(ts2 => loop(newState, ts2));
-};
+}
 
 // --- Clique no botão de reiniciar ---
 canvas.addEventListener("click", function(e) {
@@ -443,7 +383,6 @@ canvas.addEventListener("click", function(e) {
   ) {
     menu.style.display = "none";
     canvas.style.display = "block";
-    ajustarCanvas();
     tocarMusica();
     canvas.focus && canvas.focus();
     const novoEstado = { ...initialState(), running: true };
@@ -456,7 +395,6 @@ canvas.addEventListener("click", function(e) {
 playBtn.addEventListener("click", () => {
   menu.style.display = "none";
   canvas.style.display = "block";
-  ajustarCanvas();
   tocarMusica();
   canvas.focus && canvas.focus();
   
