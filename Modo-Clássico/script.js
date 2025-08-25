@@ -4,21 +4,36 @@ const ctx = canvas.getContext("2d");
 const playBtn = document.querySelector("#play-btn");
 const menu = document.querySelector("#menu");
 
-// images dos jogadores e dos inimigos, suas respectivas bases, cenário... :D
+// arquivos dos jogadores e dos inimigos, suas respectivas bases, cenário... :D
 const playerImg = new Image();
 playerImg.src = "assets/nave.png";
+
 const enemyImg1 = new Image();
 enemyImg1.src = "assets/Alien1(192x192).png";
+const enemyImg1_frame2 = new Image();
+enemyImg1_frame2.src = "assets/Alien1-Quadro2(192x192).png";
+
 const enemyImg2 = new Image();
 enemyImg2.src = "assets/Alien2(192x192)_0001.png";
+const enemyImg2_frame2 = new Image();
+enemyImg2_frame2.src = "assets/Alien2(192x192)_0002.png";
+
 const enemyImg3 = new Image();
 enemyImg3.src = "assets/Alien3(192x192)_0001.png";
+const enemyImg3_frame2 = new Image();
+enemyImg3_frame2.src = "assets/Alien3(192x192)_0002.png";
+
 const baseImg = new Image();
-baseImg.src = "assets/escudo(192x192).png"
+baseImg.src = "assets/escudo(192x192).png";
+
 const vidaImg = new Image();
-vidaImg.src = "assets/vida(192x192).png"
+vidaImg.src = "assets/vida(192x192).png";
 const semvidaImg = new Image();
-semvidaImg.src = "assets/sem-vida(192x192).png"
+semvidaImg.src = "assets/sem-vida(192x192).png";
+
+const playerShotSound = new Audio();
+playerShotSound.src = "assets/tiro-nave.mp3";
+playerShotSound.volume = 0.2     //ajustar se precisar
 
 // Função que carrega as informações de cada entidade do game (atributos e mecânicas)
 const state = {
@@ -37,12 +52,14 @@ const state = {
   enemySpeed: 40, 
   score: 0, 
   audio: { ctx: null, masterGain: null, bgOscs: [],
-  tones: [65, 60, 55, 50], // notas do tema original
+  tones: [65, 60, 55, 50], // notas do tema original (theu: "edu brabo, slk")
   index: 0, lastTime: 0 },
   base: (function spawn() { const cols = 3, rows = 1;
      return Array.from({ length: cols * rows },
      (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
-     y: 550 + Math.floor(i / cols) * 40, w: 100, h: 80, hp: 30, hpMax: 30, hit: 0, alive: true })); })()
+     y: 550 + Math.floor(i / cols) * 40, w: 100, h: 80, hp: 30, hpMax: 30, hit: 0, alive: true })); })(),
+  frame: 0,          // essas duas propriedades (frame e lastFrameTime) são para atualizar os sprites dos bichins, p/ fazer a animação
+  lastFrameTime: 0 
 };
 
 // -----VIDA------
@@ -81,6 +98,12 @@ const ensureAudio = () => {
   state.audio.masterGain = a.createGain();
   state.audio.masterGain.gain.value = 0.9; // volume geral (ajusta se quiser)
   state.audio.masterGain.connect(a.destination);
+};
+
+// Função para tocar o som do tiro. (para evitar reiniciar o audio, ela clona o audio sempre que o jogador atirar)
+const playAudioTiro = (audioElement) => {
+  const soundToPlay = audioElement.cloneNode();
+  soundToPlay.play().catch(e => console.error("Audio do Tiro Falhou:", e));
 };
 
 // Função para fazer tocar um tom com frequência, duração e tipo especificados
@@ -129,7 +152,7 @@ const tiro = () => {
   if (p.cooldown > 0) return;
   p.cooldown = 0.420;
   state.bullets.push({ x: p.x + p.w / 2 - 2, y: p.y - 6, w: 4, h: 8, dy: -420 });
-  playTone(1000, 0.06, "square", 0.08);
+  playAudioTiro(playerShotSound);
 };
 
 // Função para processar as colisões do tiro do jogador com a base
@@ -143,7 +166,7 @@ function processPlayerBulletBase(bullet, base, idx) {
     return;
   }
   processPlayerBulletBase(bullet, base, idx + 1);
-}
+};
 
 
 // Função para processar colisões entre balas e inimigos
@@ -152,13 +175,15 @@ function processBullets(bullets, enemies, idx = 0) {
   const b = bullets[idx];
   processEnemies(b, enemies, 0);
   processBullets(bullets, enemies, idx + 1);
-}
+};
+
 // Função que relaciona os inimigos com os tiros que produzem assim também como se posicionam no canva
 const enemyPoints = {
   1: 10,   // inimigo de baixo
   2: 20,   // inimigo do meio
   3: 30    // inimigo de cima
 };
+
 function processEnemies(bullet, enemies, idx) {
   if (idx >= enemies.length) return;
   const e = enemies[idx];
@@ -172,7 +197,7 @@ function processEnemies(bullet, enemies, idx) {
     return; // Para após a primeira colisão
   }
   processEnemies(bullet, enemies, idx + 1);
-}
+};
 
 // Função para processar colisão entre balas do inimigo e a base
 function processBulletBase(bullet, base, idx) {
@@ -186,11 +211,11 @@ function processBulletBase(bullet, base, idx) {
     bullet.y = canvas.height + 100; // remove o tiro (filtro pega)
     if (e.hp <= 0) {
       e.alive = false;
-    }
+    };
     return; // evita múltiplos acertos no mesmo frame
-  }
+  };
   processBulletBase(bullet, base, idx + 1);
-}
+};
 
 // Função para verificar se algum inimigo chegou na base
 function checkEnemyBase(enemies, idx = 0) {
@@ -297,6 +322,15 @@ const update = (dt) => {
     state.enemies = state.enemies.map(e => ({ ...e, x: e.x + state.enemyDir * state.enemySpeed * dt }));
   }
 }
+
+  // Lógica da animação dos invasores/aliens
+  state.lastFrameTime += dt;
+  const animationInterval = 0.5; // Intervalo de 0.5 segundos para a animação
+  if (state.lastFrameTime >= animationInterval) {
+    state.frame = (state.frame + 1) % 2; // Alterna entre 0 e 1
+    state.lastFrameTime -= animationInterval;
+}
+
   // colisões (balas x inimigos) & (balas x base)
   state.bullets.forEach(bullet => {
     processEnemies(bullet, state.enemies, 0);
@@ -312,6 +346,20 @@ const update = (dt) => {
   playInvaderTone();
 };
 
+// Função que retorna o frame certo da bestafera (alien) (coé, kalil. não poder usar let é paia, ein... nem precisaria dessa função, era só meter o let na parte dos inimigos na função render e dale)
+const getEnemyImage = (enemyType, currentFrame) => {
+  const isFrame1 = currentFrame === 0;
+
+  if (enemyType === 1) {
+      return isFrame1 ? enemyImg1 : enemyImg1_frame2;
+  }
+  if (enemyType === 2) {
+      return isFrame1 ? enemyImg2 : enemyImg2_frame2;
+  }
+  if (enemyType === 3) {
+      return isFrame1 ? enemyImg3 : enemyImg3_frame2
+  }
+};
 
 
 // --- Render --- (mostrar,criar e desenhar na tela)
@@ -361,9 +409,8 @@ state.base.forEach(b => {
   // Enemies
   state.enemies.forEach(e => {
    if (!e.alive) return;
-   if (e.type === 1) ctx.drawImage(enemyImg1, e.x, e.y, e.w, e.h);
-   if (e.type === 2) ctx.drawImage(enemyImg2, e.x, e.y, e.w, e.h);
-   if (e.type === 3) ctx.drawImage(enemyImg3, e.x, e.y, e.w, e.h);
+   const img = getEnemyImage(e.type, state.frame);
+   ctx.drawImage(img, e.x, e.y, e.w, e.h)
   });
   
   ctx.fillStyle = "#fff"; ctx.font = "16px monospace"; ctx.fillText("Score: " + state.score, 10, 20);
