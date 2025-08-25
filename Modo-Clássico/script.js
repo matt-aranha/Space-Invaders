@@ -20,7 +20,7 @@ vidaImg.src = "assets/vida(192x192).png"
 const semvidaImg = new Image();
 semvidaImg.src = "assets/sem-vida(192x192).png"
 
-// Função que carrega as informações de cada entidade do game
+// Função que carrega as informações de cada entidade do game (atributos e mecânicas)
 const state = {
   running: false,
   lastTime: 0,
@@ -67,7 +67,8 @@ const updateLivesUI = (state) => {
 // ------ KEYS -----
 // Função que recebe os input da interação teclado do usuário e game
 const keys = {};
-document.addEventListener("keydown", e => { keys[e.code] = true; if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) e.preventDefault(); });
+document.addEventListener("keydown", e => { keys[e.code] = true;
+  if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) e.preventDefault(); });
 document.addEventListener("keyup", e => { keys[e.code] = false; });
 
 // --- Áudio (WebAudio), mecanica de audio exportada ---
