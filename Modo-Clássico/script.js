@@ -36,7 +36,9 @@ const state = {
   enemyDir: 1, 
   enemySpeed: 40, 
   score: 0, 
-  audio: { ctx: null, masterGain: null, bgOscs: [] },
+  audio: { ctx: null, masterGain: null, bgOscs: [],
+  tones: [65, 60, 55, 50], // notas do tema original
+  index: 0, lastTime: 0 },
   base: (function spawn() { const cols = 3, rows = 1;
      return Array.from({ length: cols * rows },
      (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
@@ -62,8 +64,6 @@ const updateLivesUI = (state) => {
   container.innerHTML = livesToHTML(state.player.lives);
 };
 
-
-
 // ------ KEYS -----
 // Função que recebe os input da interação teclado do usuário e game
 const keys = {};
@@ -83,7 +83,7 @@ const ensureAudio = () => {
 };
 
 // Função para fazer tocar um tom com frequência, duração e tipo especificados
-const playTone = (freq, duration = 0.08, type = "square", vol = 0.12) => {
+const playTone = (freq, duration = 0.08, type = "square", vol = 0.12, endFreq = null) => {
   const a = state.audio.ctx;
   if (!a) return;
   const o = a.createOscillator();
@@ -93,8 +93,33 @@ const playTone = (freq, duration = 0.08, type = "square", vol = 0.12) => {
   o.connect(g); g.connect(state.audio.masterGain);
   o.start();
   g.gain.setValueAtTime(vol, a.currentTime);
+  if (endFreq !== null) {
+    o.frequency.exponentialRampToValueAtTime(endFreq, a.currentTime + duration);
+  }
   g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + duration);
   o.stop(a.currentTime + duration + 0.02);
+};
+const playInvaderTone = () => {
+  const a = state.audio;
+  if (!a.ctx) return;
+
+  const now = performance.now();
+  // Calcula o tempo entre as batidas. Fica mais rápido com menos inimigos vivos.
+  const timeBetweenBeats = Math.max(100, 550 - (state.enemies.filter(e => e.alive).length * 5));
+
+  if (now - a.lastTime < timeBetweenBeats) {
+    return; // Ainda não é hora de tocar
+  }
+
+  // Pega a próxima nota da sequência
+  const noteToPlay = a.tones[a.index];
+  
+  // Usa a funç. 'playTone' já existente para tocar a nota
+  playTone(noteToPlay, 0.1, "square", 0.1);
+
+  // Avança para a próxima nota da sequência
+  a.index = (a.index + 1) % a.tones.length;
+  a.lastTime = now;
 };
 
 // --- Ações do jogo ---
@@ -142,7 +167,7 @@ function processEnemies(bullet, enemies, idx) {
     e.alive = false;
     bullet.y = -9999; // marca pra remoção, saem do plano
     state.score += enemyPoints[e.type];
-    playTone(220 + Math.random() * 200, 0.12, "sawtooth", 0.06);
+    playTone(600, 0.15, "sawtooth", 0.08, 50);;
     return; // Para após a primeira colisão
   }
   processEnemies(bullet, enemies, idx + 1);
@@ -281,6 +306,9 @@ const update = (dt) => {
 
     // inimigo chega na base -> game over
   checkEnemyBase(state.enemies);
+
+  //manter música tocando
+  playInvaderTone();
 };
 
 
@@ -391,8 +419,7 @@ canvas.addEventListener("click", function (e) {
     requestAnimationFrame(loop);
   }
     state.base = (function spawn() { const cols = 3, rows = 1; return Array.from({ length: cols * rows }, (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
-    y: 550 + Math.floor(i / cols) * 40, 
-    w: 100, h: 80, hp: 30, hpMax: 30, hit: 0, alive: true 
+    y: 550 + Math.floor(i / cols) * 40, w: 100, h: 80, hp: 30, hpMax: 30, hit: 0, alive: true 
   })); 
 })();
 });

@@ -1,28 +1,48 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Space Invaders</title>
-    <link rel="stylesheet" href="styleprincipal.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Space Invaders</title>
+  <link rel="stylesheet" href="styleprincipal.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
-   <header>
-        <div>
-            <h1>SPACE INVADERS</h1>
-            <p>Bem-Vindo à nossa versão do jogo.</p>
-            <p>Selecione o modo de jogo abaixo para começar:</p>
-        </div>
+  <div class="stars"></div>
+  <div class="container">
+    <header>
+      <h1 class="title">SPACE INVADERS</h1>
+      <p>Bem-vindo à nossa versão do jogo!</p>
+      <p>Selecione o modo de jogo abaixo:</p>
     </header> 
-    <div>
-        <button onclick="window.location.href='Modo-Clássico/index.html'">CLÁSSICO</button>
+
+    <div class="buttons">
+      <button onclick="window.location.href='Modo-Clássico/index.html'">🎮 CLÁSSICO</button>
+      <button onclick="window.location.href='modosobreviva/index.html'">🛡️ ÚLTIMO SOBREVIVENTE</button>
     </div>
-    <div>
-        <button onclick="window.location.href='modosobreviva/menuinicial.html'">ÚLTIMO <br>SOBREVIVENTE</br></button>
-    </div>
+  </div>
 
+  <!-- Créditos -->
+  <footer class="credits">
+    <p>
+      Criado por: Eduardo Souza, Mateus Aranha e Renato Veloso <br>
+      
+      Engenharia de Computação - UFS <br>
+      Prof. Dr. Khalil Bispo
+    </p>
+  </footer>
 
+  <audio id="bg-music" autoplay loop>
+    <source src="musica.mp3" type="audio/mpeg">
+  </audio>
 
-    <script src="\Modo-Clássico\script.js"></script>
+  <script>
+    // Garante que música só toca após interação (exigência de navegadores)
+    document.body.addEventListener("click", () => {
+      const music = document.getElementById("bg-music");
+      music.volume = 0.3;
+      music.play();
+    }, { once: true });
+  </script>
 </body>
 </html>
