@@ -245,6 +245,15 @@ function processBulletBase(bullet, base, idx) {
   processBulletBase(bullet, base, idx + 1);
 }
 
+// Função para detectar se a horda de aliens morreu e então regenerar o escudo
+const regenerateBases = (bases) => {
+  return bases.map(base => ({
+        ...base,        //copia a base original
+        hp: base.hpMax, //regenera o hp para o máximo
+        alive: true     // ressuscita o escudo que foi destruído
+  }));
+};
+
 // Função para verificar se algum inimigo chegou na base
 function checkEnemyBase(enemies, idx = 0) {
   if (idx >= enemies.length) return;
@@ -355,6 +364,7 @@ const update = (dt) => {
   state.wave += 1;
   state.enemySpeed += 10.5;
   state.enemyFireRate *= 1.12; // sobe a dificuldade
+  state.base = regenerateBases(state.base);
   state.enemies = (function spawn() {
   const cols = 9, rows = 4;
   return Array.from({ length: cols * rows }, (_, i) => {
