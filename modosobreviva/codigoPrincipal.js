@@ -47,9 +47,9 @@ const tocarTiro = () => {
 
 
 
-
+// converte graus para radianos
 const degToRad = deg => deg * Math.PI / 180;
-
+// estado inicial do jogador
 const initialPlayer = () => ({
   x: canvas.width / 2,
   y: canvas.height / 2,
@@ -63,6 +63,7 @@ const initialPlayer = () => ({
   invulneravelAte: 0
 });
 
+// estado inicial do jogo
 const initialState = () => ({
   running: false,
   lastTime: 0,
@@ -73,10 +74,12 @@ const initialState = () => ({
   score: 0
 });
 
+// captura de teclas
 const keys = {};
 document.addEventListener("keydown", e => { keys[e.code] = true; });
 document.addEventListener("keyup", e => { keys[e.code] = false; });
 
+// função para criar um inimigo em uma posição aleatória na borda do canvas
 const spawnEnemy = canvas => {
   const side = Math.floor(Math.random() * 4);
   return {
@@ -89,9 +92,9 @@ const spawnEnemy = canvas => {
   };
 };
 
-//função para atualizar o estado do jogador
 
 
+//função para atualizar o estado do jogado
 const updatePlayer = (player, keys, dt, canvas) => {
   const angle = player.angle + (keys["KeyA"] ? -360 * dt : 0) + (keys["KeyD"] ? 360 * dt : 0);
   const move = keys["KeyW"] ? player.maxSpeed : (keys["KeyS"] ? -player.maxSpeed : 0);
@@ -101,12 +104,14 @@ const updatePlayer = (player, keys, dt, canvas) => {
   const cooldown = Math.max(0, player.cooldown - dt);
   return { ...player, x, y, angle, speed: move, cooldown };
 };
+
 //função para atualizar os estado da bala
 const updateBullets = (bullets, dt, canvas) =>
   bullets
     .map(b => ({ ...b, x: b.x + b.dx * dt, y: b.y + b.dy * dt }))
     .filter(b => b.x > 0 && b.x < canvas.width && b.y > 0 && b.y < canvas.height);
 
+// função para atualizar o estado dos inimigos
 const updateEnemies = (enemies, player, dt) =>
   enemies.map(e => {
     if (!e.alive) return e;
@@ -118,6 +123,7 @@ const updateEnemies = (enemies, player, dt) =>
     return { ...e, x: e.x + vx, y: e.y + vy };
   });
 
+// função para os inimigos atirarem
 const enemyShoot = (enemies, player, enemyBullets) =>
   enemies.reduce((bullets, e) => {
     if (e.alive && Math.hypot(player.x - e.x, player.y - e.y) < 200 && Math.random() < 0.01) {
@@ -135,6 +141,7 @@ const enemyShoot = (enemies, player, enemyBullets) =>
     return bullets;
   }, enemyBullets);
 
+// função para processar colisões entre balas e inimigos
 const processBullets = (bullets, enemies, score) => {
   // Função recursiva para processar colisão de uma bala com os inimigos
   const processBullet = (bullet, enemiesArr, idx = 0) => {
@@ -166,6 +173,7 @@ const processBullets = (bullets, enemies, score) => {
   );
 };
 
+// função para processar colisões entre inimigos e o jogador
 const processPlayerHit = (player, enemyBullets, ts) => {
   // se ainda está invulnerável, não sofre dano
   if (ts < player.invulneravelAte) {
@@ -199,16 +207,18 @@ const processPlayerHit = (player, enemyBullets, ts) => {
 
   return {
     player: hits > 0
-      ? { ...player, lives: player.lives - hits, invulneravelAte: ts + 2000 } // meio segundo
+      ? { ...player, lives: player.lives - hits, invulneravelAte: ts + 2000 } // dois segundos de invulnerabilidade
       : player,
     enemyBullets: newBullets,
     foiAcertado: hits > 0
   };
 };
 
+// função para spawnar uma onda de inimigos
 const spawnEnemiesWave = (canvas, quantidade = 5) =>
   Array.from({ length: quantidade }, () => spawnEnemy(canvas));
 
+// função para o jogador atirar
 const tiro = (state) => {
   if (state.player.cooldown > 0) return { state, atirou: false };
   const rad = degToRad(state.player.angle);
@@ -230,6 +240,7 @@ const tiro = (state) => {
   };
 };
 
+// função para proximos estados do jogo
 const nextState = (state, keys, dt, canvas, ts) => {
   const precisaSpawnInicial = state.enemies.length === 0;
   const todosMortos = state.enemies.length > 0 && state.enemies.every(e => !e.alive);
@@ -270,6 +281,7 @@ const nextState = (state, keys, dt, canvas, ts) => {
   };
 };
 
+// função para renderizar o estado do jogo
 const render = (state) => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -283,7 +295,7 @@ const render = (state) => {
     ctx.drawImage(playerImg, -state.player.w / 2, -state.player.h / 2, state.player.w, state.player.h);
     ctx.restore();
   }
-
+ // desenha balas
   state.bullets.forEach(b => drawRect(b.x, b.y, b.w, b.h, "#58a6ff"));
   state.enemyBullets.forEach(b => drawRect(b.x, b.y, b.w, b.h, "#ff5470"));
 
@@ -379,6 +391,7 @@ canvas.addEventListener("click", function(e) {
   }
 });
 
+// --- Clique no botão Play do menu ---
 playBtn.addEventListener("click", () => {
   menu.style.display = "none";
   canvas.style.display = "block";
