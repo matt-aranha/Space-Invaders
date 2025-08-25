@@ -563,7 +563,7 @@ canvas.addEventListener("click", function (e) {
     })();
 
     state.base = (function spawn() { const cols = 3, rows = 1; return Array.from({ length: cols * rows }, (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
-      y: 550 + Math.floor(i / cols) * 40, w: 100, h: 80, hp: 30, hpMax: 30, hit: 0, alive: true
+      y: 550 + Math.floor(i / cols) * 40, w: 120, h: 100, hp: 30, hpMax: 30, hit: 0, alive: true
     }));
     })();
     
@@ -610,7 +610,7 @@ playBtn.addEventListener("click", () => {
     });
   })();
   state.base = (function spawn() { const cols = 3, rows = 1; return Array.from({ length: cols * rows }, (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
-    y: 550 + Math.floor(i / cols) * 40, w: 100, h: 80, hp: 30, hpMax: 30, hit: 0,alive: true
+    y: 550 + Math.floor(i / cols) * 40, w: 120, h: 100, hp: 30, hpMax: 30, hit: 0,alive: true
   }));
   })();
   
