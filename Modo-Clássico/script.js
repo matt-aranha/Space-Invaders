@@ -59,7 +59,7 @@ const state = {
   wave: 1,
   enemyFireRate: 0.0005,
   enemies: (function spawn() {
-  const cols = 9, rows = 4;
+  const cols = 12, rows = 4;
   return Array.from({ length: cols * rows }, (_, i) => {
     const row = Math.floor(i / cols);
     // Mapeia cada linha para um tipo de inimigo (clássico)
@@ -108,7 +108,7 @@ const updateLivesUI = (state) => {
   container.innerHTML = livesToHTML(state.player.lives);
 };
 
-// ------ KEYS -----
+// ------ KEYS (teclas ;) ) -----
 // Função que recebe os input da interação teclado do usuário e game
 const keys = {};
 document.addEventListener("keydown", e => { keys[e.code] = true;
@@ -305,7 +305,6 @@ const updatePlayerAnimation = (playerState, dt, fps) => {
 // Função para selecionar a imagem correta da nave
 const getPlayerImage = (animationFrame) => playerFrames[animationFrame];
 
-
 // Função (theu: GIGANTE!! edu: MT msm) que retorna as modificações do state inicial
 const update = (dt) => {
   if (state.player.invincible > 0) {
@@ -366,7 +365,7 @@ const update = (dt) => {
   state.enemyFireRate *= 1.12; // sobe a dificuldade
   state.base = regenerateBases(state.base);
   state.enemies = (function spawn() {
-  const cols = 9, rows = 4;
+  const cols = 11, rows = 4;
   return Array.from({ length: cols * rows }, (_, i) => {
     const row = Math.floor(i / cols);
     // Mapeia cada linha para um tipo de inimigo (clássico)
@@ -507,7 +506,7 @@ state.base.forEach(b => {
    ctx.drawImage(img, e.x, e.y, e.w, e.h)
   });
   
-  ctx.fillStyle = "#fff"; ctx.font = "16px monospace"; ctx.fillText("Score: " + state.score, 10, 20);
+  ctx.fillStyle = "#fff"; ctx.font = "16px monospace"; ctx.fillText("Score: " + state.score, 600, 20);
 
   if (!state.running) {
     ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
