@@ -4,7 +4,7 @@ const ctx = canvas.getContext("2d");
 const playBtn = document.querySelector("#play-btn");
 const menu = document.querySelector("#menu");
 
-// images dos jogadores e dos inimigos, suas respectivas bases, cenário... :D
+// arquivos dos jogadores e dos inimigos, suas respectivas bases, cenário... :D
 const playerImg = new Image();
 playerImg.src = "assets/nave.png";
 
@@ -25,10 +25,15 @@ enemyImg3_frame2.src = "assets/Alien3(192x192)_0002.png";
 
 const baseImg = new Image();
 baseImg.src = "assets/escudo(192x192).png";
+
 const vidaImg = new Image();
 vidaImg.src = "assets/vida(192x192).png";
 const semvidaImg = new Image();
 semvidaImg.src = "assets/sem-vida(192x192).png";
+
+const playerShotSound = new Audio();
+playerShotSound.src = "assets/tiro-nave.mp3";
+playerShotSound.volume = 0.2     //ajustar se precisar
 
 // Função que carrega as informações de cada entidade do game
 const state = {
@@ -94,6 +99,12 @@ const ensureAudio = () => {
   state.audio.masterGain.connect(a.destination);
 };
 
+// Função para tocar o som do tiro. (para evitar reiniciar o audio, ela clona o audio sempre que o jogador atirar)
+const playAudioTiro = (audioElement) => {
+  const soundToPlay = audioElement.cloneNode();
+  soundToPlay.play().catch(e => console.error("Audio do Tiro Falhou:", e));
+};
+
 // Função para fazer tocar um tom com frequência, duração e tipo especificados
 const playTone = (freq, duration = 0.08, type = "square", vol = 0.12, endFreq = null) => {
   const a = state.audio.ctx;
@@ -140,7 +151,7 @@ const tiro = () => {
   if (p.cooldown > 0) return;
   p.cooldown = 0.420;
   state.bullets.push({ x: p.x + p.w / 2 - 2, y: p.y - 6, w: 4, h: 8, dy: -420 });
-  playTone(1000, 0.06, "square", 0.08);
+  playAudioTiro(playerShotSound);
 };
 
 // Função para processar as colisões do tiro do jogador com a base
@@ -154,7 +165,7 @@ function processPlayerBulletBase(bullet, base, idx) {
     return;
   }
   processPlayerBulletBase(bullet, base, idx + 1);
-}
+};
 
 
 // Função para processar colisões entre balas e inimigos
@@ -163,13 +174,15 @@ function processBullets(bullets, enemies, idx = 0) {
   const b = bullets[idx];
   processEnemies(b, enemies, 0);
   processBullets(bullets, enemies, idx + 1);
-}
+};
+
 // Função que relaciona os inimigos com os tiros que produzem assim também como se posicionam no canva
 const enemyPoints = {
   1: 10,   // inimigo de baixo
   2: 20,   // inimigo do meio
   3: 30    // inimigo de cima
 };
+
 function processEnemies(bullet, enemies, idx) {
   if (idx >= enemies.length) return;
   const e = enemies[idx];
@@ -183,7 +196,7 @@ function processEnemies(bullet, enemies, idx) {
     return; // Para após a primeira colisão
   }
   processEnemies(bullet, enemies, idx + 1);
-}
+};
 
 // Função para processar colisão entre balas do inimigo e a base
 function processBulletBase(bullet, base, idx) {
@@ -197,11 +210,11 @@ function processBulletBase(bullet, base, idx) {
     bullet.y = canvas.height + 100; // remove o tiro (filtro pega)
     if (e.hp <= 0) {
       e.alive = false;
-    }
+    };
     return; // evita múltiplos acertos no mesmo frame
-  }
+  };
   processBulletBase(bullet, base, idx + 1);
-}
+};
 
 // Função para verificar se algum inimigo chegou na base
 function checkEnemyBase(enemies, idx = 0) {
