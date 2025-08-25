@@ -1,10 +1,10 @@
-//inports brabos
+//inports brabos ;)
 const canvas = document.querySelector("#space-invaders");
 const ctx = canvas.getContext("2d");
 const playBtn = document.querySelector("#play-btn");
 const menu = document.querySelector("#menu");
 
-// images dos jogadores e dos inimigos, suas respectivas bases, cenário...
+// images dos jogadores e dos inimigos, suas respectivas bases, cenário... :D
 const playerImg = new Image();
 playerImg.src = "assets/nave.png";
 const enemyImg1 = new Image();
@@ -28,7 +28,7 @@ const state = {
   enemyBullets: [],
   bullets: [],
   wave: 1,
-  enemyFireRate: 0.002,
+  enemyFireRate: 0.0005,
   enemies: (function spawn() { const cols = 9, rows = 4;
      return Array.from({ length: cols * rows },
      (_, i) => ({ x: 300 + (i % cols) * 60,
@@ -40,7 +40,7 @@ const state = {
   base: (function spawn() { const cols = 3, rows = 1;
      return Array.from({ length: cols * rows },
      (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
-     y: 550 + Math.floor(i / cols) * 40, w: 80, h: 64, hp: 10, hpMax: 10, hit: 0, alive: true })); })()
+     y: 550 + Math.floor(i / cols) * 40, w: 100, h: 80, hp: 30, hpMax: 30, hit: 0, alive: true })); })()
 };
 
 // -----VIDA------
@@ -134,7 +134,7 @@ function processEnemies(bullet, enemies, idx) {
   processEnemies(bullet, enemies, idx + 1);
 }
 
-// Função para processar colisão entre balas e a base
+// Função para processar colisão entre balas do inimigo e a base
 function processBulletBase(bullet, base, idx) {
   if (idx >= base.length) return;
   const e = base[idx];
@@ -372,7 +372,7 @@ canvas.addEventListener("click", function (e) {
   }
     state.base = (function spawn() { const cols = 3, rows = 1; return Array.from({ length: cols * rows }, (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
     y: 550 + Math.floor(i / cols) * 40, 
-    w: 80, h: 64, hp: 10, hpMax: 10, hit: 0,alive: true 
+    w: 100, h: 80, hp: 30, hpMax: 30, hit: 0, alive: true 
   })); 
 })();
 });
@@ -403,7 +403,7 @@ playBtn.addEventListener("click", () => {
      y: 40 + Math.floor(i / cols) * 40, w: 64, h: 64, alive: true, type: Math.floor(Math.random() * 3) + 1 })); })();
   requestAnimationFrame(loop);
   state.base = (function spawn() { const cols = 3, rows = 1; return Array.from({ length: cols * rows }, (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
-    y: 550 + Math.floor(i / cols) * 40, w: 80, h: 64, hp: 10, hpMax: 10, hit: 0,alive: true 
+    y: 550 + Math.floor(i / cols) * 40, w: 100, h: 80, hp: 30, hpMax: 30, hit: 0,alive: true 
   })); 
 })();
 });
