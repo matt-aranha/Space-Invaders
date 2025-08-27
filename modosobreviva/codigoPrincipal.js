@@ -2,6 +2,7 @@ const canvas = document.querySelector("#ultimo-Sobrevivente");
 const ctx = canvas.getContext("2d");
 const playBtn = document.querySelector("#play-btn");
 const menu = document.querySelector("#menu");
+const muteBtn = document.querySelector("#mute-btn")
 
 const bgImg = new Image();
 bgImg.src = "sprites/planodefundo.png"; 
@@ -93,6 +94,7 @@ const initialPlayer = () => ({
 const initialState = () => ({
   running: false,
   lastTime: 0,
+  isMuted: false,
   player: initialPlayer(),
   bullets: [],
   enemies: [],
@@ -307,6 +309,27 @@ const nextState = (state, keys, dt, canvas, ts) => {
   };
 };
 
+//BOTÃO MUTE
+muteBtn.addEventListener("click", () => {
+  state.isMuted = !state.isMuted; // Inverte o estado (true/false)
+
+  if (state.isMuted) {
+    // Se estiver mutado, zera o volume de tudo
+    if (state.audio.masterGain) {
+      state.audio.masterGain.gain.value = 0; // Zera o volume do Web Audio (SFX, fundo)
+    }
+    playerShotSound.muted = true; // Muta o som de tiro do HTML Audio
+    muteBtn.textContent = "Desmutar"; // Muda o texto do botão
+  } else {
+    // Se não estiver mutado, restaura o volume
+    if (state.audio.masterGain) {
+      state.audio.masterGain.gain.value = 0.9; // Restaura o volume do Web Audio
+    }
+    playerShotSound.muted = false; // Desmuta o som de tiro
+    muteBtn.textContent = "Mutar Som"; // Restaura o texto do botão
+  }
+});
+
 // função para renderizar o estado do jogo
 const render = (state) => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -460,6 +483,7 @@ canvas.addEventListener("click", function(e) {
   ) {
     menu.style.display = "none";
     canvas.style.display = "block";
+    muteBtn.style.display = 'block';
     ajustarCanvas();
     tocarMusica();
     canvas.focus && canvas.focus();
@@ -473,6 +497,7 @@ canvas.addEventListener("click", function(e) {
 playBtn.addEventListener("click", () => {
   menu.style.display = "none";
   canvas.style.display = "block";
+  muteBtn.style.display = 'block';
   ajustarCanvas();
   tocarMusica();
   canvas.focus && canvas.focus();
