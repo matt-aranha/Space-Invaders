@@ -30,14 +30,14 @@ body {
 }
 
 #menu h1 {
-  font-size: 28px;
+  font-size: 38px;
   color: #00ffea;
   text-shadow: 0 0 10px #00ffee, 0 0 20px #00ffee;
   margin-bottom: 20px;
 }
 
 #menu h2 {
-  font-size: 12px;
+  font-size: 20px;
   color: #ccc;
   margin-top: 20px;
 }
