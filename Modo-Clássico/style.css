@@ -33,6 +33,10 @@ body {
     width: 120px;              /* Largura fixa para o texto não alterar o tamanho */
     transition: opacity 0.2s;  /* Transição suave para o efeito hover */
 }
+kbd{
+  font-size: 32px;
+}
+
 
 #lives-container {
   position: absolute;
