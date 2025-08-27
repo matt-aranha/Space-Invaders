@@ -21,20 +21,13 @@ body {
   to { background-position: -10000px 5000px; }
 }
 
+.logo {
+  height: 400px;
+  align-items: center;
+}
+
 .container {
   padding: 50px;
-}
-
-.title {
-  font-size: 40px;
-  color: #00ffea;
-  text-shadow: 0 0 10px #00ffee, 0 0 20px #00ffee;
-  animation: blink 1.2s infinite alternate;
-}
-
-@keyframes blink {
-  from { opacity: 1; }
-  to { opacity: 0.6; }
 }
 
 header p {
@@ -52,22 +45,22 @@ header p {
 }
 
 button {
-  background: black;
-  border: 2px solid #00ffea;
-  color: #00ffea;
+  background: rgb(0, 0, 0);
+  border: 2px solid #8a0000;
+  color: #ffc400;
   padding: 15px 30px;
   font-size: 16px;
+  font-family: 'Press Start 2P', cursive;
   text-transform: uppercase;
   cursor: pointer;
   border-radius: 8px;
   transition: 0.3s;
-  text-shadow: 0 0 8px #00ffee;
 }
 
 button:hover {
-  background: #00ffea;
+  background: #ffc400;
   color: black;
-  box-shadow: 0 0 20px #00ffee, 0 0 40px #00ffee;
+  box-shadow: 0 0 20px #8a0000, 0 0 40px #8a0000;
 }
 
 .credits {
@@ -75,9 +68,9 @@ button:hover {
   bottom: 10px;
   left: 10px;
   font-size: 10px;
-  color: #00ffea;
+  color: #ffc400;
   text-align: left;
-  text-shadow: 0 0 5px #00ffee, 0 0 10px #00ffee;
+  text-shadow: 0 0 5px #8a0000, 0 0 10px #ffffff;
   font-family: 'Press Start 2P', cursive;
   line-height: 1.6;
   opacity: 0.8;
