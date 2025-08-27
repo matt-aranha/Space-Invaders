@@ -12,31 +12,25 @@ const playerImg_frame2 = new Image();
 playerImg_frame2.src = "assets/SpaceShip(192x192)_0002.png"
 const playerImg_frame3 = new Image();
 playerImg_frame3.src = "assets/SpaceShip(192x192)_0003.png"
-const playerFrames = [playerImg, playerImg_frame2, playerImg_frame3]      // array para facilitar a chamada dos frames na nave pew pew. Ed: ÉH
-
+const playerFrames = [playerImg, playerImg_frame2, playerImg_frame3]  // array para facilitar a chamada dos frames na nave pew pew. Ed: ÉH
 const enemyImg1 = new Image();
 enemyImg1.src = "assets/Alien1(192x192).png";
 const enemyImg1_frame2 = new Image();
 enemyImg1_frame2.src = "assets/Alien1-Quadro2(192x192).png";
-
 const enemyImg2 = new Image();
 enemyImg2.src = "assets/Alien2(192x192)_0001.png";
 const enemyImg2_frame2 = new Image();
 enemyImg2_frame2.src = "assets/Alien2(192x192)_0002.png";
-
 const enemyImg3 = new Image();
 enemyImg3.src = "assets/Alien3(192x192)_0001.png";
 const enemyImg3_frame2 = new Image();
 enemyImg3_frame2.src = "assets/Alien3(192x192)_0002.png";
-
 const baseImg = new Image();
 baseImg.src = "assets/escudo(192x192).png";
-
 const vidaImg = new Image();
 vidaImg.src = "assets/vida(192x192).png";
 const semvidaImg = new Image();
 semvidaImg.src = "assets/sem-vida(192x192).png";
-
 const playerShotSound = new Audio();
 playerShotSound.src = "assets/tiro-nave.mp3";
 playerShotSound.volume = 0.1     //ajustar se precisar
@@ -93,8 +87,7 @@ const state = {
 // Função que recebe o número de vidas e devolve as imagens corretas
 const renderLives = (lives, maxLives = 3) => 
   Array.from({ length: maxLives }, (_, i) =>
-    i < lives ? "assets/vida(192x192).png" : "assets/sem-vida(192x192).png"
-  );
+    i < lives ? "assets/vida(192x192).png" : "assets/sem-vida(192x192).png");
 
 // Função que transforma a lista de imagens em DOM (strings) HTML
 const livesToHTML = (lives) =>
@@ -522,13 +515,13 @@ state.base.forEach(b => {
     ctx.fillText("GAME OVER", canvas.width / 2 + 3, canvas.height / 2 - 50 + 3);
     
     // Texto principal
-    ctx.fillStyle = "#ff5470"; // Cor do texto
+    ctx.fillStyle = "#25f82fff"; // Cor do texto
     ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 50);
 
     // --- Subtexto de Instrução ---
     ctx.font = "14px 'Press Start 2P'";
     ctx.fillStyle = "#fff";
-    ctx.fillText("Clique no botao para reiniciar", canvas.width / 2, canvas.height / 2);
+    ctx.fillText("Clique no botão para reiniciar", canvas.width / 2, canvas.height / 2);
 
     // --- Botão de Reiniciar com Estilo Retrô ---
     const btnWidth = 240, btnHeight = 50;
@@ -537,7 +530,7 @@ state.base.forEach(b => {
     const shadowOffset = 5; // Tamanho da "sombra 3D"
 
     // Sombra do botão (desenhada primeiro, por baixo)
-    ctx.fillStyle = "#c44259"; // Rosa escuro para a sombra
+    ctx.fillStyle = "#02a036ff"; // Rosa escuro para a sombra
     ctx.fillRect(btnX, btnY, btnWidth, btnHeight);
 
     // Corpo principal do botão (desenhado por cima, um pouco deslocado)
