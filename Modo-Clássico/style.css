@@ -52,7 +52,7 @@ body {
 }
 /* Efeito de botão sendo pressionado */
 #mute-btn:active {
-    top: 3px;
+    top: -710px;
     box-shadow: 0 1px 0 #c44259;
 }
 
