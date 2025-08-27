@@ -13,25 +13,47 @@ body {
   text-align: center;
 }
 
+/* Estilo Retrô para o Botão Principal */
 #play-btn {
-  font-size: 24px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  background: #0f0;
-  cursor: pointer;
+    font-family: 'Press Start 2P', monospace; /* Fonte pixelada clássica */
+    font-size: 24px;
+    padding: 15px 30px;
+    color: white;
+    background: #008000; /* Verde um pouco mais escuro */
+    border: 2px solid white;
+    box-shadow: 0 6px 0 #004d00; /* Sombra 3D escura */
+    cursor: pointer;
+    position: relative; /* Necessário para o efeito de clique */
+    transition: top 0.05s ease-in-out;
+}
+/* Efeito de botão sendo pressionado */
+#play-btn:active {
+    top: 4px; /* Move o botão para baixo */
+    box-shadow: 0 2px 0 #004d00; /* Reduz a sombra */
 }
 
+/* Estilo Retrô para o Botão de Mute */
 #mute-btn {
-    background-color: #232946; /* Cor de fundo escura, igual ao botão "Reiniciar" */
-    color: #ff5470;           /* Cor do texto, igual ao botão "Reiniciar" */
-    border: 2px solid #ff5470; /* Borda na mesma cor do texto */
-    padding: 5px 10px;         /* Espaçamento interno */
-    font-family: monospace;    /* Fonte consistente com o resto do jogo */
-    font-size: 16px;
+    display: none; /* Esconde o botão por padrão */
+    position: absolute;
+    top: -710px;
+    left: 10px;
+    font-family: 'Press Start 2P', monospace; /* Fonte pixelada */
+    font-size: 14px;
+    color: #ff5470;
+    background-color: #232946;
+    border: 2px solid #ff5470;
+    padding: 8px 12px;
+    width: 140px; /* Ajuste de largura para o novo texto */
+    box-shadow: 0 4px 0 #c44259; /* Sombra 3D rosa escuro */
     cursor: pointer;
-    width: 120px;              /* Largura fixa para o texto não alterar o tamanho */
-    transition: opacity 0.2s;  /* Transição suave para o efeito hover */
+    position: relative;
+    transition: top 0.05s ease-in-out;
+}
+/* Efeito de botão sendo pressionado */
+#mute-btn:active {
+    top: -710px;
+    box-shadow: 0 1px 0 #c44259;
 }
 
 #lives-container {
@@ -60,4 +82,60 @@ canvas {
   background-size: cover;
   display: block;
   margin: auto;
+}
+
+/* Estilo para o título principal do jogo */
+#menu h1 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 5em; /* Tamanho grande para o título */
+    color: #0f0; /* Verde clássico de arcade */
+    text-shadow: 4px 4px 0px #004d00; /* Efeito de sombra 3D */
+    line-height: 1.2;
+}
+
+/* Estilo para o texto de instrução */
+#menu h2 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1em; /* Tamanho menor para instruções */
+    color: #fff; /* Cor branca para boa leitura */
+    line-height: 1.5; /* Espaçamento entre linhas */
+    margin-top: 40px;
+}
+
+/* Garante que o texto dentro da tag <kbd> também use a fonte */
+#menu h2 kbd {
+    font-family: inherit; /* Herda a fonte do h2 */
+    font-size: 2em; /* Mantém o mesmo tamanho do texto */
+}
+
+/* Container que segura o canvas e o efeito CRT */
+#game-container {
+  position: relative;
+  display: inline-block; /* Ajusta o tamanho ao conteúdo */
+  box-shadow: 0 0 40px rgba(255, 84, 112, 0.5); /* Brilho neon opcional */
+}
+
+/* Efeito CRT (scanlines e vinheta) */
+#game-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(ellipse at center, rgba(0,0,0,0) 30%, rgba(0,0,0,0.5) 100%),
+    repeating-linear-gradient(
+      rgba(0,0,0,0) 0px,
+      rgba(0,0,0,0) 1px,
+      rgba(0,0,0,0.3) 2px,
+      rgba(0,0,0,0.3) 3px
+    );
+  pointer-events: none; /* Permite que cliques atravessem o efeito */
+  border-radius: 15px; /* Simula a curvatura da tela */
+}
+
+/* Leve curvatura no canvas para completar o efeito */
+canvas {
+  border-radius: 15px;
 }

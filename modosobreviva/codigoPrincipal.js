@@ -311,7 +311,7 @@ const nextState = (state, keys, dt, canvas, ts) => {
 const render = (state) => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // 🔹 Função funcional para desenhar fundo sem let
+  // 🔹 Função funcional para desenhar fundo 
   const drawBackground = (ctx, img, canvas) => {
     const imgRatio = img.width / img.height;
     const canvasRatio = canvas.width / canvas.height;
@@ -374,10 +374,10 @@ const render = (state) => {
     ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#54f4ffff";
-    ctx.font = "34px monospace";
+    ctx.font = "45px monospace";
     ctx.textAlign = "center";
     ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 10);
-    ctx.font = "16px monospace";
+    ctx.font = "20px monospace";
     ctx.fillStyle = "#fff";
     ctx.fillText(
       "Clique no botão para reiniciar",

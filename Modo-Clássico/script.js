@@ -12,7 +12,7 @@ const playerImg_frame2 = new Image();
 playerImg_frame2.src = "assets/SpaceShip(192x192)_0002.png"
 const playerImg_frame3 = new Image();
 playerImg_frame3.src = "assets/SpaceShip(192x192)_0003.png"
-const playerFrames = [playerImg, playerImg_frame2, playerImg_frame3]      // array para facilitar a chamada dos frames na nave pew pew
+const playerFrames = [playerImg, playerImg_frame2, playerImg_frame3]      // array para facilitar a chamada dos frames na nave pew pew. Ed: ÉH
 
 const enemyImg1 = new Image();
 enemyImg1.src = "assets/Alien1(192x192).png";
@@ -470,7 +470,7 @@ const render = () => {
     ctx.drawImage(currentPlayerImg, state.player.x, state.player.y, state.player.w, state.player.h);
   }
 
-  // Player lives
+  // Player lives (IN PORTUGUESE, please ;-; : vidas)
   ctx.fillStyle = "#fff";
   ctx.font = "16px monospace";
   ctx.fillText("Vidas: " + state.player.lives, canvas.width - 100, 20);
@@ -506,29 +506,54 @@ state.base.forEach(b => {
    ctx.drawImage(img, e.x, e.y, e.w, e.h)
   });
   
-  ctx.fillStyle = "#fff"; ctx.font = "16px monospace"; ctx.fillText("Score: " + state.score, 600, 20);
+  ctx.fillStyle = "#fff"; ctx.font = "16px monospace"; ctx.fillText("Score: " + state.score, 580, 20);
 
   if (!state.running) {
-    ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#ff5470"; ctx.font = "34px monospace"; ctx.textAlign = "center";
-    ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 10);
-    ctx.font = "16px monospace"; ctx.fillStyle = "#fff";
-    ctx.fillText("Clique em Play para reiniciar", canvas.width / 2, canvas.height / 2 + 20);
+    // --- Tela de Fundo Escurecida ---
+    ctx.fillStyle = "rgba(0,0,0,0.75)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Desenha botão de reiniciar
-    const btnWidth = 180, btnHeight = 44;
+    // --- Texto "GAME OVER" com Estilo Retrô ---
+    ctx.font = "48px 'Press Start 2P'";
+    ctx.textAlign = "center";
+
+    // Efeito de sombra/contorno para o texto
+    ctx.fillStyle = "#fff"; // Cor do contorno
+    ctx.fillText("GAME OVER", canvas.width / 2 + 3, canvas.height / 2 - 50 + 3);
+    
+    // Texto principal
+    ctx.fillStyle = "#ff5470"; // Cor do texto
+    ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 50);
+
+    // --- Subtexto de Instrução ---
+    ctx.font = "14px 'Press Start 2P'";
+    ctx.fillStyle = "#fff";
+    ctx.fillText("Clique no botao para reiniciar", canvas.width / 2, canvas.height / 2);
+
+    // --- Botão de Reiniciar com Estilo Retrô ---
+    const btnWidth = 240, btnHeight = 50;
     const btnX = canvas.width / 2 - btnWidth / 2;
-    const btnY = canvas.height / 2 + 40;
-    ctx.fillStyle = "#232946";
-    ctx.strokeStyle = "#ff5470";
-    ctx.lineWidth = 3;
+    const btnY = canvas.height / 2 + 30;
+    const shadowOffset = 5; // Tamanho da "sombra 3D"
+
+    // Sombra do botão (desenhada primeiro, por baixo)
+    ctx.fillStyle = "#c44259"; // Rosa escuro para a sombra
     ctx.fillRect(btnX, btnY, btnWidth, btnHeight);
-    ctx.strokeRect(btnX, btnY, btnWidth, btnHeight);
-    ctx.font = "20px monospace";
-    ctx.fillStyle = "#ff5470";
-    ctx.fillText("Reiniciar", canvas.width / 2, btnY + 29);
+
+    // Corpo principal do botão (desenhado por cima, um pouco deslocado)
+    ctx.fillStyle = "#232946";
+    ctx.fillRect(btnX, btnY - shadowOffset, btnWidth, btnHeight);
+
+    // Texto do botão
+    ctx.font = "18px 'Press Start 2P'";
+    ctx.fillStyle = "#fff"; // Texto branco para contraste
+    ctx.textBaseline = "middle"; // Alinha o texto verticalmente pelo meio
+    ctx.fillText("Reiniciar", canvas.width / 2, btnY - shadowOffset + (btnHeight / 2));
+
+    // Reseta os alinhamentos para não afetar outros desenhos
     ctx.textAlign = "start";
-  }
+    ctx.textBaseline = "alphabetic";
+}
 };
 
 // --- Detecta clique no botão de reiniciar, como um evento de retorno ---
@@ -549,6 +574,7 @@ canvas.addEventListener("click", function (e) {
     if (state.audio.ctx && state.audio.ctx.state === "suspended") state.audio.ctx.resume();
     menu.style.display = "none";
     canvas.style.display = "block";
+    muteBtn.style.display = 'block';
     state.running = true;
     state.lastTime = 0;
     state.score = 0;
@@ -597,6 +623,7 @@ playBtn.addEventListener("click", () => {
   if (state.audio.ctx && state.audio.ctx.state === "suspended") state.audio.ctx.resume();
   menu.style.display = "none";
   canvas.style.display = "block";
+  muteBtn.style.display = 'block';
   state.running = true;
   state.lastTime = 0;
   state.score = 0;

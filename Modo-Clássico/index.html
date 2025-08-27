@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
+<head> 
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Space Invaders</title>
@@ -10,14 +11,20 @@
       <div id="menu">
             <h1>SPACE INVADERS</h1>
             <button id="play-btn">▶ Play</button>
-            <h2>Use o 'A' ou '<-', 'D' ou '->',  para mover-se e 'W' ou 'ESPAÇO' para atirar</h2>
+            <h2>Use o 'A' ou <kbd>&larr;</kbd>, 'D' ou <kbd>&rarr;</kbd>,  para mover-se e 'W' ou 'ESPAÇO' para atirar</h2>
             <img src="/Modo-Clássico/assets/Controle(192x192).png">
       </div>
 
       <div style="position: relative; display: inline-block;">
             <div id="lives-container"></div>
             <canvas id="space-invaders" width="1200" height="720" style="display:none"></canvas>
-            <button id="mute-btn" style="position: absolute; top: 30px; left: 10px;">Mutar Som</button>
+            <button id="mute-btn">Mutar Som</button>
+      </div> 
+
+      <div id="game-container">
+             <div id="lives-container"></div>
+             <button id="mute-btn">Mutar Som</button>
+             <canvas id="space-invaders" width="1200" height="720" style="display:none"></canvas>
       </div>
 
       <audio id="bg-music" src="music.mp3" loop></audio>
