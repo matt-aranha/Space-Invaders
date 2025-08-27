@@ -470,7 +470,7 @@ const render = () => {
     ctx.drawImage(currentPlayerImg, state.player.x, state.player.y, state.player.w, state.player.h);
   }
 
-  // Player lives
+  // Player lives (IN PORTUGUESE, please ;-; : vidas)
   ctx.fillStyle = "#fff";
   ctx.font = "16px monospace";
   ctx.fillText("Vidas: " + state.player.lives, canvas.width - 100, 20);
@@ -506,7 +506,7 @@ state.base.forEach(b => {
    ctx.drawImage(img, e.x, e.y, e.w, e.h)
   });
   
-  ctx.fillStyle = "#fff"; ctx.font = "16px monospace"; ctx.fillText("Score: " + state.score, 600, 20);
+  ctx.fillStyle = "#fff"; ctx.font = "16px monospace"; ctx.fillText("Score: " + state.score, 580, 20);
 
   if (!state.running) {
     ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
