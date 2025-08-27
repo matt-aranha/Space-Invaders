@@ -107,3 +107,35 @@ canvas {
     font-family: inherit; /* Herda a fonte do h2 */
     font-size: 2em; /* Mantém o mesmo tamanho do texto */
 }
+
+/* Container que segura o canvas e o efeito CRT */
+#game-container {
+  position: relative;
+  display: inline-block; /* Ajusta o tamanho ao conteúdo */
+  box-shadow: 0 0 40px rgba(255, 84, 112, 0.5); /* Brilho neon opcional */
+}
+
+/* Efeito CRT (scanlines e vinheta) */
+#game-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(ellipse at center, rgba(0,0,0,0) 30%, rgba(0,0,0,0.5) 100%),
+    repeating-linear-gradient(
+      rgba(0,0,0,0) 0px,
+      rgba(0,0,0,0) 1px,
+      rgba(0,0,0,0.3) 2px,
+      rgba(0,0,0,0.3) 3px
+    );
+  pointer-events: none; /* Permite que cliques atravessem o efeito */
+  border-radius: 15px; /* Simula a curvatura da tela */
+}
+
+/* Leve curvatura no canvas para completar o efeito */
+canvas {
+  border-radius: 15px;
+}
