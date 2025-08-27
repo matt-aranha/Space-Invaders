@@ -35,7 +35,7 @@ const calcularCanvasSize = (largura, altura, proporcao) => {
 };
 
 const ajustarCanvas = () => {
-  const proporcao = 1880/ 1220;
+  const proporcao = 1216/ 1024; 
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
 
@@ -311,7 +311,7 @@ const nextState = (state, keys, dt, canvas, ts) => {
 const render = (state) => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // 🔹 Função funcional para desenhar fundo 
+  //  Função funcional para desenhar fundo 
   const drawBackground = (ctx, img, canvas) => {
     const imgRatio = img.width / img.height;
     const canvasRatio = canvas.width / canvas.height;
@@ -354,22 +354,22 @@ const render = (state) => {
     ctx.restore();
   }
 
-  // 🔹 Balas
+  //  Balas
   state.bullets.forEach(b => drawRect(b.x, b.y, b.w, b.h, "#58a6ff"));
   state.enemyBullets.forEach(b => drawRect(b.x, b.y, b.w, b.h, "#ff5470"));
 
-  // 🔹 Inimigos
+  //  Inimigos
   state.enemies.forEach(e => {
     if (e.alive) ctx.drawImage(enemyImg, e.x, e.y, e.w, e.h);
   });
 
-  // 🔹 HUD
+  //  HUD
   ctx.fillStyle = "#fff";
   ctx.font = "16px monospace";
   ctx.fillText("Vidas: " + state.player.lives, 10, 20);
   ctx.fillText("Score: " + state.score, 10, 40);
 
-  // 🔹 Tela de Game Over + Botão
+  //  Tela de Game Over + Botão
   if (!state.running) {
     ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
