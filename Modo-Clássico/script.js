@@ -365,7 +365,7 @@ const update = (dt) => {
   state.enemyFireRate *= 1.12; // sobe a dificuldade
   state.base = regenerateBases(state.base);
   state.enemies = (function spawn() {
-  const cols = 11, rows = 4;
+  const cols = 12, rows = 4;
   return Array.from({ length: cols * rows }, (_, i) => {
     const row = Math.floor(i / cols);
     // Mapeia cada linha para um tipo de inimigo (clássico)

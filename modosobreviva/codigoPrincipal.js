@@ -3,6 +3,9 @@ const ctx = canvas.getContext("2d");
 const playBtn = document.querySelector("#play-btn");
 const menu = document.querySelector("#menu");
 
+const bgImg = new Image();
+bgImg.src = "sprites/planodefundo.png"; 
+
 const playerImg = new Image();
 playerImg.src = "sprites/nave.png";
 const enemyImg = new Image();
@@ -23,7 +26,30 @@ const tocarDano = () => {
   s.play();
 };
 
+// Ajuste funcional do tamanho do canvas
+const calcularCanvasSize = (largura, altura, proporcao) => {
+  const ratio = largura / altura;
+  return ratio > proporcao
+    ? { width: altura * proporcao, height: altura }
+    : { width: largura, height: largura / proporcao };
+};
 
+const ajustarCanvas = () => {
+  const proporcao = 1880/ 1220;
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
+
+  const { width, height } =
+    screenWidth / screenHeight > proporcao
+      ? { width: screenHeight * proporcao, height: screenHeight }
+      : { width: screenWidth, height: screenWidth / proporcao };
+
+  canvas.width = width;
+  canvas.height = height;
+};
+
+window.addEventListener("resize", ajustarCanvas);
+ajustarCanvas();
 
 // funções para tocar música e som de tiro
 const tocarMusica = () => {
@@ -47,9 +73,9 @@ const tocarTiro = () => {
 
 
 
-
+// converte graus para radianos
 const degToRad = deg => deg * Math.PI / 180;
-
+// estado inicial do jogador
 const initialPlayer = () => ({
   x: canvas.width / 2,
   y: canvas.height / 2,
@@ -63,6 +89,7 @@ const initialPlayer = () => ({
   invulneravelAte: 0
 });
 
+// estado inicial do jogo
 const initialState = () => ({
   running: false,
   lastTime: 0,
@@ -73,10 +100,12 @@ const initialState = () => ({
   score: 0
 });
 
+// captura de teclas
 const keys = {};
 document.addEventListener("keydown", e => { keys[e.code] = true; });
 document.addEventListener("keyup", e => { keys[e.code] = false; });
 
+// função para criar um inimigo em uma posição aleatória na borda do canvas
 const spawnEnemy = canvas => {
   const side = Math.floor(Math.random() * 4);
   return {
@@ -89,9 +118,9 @@ const spawnEnemy = canvas => {
   };
 };
 
-//função para atualizar o estado do jogador
 
 
+//função para atualizar o estado do jogado
 const updatePlayer = (player, keys, dt, canvas) => {
   const angle = player.angle + (keys["KeyA"] ? -360 * dt : 0) + (keys["KeyD"] ? 360 * dt : 0);
   const move = keys["KeyW"] ? player.maxSpeed : (keys["KeyS"] ? -player.maxSpeed : 0);
@@ -101,12 +130,14 @@ const updatePlayer = (player, keys, dt, canvas) => {
   const cooldown = Math.max(0, player.cooldown - dt);
   return { ...player, x, y, angle, speed: move, cooldown };
 };
+
 //função para atualizar os estado da bala
 const updateBullets = (bullets, dt, canvas) =>
   bullets
     .map(b => ({ ...b, x: b.x + b.dx * dt, y: b.y + b.dy * dt }))
     .filter(b => b.x > 0 && b.x < canvas.width && b.y > 0 && b.y < canvas.height);
 
+// função para atualizar o estado dos inimigos
 const updateEnemies = (enemies, player, dt) =>
   enemies.map(e => {
     if (!e.alive) return e;
@@ -118,6 +149,7 @@ const updateEnemies = (enemies, player, dt) =>
     return { ...e, x: e.x + vx, y: e.y + vy };
   });
 
+// função para os inimigos atirarem
 const enemyShoot = (enemies, player, enemyBullets) =>
   enemies.reduce((bullets, e) => {
     if (e.alive && Math.hypot(player.x - e.x, player.y - e.y) < 200 && Math.random() < 0.01) {
@@ -135,6 +167,7 @@ const enemyShoot = (enemies, player, enemyBullets) =>
     return bullets;
   }, enemyBullets);
 
+// função para processar colisões entre balas e inimigos
 const processBullets = (bullets, enemies, score) => {
   // Função recursiva para processar colisão de uma bala com os inimigos
   const processBullet = (bullet, enemiesArr, idx = 0) => {
@@ -166,6 +199,7 @@ const processBullets = (bullets, enemies, score) => {
   );
 };
 
+// função para processar colisões entre inimigos e o jogador
 const processPlayerHit = (player, enemyBullets, ts) => {
   // se ainda está invulnerável, não sofre dano
   if (ts < player.invulneravelAte) {
@@ -199,16 +233,18 @@ const processPlayerHit = (player, enemyBullets, ts) => {
 
   return {
     player: hits > 0
-      ? { ...player, lives: player.lives - hits, invulneravelAte: ts + 2000 } // meio segundo
+      ? { ...player, lives: player.lives - hits, invulneravelAte: ts + 2000 } // dois segundos de invulnerabilidade
       : player,
     enemyBullets: newBullets,
     foiAcertado: hits > 0
   };
 };
 
+// função para spawnar uma onda de inimigos
 const spawnEnemiesWave = (canvas, quantidade = 5) =>
   Array.from({ length: quantidade }, () => spawnEnemy(canvas));
 
+// função para o jogador atirar
 const tiro = (state) => {
   if (state.player.cooldown > 0) return { state, atirou: false };
   const rad = degToRad(state.player.angle);
@@ -230,6 +266,7 @@ const tiro = (state) => {
   };
 };
 
+// função para proximos estados do jogo
 const nextState = (state, keys, dt, canvas, ts) => {
   const precisaSpawnInicial = state.enemies.length === 0;
   const todosMortos = state.enemies.length > 0 && state.enemies.every(e => !e.alive);
@@ -270,8 +307,35 @@ const nextState = (state, keys, dt, canvas, ts) => {
   };
 };
 
+// função para renderizar o estado do jogo
 const render = (state) => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // 🔹 Função funcional para desenhar fundo sem let
+  const drawBackground = (ctx, img, canvas) => {
+    const imgRatio = img.width / img.height;
+    const canvasRatio = canvas.width / canvas.height;
+
+    const { drawWidth, drawHeight, offsetX, offsetY } =
+      canvasRatio > imgRatio
+        ? {
+            drawWidth: canvas.width,
+            drawHeight: canvas.width / imgRatio,
+            offsetX: 0,
+            offsetY: (canvas.height - canvas.width / imgRatio) / 2
+          }
+        : {
+            drawHeight: canvas.height,
+            drawWidth: canvas.height * imgRatio,
+            offsetX: (canvas.width - canvas.height * imgRatio) / 2,
+            offsetY: 0
+          };
+
+    ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+  };
+
+  // Se quiser usar fundo, descomente:
+   drawBackground(ctx, bgImg, canvas);
 
   const invulneravel = state.lastTime < state.player.invulneravelAte;
   const deveDesenhar = !invulneravel || Math.floor(state.lastTime / 100) % 2 === 0;
@@ -280,44 +344,58 @@ const render = (state) => {
     ctx.save();
     ctx.translate(state.player.x, state.player.y);
     ctx.rotate(degToRad(state.player.angle) + Math.PI / 2);
-    ctx.drawImage(playerImg, -state.player.w / 2, -state.player.h / 2, state.player.w, state.player.h);
+    ctx.drawImage(
+      playerImg,
+      -state.player.w / 2,
+      -state.player.h / 2,
+      state.player.w,
+      state.player.h
+    );
     ctx.restore();
   }
 
+  // 🔹 Balas
   state.bullets.forEach(b => drawRect(b.x, b.y, b.w, b.h, "#58a6ff"));
   state.enemyBullets.forEach(b => drawRect(b.x, b.y, b.w, b.h, "#ff5470"));
 
+  // 🔹 Inimigos
   state.enemies.forEach(e => {
     if (e.alive) ctx.drawImage(enemyImg, e.x, e.y, e.w, e.h);
   });
 
+  // 🔹 HUD
   ctx.fillStyle = "#fff";
   ctx.font = "16px monospace";
   ctx.fillText("Vidas: " + state.player.lives, 10, 20);
   ctx.fillText("Score: " + state.score, 10, 40);
 
+  // 🔹 Tela de Game Over + Botão
   if (!state.running) {
     ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#ff5470";
+    ctx.fillStyle = "#54f4ffff";
     ctx.font = "34px monospace";
     ctx.textAlign = "center";
     ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 10);
     ctx.font = "16px monospace";
     ctx.fillStyle = "#fff";
-    ctx.fillText("Clique em Play para reiniciar", canvas.width / 2, canvas.height / 2 + 20);
+    ctx.fillText(
+      "Clique no botão para reiniciar",
+      canvas.width / 2,
+      canvas.height / 2 + 20
+    );
 
-    // Desenha botão de reiniciar
-    const btnWidth = 180, btnHeight = 44;
+    const btnWidth = 180,
+      btnHeight = 44;
     const btnX = canvas.width / 2 - btnWidth / 2;
     const btnY = canvas.height / 2 + 40;
     ctx.fillStyle = "#232946";
-    ctx.strokeStyle = "#ff5470";
+    ctx.strokeStyle = "#19fddfff";
     ctx.lineWidth = 3;
     ctx.fillRect(btnX, btnY, btnWidth, btnHeight);
     ctx.strokeRect(btnX, btnY, btnWidth, btnHeight);
     ctx.font = "20px monospace";
-    ctx.fillStyle = "#ff5470";
+    ctx.fillStyle = "#54ebffff";
     ctx.fillText("Reiniciar", canvas.width / 2, btnY + 29);
     ctx.textAlign = "start";
   }
@@ -329,32 +407,26 @@ function drawRect(x, y, w, h, color) {
 }
 
 // --- Loop funcional ---
-function loop(state, ts) {
-  if (!state.running) {
-    pararMusica();
-    return;
-  }
+const loop = (state, ts) => {
   const dt = Math.min(0.05, (ts - (state.lastTime || ts)) / 1000);
-  const newState = nextState(state, keys, dt, canvas, ts);
-  
+  const newState = state.running
+    ? nextState(state, keys, dt, canvas, ts)
+    : { ...state, lastTime: ts };
+
   render(newState);
 
-  // sons
-  if (state.player.cooldown === 0 && keys["Space"]) {
-    tocarTiro();
+  if (!newState.running) {
+    pararMusica();
   }
-  if (newState.inimigosAtiraram) {
-    tocarTiro();
-  }
-  if (newState.foiAcertado) {
-    tocarDano();
-  }
-  if (newState.inimigoAcertado) {
-    tocarDano();
+  if (newState.running) {
+    if (state.player.cooldown === 0 && keys["Space"]) tocarTiro();
+    if (newState.inimigosAtiraram) tocarTiro();
+    if (newState.foiAcertado) tocarDano();
+    if (newState.inimigoAcertado) tocarDano();
   }
 
   requestAnimationFrame(ts2 => loop(newState, ts2));
-}
+};
 
 // --- Clique no botão de reiniciar ---
 canvas.addEventListener("click", function(e) {
@@ -371,6 +443,7 @@ canvas.addEventListener("click", function(e) {
   ) {
     menu.style.display = "none";
     canvas.style.display = "block";
+    ajustarCanvas();
     tocarMusica();
     canvas.focus && canvas.focus();
     const novoEstado = { ...initialState(), running: true };
@@ -379,9 +452,11 @@ canvas.addEventListener("click", function(e) {
   }
 });
 
+// --- Clique no botão Play do menu ---
 playBtn.addEventListener("click", () => {
   menu.style.display = "none";
   canvas.style.display = "block";
+  ajustarCanvas();
   tocarMusica();
   canvas.focus && canvas.focus();
   
