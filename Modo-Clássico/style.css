@@ -21,8 +21,8 @@ body {
     
     /* Paleta de Cores Azul Adaptada */
     background: black;
-    border: 2px solid #035002; /* Borda azul escuro */
-    color: #19c917;           /* Texto azul ciano */
+    border: 2px solid #035002; /* Borda verde escuro */
+    color: #19c917;           /* Texto verde claro */
     text-shadow: 0 0 10px #00ff3c; /* Leve brilho no texto */
     
     /* Estilo do Botão do Menu Principal */
@@ -31,11 +31,11 @@ body {
     transition: 0.3s;
 }
 
-/* Efeito de brilho no hover, adaptado para azul */
+/* Efeito de brilho no hover, adaptado para verde */
 #play-btn:hover {
-    background: #03b830; /* Fundo fica ciano */
+    background: #03b830; /* Fundo fica verde */
     color: black;        /* Texto fica preto */
-    box-shadow: 0 0 20px #01831b, 0 0 40px  #01831b; /* Brilho azul escuro */
+    box-shadow: 0 0 20px #01831b, 0 0 40px  #01831b; /* Brilho verde escuro */
 }
 
 /* Estilo Retrô para o Botão de Mute */
@@ -46,12 +46,12 @@ body {
     left: 10px;
     font-family: 'Press Start 2P', monospace; /* Fonte pixelada */
     font-size: 14px;
-    color: #ff5470;
+    color: #ffffff;
     background-color: #232946;
-    border: 2px solid #ff5470;
+    border: 2px solid #a7a7a7;
     padding: 8px 12px;
     width: 140px; /* Ajuste de largura para o novo texto */
-    box-shadow: 0 4px 0 #c44259; /* Sombra 3D rosa escuro */
+    box-shadow: 0 4px 0 #919191; /* Sombra 3D rosa escuro */
     cursor: pointer;
     position: relative;
     transition: top 0.05s ease-in-out;
@@ -59,7 +59,7 @@ body {
 /* Efeito de botão sendo pressionado */
 #mute-btn:active {
     top: -710px;
-    box-shadow: 0 1px 0 #c44259;
+    box-shadow: 0 1px 0 #919191;
 }
 
 #lives-container {

@@ -44,7 +44,7 @@ const state = {
   lastTime: 0,
   isMuted: false,
   player: { 
-      x: (canvas.width / 2) - 25, y: canvas.height - 80, w: 90, h: 70,
+      x: (canvas.width / 2) - 40, y: canvas.height - 80, w: 90, h: 70,
       speed: 450,
       cooldown: 0, 
       lives: 3, 
@@ -455,7 +455,7 @@ muteBtn.addEventListener("click", () => {
     }
     playerShotSound.muted = false; // Desmuta o som de tiro
     baseDestroyedSound.muted = false; // Desmuta o som da explosão
-    muteBtn.textContent = "Mutar Som"; // Restaura o texto do botão
+    muteBtn.textContent = "Mutar"; // Restaura o texto do botão
   }
 });
 
@@ -478,8 +478,8 @@ const render = () => {
 
   // Player lives (IN PORTUGUESE, please ;-; : vidas)
   ctx.fillStyle = "#fff";
-  ctx.font = "16px monospace";
-  ctx.fillText("Vidas: " + state.player.lives, canvas.width - 100, 20);
+  ctx.font = "16px 'Press Start 2P'";
+  ctx.fillText("Vidas: ", canvas.width - 150, 20);
 
 
   // Bullets
@@ -512,7 +512,7 @@ state.base.forEach(b => {
    ctx.drawImage(img, e.x, e.y, e.w, e.h)
   });
   
-  ctx.fillStyle = "#fff"; ctx.font = "16px monospace"; ctx.fillText("Score: " + state.score, 580, 20);
+  ctx.fillStyle = "#fff"; ctx.font = "16px 'Press Start 2P'"; ctx.fillText("Score: " + state.score, 550, 20);
 
   if (!state.running) {
     // --- Tela de Fundo Escurecida ---
@@ -632,7 +632,7 @@ playBtn.addEventListener("click", () => {
   playerShotSound.pause();
   baseDestroyedSound.play().catch(e => {});
   baseDestroyedSound.pause();
-  
+
   menu.style.display = "none";
   canvas.style.display = "block";
   muteBtn.style.display = 'block';
