@@ -34,6 +34,9 @@ semvidaImg.src = "assets/sem-vida(192x192).png";
 const playerShotSound = new Audio();
 playerShotSound.src = "assets/tiro-nave.mp3";
 playerShotSound.volume = 0.1     //ajustar se precisar
+const baseDestroyedSound = new Audio();
+baseDestroyedSound.src = "assets/explosao.mp3"
+baseDestroyedSound.volume = 0.2  // ajustar se precisar
 
 // Função que carrega as informações de cada entidade do game (atributos e mecânicas)
 const state = {
@@ -232,6 +235,7 @@ function processBulletBase(bullet, base, idx) {
     bullet.y = canvas.height + 100; // remove o tiro (filtro pega)
     if (e.hp <= 0) {
       e.alive = false;
+      e.justDied = true;  // sinaliza que a base foi destruída
     };
     return; // evita múltiplos acertos no mesmo frame
   };
@@ -406,6 +410,13 @@ const update = (dt) => {
     // inimigo chega na base -> game over
   checkEnemyBase(state.enemies);
 
+  state.base.forEach(b => {
+    if (b.justDied){
+      playAudioTiro(baseDestroyedSound);
+      b.justDied = false;   // reseta o sinalizador
+    }
+  })
+
   //manter música tocando
   playInvaderTone();
 };
@@ -435,6 +446,7 @@ muteBtn.addEventListener("click", () => {
       state.audio.masterGain.gain.value = 0; // Zera o volume do Web Audio (SFX, fundo)
     }
     playerShotSound.muted = true; // Muta o som de tiro do HTML Audio
+    baseDestroyedSound.muted = true; // Muta o som da explosão do HTML Audio
     muteBtn.textContent = "Desmutar"; // Muda o texto do botão
   } else {
     // Se não estiver mutado, restaura o volume
@@ -442,6 +454,7 @@ muteBtn.addEventListener("click", () => {
       state.audio.masterGain.gain.value = 0.9; // Restaura o volume do Web Audio
     }
     playerShotSound.muted = false; // Desmuta o som de tiro
+    baseDestroyedSound.muted = false; // Desmuta o som da explosão
     muteBtn.textContent = "Mutar Som"; // Restaura o texto do botão
   }
 });
@@ -614,6 +627,12 @@ const loop = (ts) => {
 playBtn.addEventListener("click", () => {
   ensureAudio();
   if (state.audio.ctx && state.audio.ctx.state === "suspended") state.audio.ctx.resume();
+    // Tenta tocar e pausa o som para "desbloquear" a permissão de áudio do navegador
+  playerShotSound.play().catch(e => {});
+  playerShotSound.pause();
+  baseDestroyedSound.play().catch(e => {});
+  baseDestroyedSound.pause();
+  
   menu.style.display = "none";
   canvas.style.display = "block";
   muteBtn.style.display = 'block';
