@@ -8,9 +8,9 @@ const bgImg = new Image();
 bgImg.src = "sprites/planodefundo.png"; 
 
 const playerImg = new Image();
-playerImg.src = "sprites/nave.png";
+playerImg.src = "sprites/SpaceShip(192x192)_0003.png";
 const enemyImg = new Image();
-enemyImg.src = "sprites/invader2.png";
+enemyImg.src = "sprites/Alien1(192x192).png";
 
 const musica = new Audio('sons/musica.mp3');// musica de kim lightyear
 musica.loop = true;
@@ -113,8 +113,8 @@ const spawnEnemy = canvas => {
   return {
     x: side === 0 ? Math.random() * canvas.width : (side === 1 ? canvas.width : (side === 2 ? Math.random() * canvas.width : 0)),
     y: side === 0 ? 0 : (side === 1 ? Math.random() * canvas.height : (side === 2 ? canvas.height : Math.random() * canvas.height)),
-    w: 36,
-    h: 28,
+    w: 64,
+    h: 64,
     speed: 60 + Math.random() * 60,
     alive: true
   };
