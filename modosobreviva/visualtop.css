@@ -1,10 +1,12 @@
 body {
   margin: 0;
-  font-family: 'Press Start 2P', cursive;
-  color: #fff;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background: black;
-  overflow: hidden;
-  text-align: center;
+  color: white;
+  font-family: Arial, sans-serif;
 }
 
 /* Canvas de fundo (substitui as estrelas animadas) */
@@ -20,44 +22,150 @@ body {
 /* Menu central */
 #menu {
   text-align: center;
-  background: rgba(0, 0, 0, 0.7);
-  border: 2px solid #00ffea;
-  border-radius: 12px;
-  padding: 40px 20px;
-  box-shadow: 0 0 20px #00ffee, 0 0 40px #00ffee;
-  margin-top: 10vh;
-  display: inline-block;
 }
 
-#menu h1 {
-  font-size: 38px;
-  color: #00ffea;
-  text-shadow: 0 0 10px #00ffee, 0 0 20px #00ffee;
-  margin-bottom: 20px;
-}
-
-#menu h2 {
-  font-size: 20px;
-  color: #ccc;
-  margin-top: 20px;
-}
-
-/* Botão Play */
+/* Estilo Retrô para o Botão Principal (com brilho) */
 #play-btn {
-  background: black;
-  border: 2px solid #00ffea;
-  color: #00ffea;
-  padding: 15px 30px;
-  font-size: 16px;
-  text-transform: uppercase;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: 0.3s;
-  text-shadow: 0 0 8px #00ffee;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 24px;
+    padding: 15px 30px;
+    
+    /* Paleta de Cores Azul Adaptada */
+    background: black;
+    border: 2px solid #024f9b; /* Borda azul escuro */
+    color: #00aaff;           /* Texto azul ciano */
+    text-shadow: 0 0 10px #00aaff; /* Leve brilho no texto */
+    
+    /* Estilo do Botão do Menu Principal */
+    cursor: pointer;
+    border-radius: 8px; /* Cantos arredondados */
+    transition: 0.3s;
 }
 
+/* Efeito de brilho no hover, adaptado para azul */
 #play-btn:hover {
-  background: #00ffea;
-  color: black;
-  box-shadow: 0 0 20px #00ffee, 0 0 40px #00ffee;
+    background: #00aaff; /* Fundo fica ciano */
+    color: black;        /* Texto fica preto */
+    box-shadow: 0 0 20px #024f9b, 0 0 40px #024f9b; /* Brilho azul escuro */
+}
+
+/* Estilo Retrô para o Botão de Mute */
+#mute-btn {
+    display: none; /* Esconde o botão por padrão */
+    position: absolute;
+    top: -710px;
+    left: 10px;
+    font-family: 'Press Start 2P', monospace; /* Fonte pixelada */
+    font-size: 14px;
+    color: #ff5470;
+    background-color: #232946;
+    border: 2px solid #ff5470;
+    padding: 8px 12px;
+    width: 140px; /* Ajuste de largura para o novo texto */
+    box-shadow: 0 4px 0 #c44259; /* Sombra 3D rosa escuro */
+    cursor: pointer;
+    position: relative;
+    transition: top 0.05s ease-in-out;
+}
+/* Efeito de botão sendo pressionado */
+#mute-btn:active {
+    top: -710px;
+    box-shadow: 0 1px 0 #c44259;
+}
+
+#lives-container {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  padding: 8px 12px;
+  border-radius: 8px;
+  z-index: 100;
+}
+
+#lives-container img{
+  width: 50px;
+  height: 50px;
+  image-rendering: pixelated;
+  transition: transform 0.2s ease-in-out;
+}
+
+#lives-container img:hover {
+  transform: scale(1.2);
+}
+
+canvas {
+  background-image: url(/Modo-Clássico/assets/EspaçoFINAL\(1200x720\).png);
+  background-size: cover;
+  display: block;
+  margin: auto;
+}
+
+/* Estilo para o título principal do jogo */
+#menu h1 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 5em; /* Tamanho grande para o título */
+    color: rgb(0, 170, 255); /* Verde clássico de arcade */
+    text-shadow: 4px 4px 0px #024f9b; /* Efeito de sombra 3D */
+    line-height: 1.2;
+}
+
+/* Estilo para o texto de instrução */
+#menu h2 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1em; /* Tamanho menor para instruções */
+    color: #fff; /* Cor branca para boa leitura */
+    line-height: 1.5; /* Espaçamento entre linhas */
+    margin-top: 40px;
+}
+
+/* Garante que o texto dentro da tag <kbd> também use a fonte */
+#menu h2 kbd {
+    font-family: inherit; /* Herda a fonte do h2 */
+    font-size: 2em; /* Mantém o mesmo tamanho do texto */
+}
+
+/* Container que segura o canvas e o efeito CRT */
+#game-container {
+  position: relative;
+  display: inline-block; /* Ajusta o tamanho ao conteúdo */
+  box-shadow: 0 0 40px rgba(255, 84, 112, 0.5); /* Brilho neon opcional */
+}
+
+/* Efeito CRT (scanlines e vinheta) */
+#game-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(ellipse at center, rgba(0,0,0,0) 30%, rgba(0,0,0,0.5) 100%),
+    repeating-linear-gradient(
+      rgba(0,0,0,0) 0px,
+      rgba(0,0,0,0) 1px,
+      rgba(0,0,0,0.3) 2px,
+      rgba(0,0,0,0.3) 3px
+    );
+  pointer-events: none; /* Permite que cliques atravessem o efeito */
+  border-radius: 15px; /* Simula a curvatura da tela */
+}
+
+/* Leve curvatura no canvas para completar o efeito */
+canvas {
+  border-radius: 15px;
+}
+
+.stars {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  background: url("https://www.transparenttextures.com/patterns/stardust.png") repeat;
+  animation: moveStars 60s linear infinite;
+  z-index: -1;
+}
+@keyframes moveStars {
+  from { background-position: 0 0; }
+  to { background-position: -10000px 5000px; }
 }

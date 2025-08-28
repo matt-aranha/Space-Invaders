@@ -13,23 +13,29 @@ body {
   text-align: center;
 }
 
-/* Estilo Retrô para o Botão Principal */
+/* Estilo Retrô para o Botão Principal (com brilho) */
 #play-btn {
-    font-family: 'Press Start 2P', monospace; /* Fonte pixelada clássica */
+    font-family: 'Press Start 2P', monospace;
     font-size: 24px;
     padding: 15px 30px;
-    color: white;
-    background: #008000; /* Verde um pouco mais escuro */
-    border: 2px solid white;
-    box-shadow: 0 6px 0 #004d00; /* Sombra 3D escura */
+    
+    /* Paleta de Cores Azul Adaptada */
+    background: black;
+    border: 2px solid #035002; /* Borda azul escuro */
+    color: #19c917;           /* Texto azul ciano */
+    text-shadow: 0 0 10px #00ff3c; /* Leve brilho no texto */
+    
+    /* Estilo do Botão do Menu Principal */
     cursor: pointer;
-    position: relative; /* Necessário para o efeito de clique */
-    transition: top 0.05s ease-in-out;
+    border-radius: 8px; /* Cantos arredondados */
+    transition: 0.3s;
 }
-/* Efeito de botão sendo pressionado */
-#play-btn:active {
-    top: 4px; /* Move o botão para baixo */
-    box-shadow: 0 2px 0 #004d00; /* Reduz a sombra */
+
+/* Efeito de brilho no hover, adaptado para azul */
+#play-btn:hover {
+    background: #03b830; /* Fundo fica ciano */
+    color: black;        /* Texto fica preto */
+    box-shadow: 0 0 20px #01831b, 0 0 40px  #01831b; /* Brilho azul escuro */
 }
 
 /* Estilo Retrô para o Botão de Mute */
@@ -138,4 +144,17 @@ canvas {
 /* Leve curvatura no canvas para completar o efeito */
 canvas {
   border-radius: 15px;
+}
+
+.stars {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  background: url("https://www.transparenttextures.com/patterns/stardust.png") repeat;
+  animation: moveStars 60s linear infinite;
+  z-index: -1;
+}
+@keyframes moveStars {
+  from { background-position: 0 0; }
+  to { background-position: -10000px 5000px; }
 }

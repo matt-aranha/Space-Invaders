@@ -2,6 +2,7 @@ const canvas = document.querySelector("#ultimo-Sobrevivente");
 const ctx = canvas.getContext("2d");
 const playBtn = document.querySelector("#play-btn");
 const menu = document.querySelector("#menu");
+const muteBtn = document.querySelector("#mute-btn")
 
 const bgImg = new Image();
 bgImg.src = "sprites/planodefundo.png"; 
@@ -93,6 +94,7 @@ const initialPlayer = () => ({
 const initialState = () => ({
   running: false,
   lastTime: 0,
+  isMuted: false,
   player: initialPlayer(),
   bullets: [],
   enemies: [],
@@ -307,6 +309,27 @@ const nextState = (state, keys, dt, canvas, ts) => {
   };
 };
 
+//BOTÃO MUTE
+muteBtn.addEventListener("click", () => {
+  state.isMuted = !state.isMuted; // Inverte o estado (true/false)
+
+  if (state.isMuted) {
+    // Se estiver mutado, zera o volume de tudo
+    if (state.audio.masterGain) {
+      state.audio.masterGain.gain.value = 0; // Zera o volume do Web Audio (SFX, fundo)
+    }
+    playerShotSound.muted = true; // Muta o som de tiro do HTML Audio
+    muteBtn.textContent = "Desmutar"; // Muda o texto do botão
+  } else {
+    // Se não estiver mutado, restaura o volume
+    if (state.audio.masterGain) {
+      state.audio.masterGain.gain.value = 0.9; // Restaura o volume do Web Audio
+    }
+    playerShotSound.muted = false; // Desmuta o som de tiro
+    muteBtn.textContent = "Mutar Som"; // Restaura o texto do botão
+  }
+});
+
 // função para renderizar o estado do jogo
 const render = (state) => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -371,33 +394,50 @@ const render = (state) => {
 
   //  Tela de Game Over + Botão
   if (!state.running) {
-    ctx.fillStyle = "rgba(0,0,0,0.6)";
+     // --- Tela de Fundo Escurecida ---
+    ctx.fillStyle = "rgba(0,0,0,0.75)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#54f4ffff";
-    ctx.font = "45px monospace";
-    ctx.textAlign = "center";
-    ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 10);
-    ctx.font = "20px monospace";
-    ctx.fillStyle = "#fff";
-    ctx.fillText(
-      "Clique no botão para reiniciar",
-      canvas.width / 2,
-      canvas.height / 2 + 20
-    );
 
-    const btnWidth = 180,
-      btnHeight = 44;
+    // --- Texto "GAME OVER" com Estilo Retrô ---
+    ctx.font = "48px 'Press Start 2P'";
+    ctx.textAlign = "center";
+
+    // Efeito de sombra/contorno para o texto
+    ctx.fillStyle = "#fff"; // Cor do contorno
+    ctx.fillText("GAME OVER", canvas.width / 2 + 3, canvas.height / 2 - 50 + 3);
+    
+    // Texto principal
+    ctx.fillStyle = "#1c8dddff"; // Cor do texto
+    ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 50);
+
+    // --- Subtexto de Instrução ---
+    ctx.font = "14px 'Press Start 2P'";
+    ctx.fillStyle = "#fff";
+    ctx.fillText("Clique no botão para reiniciar", canvas.width / 2, canvas.height / 2);
+
+    // --- Botão de Reiniciar com Estilo Retrô ---
+    const btnWidth = 240, btnHeight = 50;
     const btnX = canvas.width / 2 - btnWidth / 2;
-    const btnY = canvas.height / 2 + 40;
-    ctx.fillStyle = "#232946";
-    ctx.strokeStyle = "#19fddfff";
-    ctx.lineWidth = 3;
+    const btnY = canvas.height / 2 + 30;
+    const shadowOffset = 5; // Tamanho da "sombra 3D"
+
+    // Sombra do botão (desenhada primeiro, por baixo)
+    ctx.fillStyle = "#155dbbff"; // Rosa escuro para a sombra
     ctx.fillRect(btnX, btnY, btnWidth, btnHeight);
-    ctx.strokeRect(btnX, btnY, btnWidth, btnHeight);
-    ctx.font = "20px monospace";
-    ctx.fillStyle = "#54ebffff";
-    ctx.fillText("Reiniciar", canvas.width / 2, btnY + 29);
+
+    // Corpo principal do botão (desenhado por cima, um pouco deslocado)
+    ctx.fillStyle = "#232946";
+    ctx.fillRect(btnX, btnY - shadowOffset, btnWidth, btnHeight);
+
+    // Texto do botão
+    ctx.font = "18px 'Press Start 2P'";
+    ctx.fillStyle = "#fff"; // Texto branco para contraste
+    ctx.textBaseline = "middle"; // Alinha o texto verticalmente pelo meio
+    ctx.fillText("Reiniciar", canvas.width / 2, btnY - shadowOffset + (btnHeight / 2));
+
+    // Reseta os alinhamentos para não afetar outros desenhos
     ctx.textAlign = "start";
+    ctx.textBaseline = "alphabetic";
   }
 };
 
@@ -443,6 +483,7 @@ canvas.addEventListener("click", function(e) {
   ) {
     menu.style.display = "none";
     canvas.style.display = "block";
+    muteBtn.style.display = 'block';
     ajustarCanvas();
     tocarMusica();
     canvas.focus && canvas.focus();
@@ -456,6 +497,7 @@ canvas.addEventListener("click", function(e) {
 playBtn.addEventListener("click", () => {
   menu.style.display = "none";
   canvas.style.display = "block";
+  muteBtn.style.display = 'block';
   ajustarCanvas();
   tocarMusica();
   canvas.focus && canvas.focus();

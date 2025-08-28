@@ -1,21 +1,36 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="visualtop.css">
-    <title>ultimo sobrevivente</title>
+<head> 
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Space Invaders</title>
+  <link rel="stylesheet" href="visualtop.css">
 </head>
 <body>
-    <div id="menu" class="menu">
-        <h1>Último sobrevivente</h1>
-        <button id="play-btn">▶ Play</button>
-        <h2>use os 'w', 'a', 's' e 'd'  para mover e 'espace' para atirar</h2>
-    </div>
+      <div class="stars"></div>
+  </div>
+      <div id="menu">
+            <h1>MODO SOBREVIVENTE</h1>
+            <button id="play-btn">▶ Play</button>
+            <h2>Use o 'W','A','S' e 'D' para mover-se e 'ESPAÇO' para atirar</h2>
+            <img src="/Modo-Clássico/assets/Controle(192x192).png">
+      </div>
 
-    <canvas id="ultimo-Sobrevivente" width="1440" height="1220"  style="display:none"></canvas>
+      <div style="position: relative; display: inline-block;">
+            <div id="lives-container"></div>
+            <canvas id="ultimo-Sobrevivente" width="1200" height="720" style="display:none"></canvas>
+            <button id="mute-btn">Mutar Som</button>
+      </div> 
 
+      <div id="game-container">
+             <div id="lives-container"></div>
+             <button id="mute-btn">Mutar Som</button>
+             <canvas id="space-invaders" width="1200" height="720" style="display:none"></canvas>
+      </div>
 
-    <script src="codigoPrincipal.js"></script>
+      <audio id="bg-music" src="music.mp3" loop></audio>
+      
+      <script src="codigoPrincipal.js"></script>
 </body>
 </html>
