@@ -33,10 +33,10 @@ const semvidaImg = new Image();
 semvidaImg.src = "assets/sem-vida(192x192).png";
 const playerShotSound = new Audio();
 playerShotSound.src = "assets/tiro-nave.mp3";
-playerShotSound.volume = 0.1     //ajustar se precisar
+playerShotSound.volume = 0.40    //ajustar se precisar
 const baseDestroyedSound = new Audio();
 baseDestroyedSound.src = "assets/explosao.mp3"
-baseDestroyedSound.volume = 0.2  // ajustar se precisar
+baseDestroyedSound.volume = 0.6 // ajustar se precisar
 
 // Função que carrega as informações de cada entidade do game (atributos e mecânicas)
 const state = {
@@ -127,6 +127,7 @@ const ensureAudio = () => {
 const playAudioTiro = (audioElement) => {
   const soundToPlay = audioElement.cloneNode();
   soundToPlay.muted = audioElement.muted;
+  soundToPlay.volume = audioElement.volume;
   soundToPlay.play().catch(e => console.error("Audio do Tiro Falhou:", e));
 };
 
@@ -339,6 +340,14 @@ const update = (dt) => {
   // contra a base (escudo)
   processBulletBase(b, state.base, 0);
 });
+
+state.base.forEach(b => {
+    if (b.justDied){
+      playAudioTiro(baseDestroyedSound);
+      b.justDied = false;   // reseta o sinalizador
+    }
+  })
+
 // atualiza timer de flash da base
   state.base = state.base.map(br => br.alive ? { ...br, hit: Math.max(0, (br.hit || 0) - dt) } : br);
 
@@ -409,13 +418,6 @@ const update = (dt) => {
 
     // inimigo chega na base -> game over
   checkEnemyBase(state.enemies);
-
-  state.base.forEach(b => {
-    if (b.justDied){
-      playAudioTiro(baseDestroyedSound);
-      b.justDied = false;   // reseta o sinalizador
-    }
-  })
 
   //manter música tocando
   playInvaderTone();
@@ -626,12 +628,31 @@ const loop = (ts) => {
 // --- Play button ---
 playBtn.addEventListener("click", () => {
   ensureAudio();
-  if (state.audio.ctx && state.audio.ctx.state === "suspended") state.audio.ctx.resume();
-    // Tenta tocar e pausa o som para "desbloquear" a permissão de áudio do navegador
-  playerShotSound.play().catch(e => {});
-  playerShotSound.pause();
-  baseDestroyedSound.play().catch(e => {});
-  baseDestroyedSound.pause();
+  if (state.audio.ctx && state.audio.ctx.state === "suspended") { state.audio.ctx.resume() }
+
+  // Toca e pausa o som para "desbloquear" a permissão de áudio do navegador
+    // Guarda os volumes originais
+  const originalPlayerVolume = playerShotSound.volume;
+  const originalExplosionVolume = baseDestroyedSound.volume;
+
+    // Força o volume para 0 para não fazer barulho
+  playerShotSound.volume = 0;
+  baseDestroyedSound.volume = 0;
+
+    // Toca os sons (agora permitidos pelo clique)
+  playerShotSound.play().catch(() => {});
+  baseDestroyedSound.play().catch(() => {});
+
+    // Usa um pequeno timeout para pausar e restaurar os volumes originais
+  setTimeout(() => {
+      playerShotSound.pause();
+      playerShotSound.currentTime = 0;
+      playerShotSound.volume = originalPlayerVolume;
+
+      baseDestroyedSound.pause();
+      baseDestroyedSound.currentTime = 0;
+      baseDestroyedSound.volume = originalExplosionVolume;
+  }, 10); // Um atraso mínimo, apenas para garantir a execução
 
   menu.style.display = "none";
   canvas.style.display = "block";
