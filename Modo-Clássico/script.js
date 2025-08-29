@@ -1,3 +1,4 @@
+//SCRIPT DO MODO CLÁSSICO DO JOGO SPACE INVADERS, vulgo THE BEST GAME ;)
 //inports brabos ;)
 const canvas = document.querySelector("#space-invaders");
 const ctx = canvas.getContext("2d");
@@ -60,7 +61,7 @@ const state = {
   return Array.from({ length: cols * rows }, (_, i) => {
     const row = Math.floor(i / cols);
     // Mapeia cada linha para um tipo de inimigo (clássico)
-    const typeMapping = [3, 2, 2, 1]; // Topo: tipo 3, Meio: tipo 2, Baixo: tipo 1
+    const typeMapping = [3, 2, 2, 1]; // Topo: tipo 3, Meio: tipo 2, Baixo: tipo 1, DPS temos a função que da diferentes scores a cada tipo
     const enemyType = typeMapping[row];
     
     return {
@@ -110,6 +111,15 @@ const keys = {};
 document.addEventListener("keydown", e => { keys[e.code] = true;
   if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) e.preventDefault(); });
 document.addEventListener("keyup", e => { keys[e.code] = false; });
+//Para evitar o bug clássico  de jogos de navegador (quando o foco do navegador muda e O script n reconhece a mudança e mantém pressionado a última tecla mesmo tendo a soltado)
+//Como o bug do mouse ou troca de janela, esse evento é registrado e as teclas congeladas simplesmente param
+  window.addEventListener("blur", () => {
+  // Reseta todas as teclas para 'false' se o jogador clicar fora da tela (aqui cabou-se o problema do botão direito do mouse ;) )
+  // ou ainda a janela perder o foco. Isso previne o bug da "tecla presa".
+  Object.keys(keys).forEach(key => {
+    keys[key] = false;
+  });
+});
 
 // --- Áudio (WebAudio), mecanica de audio exportada ---
 const ensureAudio = () => {
@@ -157,7 +167,7 @@ const playInvaderTone = () => {
   const timeBetweenBeats = Math.max(100, 550 - (state.enemies.filter(e => e.alive).length * 5));
 
   if (now - a.lastTime < timeBetweenBeats) {
-    return; // Ainda não é hora de tocar
+    return; // Ainda não é hora de tocar (segura onda ai :) )
   }
 
   // Pega a próxima nota da sequência
@@ -438,7 +448,7 @@ const getEnemyImage = (enemyType, currentFrame) => {
   }
 };
 
-//Evento muted, cancelar o som (a cada click, altera o boolean definido no state, invertendo seu valor lógico
+//Evento muted, cancelar o som (a cada click(depende do click do mouse no botão de mutar/desmutar), altera o boolean definido no state, invertendo seu valor lógico
 muteBtn.addEventListener("click", () => {
   state.isMuted = !state.isMuted; // Inverte o estado (true/false)
 
@@ -449,7 +459,7 @@ muteBtn.addEventListener("click", () => {
     }
     playerShotSound.muted = true; // Muta o som de tiro do HTML Audio
     baseDestroyedSound.muted = true; // Muta o som da explosão do HTML Audio
-    muteBtn.textContent = "Desmutar"; // Muda o texto do botão
+    muteBtn.textContent = "🔊 Desmutar"; // Muda o texto do botão
   } else {
     // Se não estiver mutado, restaura o volume
     if (state.audio.masterGain) {
@@ -457,7 +467,7 @@ muteBtn.addEventListener("click", () => {
     }
     playerShotSound.muted = false; // Desmuta o som de tiro
     baseDestroyedSound.muted = false; // Desmuta o som da explosão
-    muteBtn.textContent = "Mutar"; // Restaura o texto do botão
+    muteBtn.textContent = "🔇 Mutar"; // Restaura o texto do botão
   }
 });
 
@@ -496,7 +506,7 @@ state.base.forEach(b => {
   ctx.drawImage(baseImg, b.x, b.y, b.w, b.h);
   ctx.globalAlpha = 1;
 
-  // barra de vida (fundo + frente)
+  // barra de vida (fundo + frente), aqui é referente a base
   const barY = b.y - 10;
   ctx.fillStyle = "red";
   ctx.fillRect(b.x, barY, b.w, 5); // fundo
@@ -610,7 +620,7 @@ canvas.addEventListener("click", function (e) {
     }));
     })();
     
-    // O requestAnimationFrame deve estar dentro do IF para iniciar o loop
+    // O requestAnimationFrame deve estar dentro do bloco de identação do IF para iniciar o loop 
     requestAnimationFrame(loop); 
   }
 });

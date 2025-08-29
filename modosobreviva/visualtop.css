@@ -15,13 +15,36 @@ body {
   top: 50%;
   left: 50%; 
   transform: translate(-50%, -50%); 
-  z-index: -1;
   display: none;
   background: black;
 }
 /* Menu central */
 #menu {
   text-align: center;
+}
+
+/* Estilo Retrô para o Botão de Mute */
+#mute-btn {
+    display: none; /* Esconde o botão por padrão */
+    position: fixed;
+    top: 20px;
+    right: 300px;
+    font-family: 'Press Start 2P', monospace; /* Fonte pixelada */
+    font-size: 14px;
+    color: #ffffff;
+    background-color: #232946;
+    border: 2px solid #a7a7a7;
+    padding: 8px 12px;
+    width: 140px; /* Ajuste de largura para o novo texto */
+    box-shadow: 0 4px 0 #919191; /* Sombra 3D rosa escuro */
+    cursor: pointer;
+    transition: top 0.05s ease-in-out;
+    
+}
+/* Efeito de botão sendo pressionado */
+#mute-btn:active {
+    top: 24px;
+    box-shadow: 0 1px 0 #919191;
 }
 
 /* Estilo Retrô para o Botão Principal (com brilho) */
@@ -47,30 +70,6 @@ body {
     background: #00aaff; /* Fundo fica ciano */
     color: black;        /* Texto fica preto */
     box-shadow: 0 0 20px #024f9b, 0 0 40px #024f9b; /* Brilho azul escuro */
-}
-
-/* Estilo Retrô para o Botão de Mute */
-#mute-btn {
-    display: none; /* Esconde o botão por padrão */
-    position: absolute;
-    top: -710px;
-    left: 10px;
-    font-family: 'Press Start 2P', monospace; /* Fonte pixelada */
-    font-size: 14px;
-    color: #ff5470;
-    background-color: #232946;
-    border: 2px solid #ff5470;
-    padding: 8px 12px;
-    width: 140px; /* Ajuste de largura para o novo texto */
-    box-shadow: 0 4px 0 #c44259; /* Sombra 3D rosa escuro */
-    cursor: pointer;
-    position: relative;
-    transition: top 0.05s ease-in-out;
-}
-/* Efeito de botão sendo pressionado */
-#mute-btn:active {
-    top: -710px;
-    box-shadow: 0 1px 0 #c44259;
 }
 
 #lives-container {
