@@ -1,3 +1,5 @@
+//SCRIPT DO MODO SOBRIVENTEEE DO JOGO SPACE INVADERS, TOP DAS GALÁXIAS (LITERALMENTE) :D
+//inports clássicos, N PD FALTAR ;)
 const canvas = document.querySelector("#ultimo-Sobrevivente");
 const ctx = canvas.getContext("2d");
 const playBtn = document.querySelector("#play-btn");
@@ -7,19 +9,15 @@ const eventQueue = [];
 
 const bgImg = new Image();
 bgImg.src = "sprites/planodefundo.png"; 
-
 const playerImg = new Image();
 playerImg.src = "sprites/SpaceShip(192x192)_0003.png";
 const enemyImg = new Image();
 enemyImg.src = "sprites/Alien1(192x192).png";
-
-const musica = new Audio('sons/music.mp3');// musica de kim lightyear
+const musica = new Audio('sons/music.mp3');// musica de kim lightyear :)
 musica.loop = true;
 musica.volume = 0.4;
-
 const somTiro = new Audio('sons/tiro.mp3');
 somTiro.volume = 0.2;
-
 const somDano = new Audio('sons/dano.mp3');
 somDano.volume = 0.2;
 
@@ -30,7 +28,6 @@ const calcularCanvasSize = (largura, altura, proporcao) => {
     ? { width: altura * proporcao, height: altura }
     : { width: largura, height: largura / proporcao };
 };
-
 const ajustarCanvas = () => {
   const proporcao = 1216/ 1024; 
   const screenWidth = window.innerWidth;
@@ -44,7 +41,6 @@ const ajustarCanvas = () => {
   canvas.width = width;
   canvas.height = height;
 };
-
 window.addEventListener("resize", ajustarCanvas);
 ajustarCanvas();
 
@@ -54,12 +50,11 @@ const tocarMusica = () => {
     musica.currentTime = 0;
     musica.play();
   }
-};
+}
 const pararMusica = () => {
   musica.pause();
   musica.currentTime = 0;
-};
-
+}
 
 const tocarTiro = () => {
   // Para permitir tiros rápidos, clone o áudio
@@ -67,26 +62,26 @@ const tocarTiro = () => {
   s.volume = somTiro.volume;
   s.muted = somTiro.muted;
   s.play();
-};
+}
 const parartiro = () => {
   somTiro.pause();
   somTiro.currentTime = 0;
-};
-
+}
 
 const tocarDano = () => {
   const s = somDano.cloneNode();
   s.volume = somDano.volume;
   s.muted = somDano.muted;
   s.play();
-};
+}
 const pararsomdano = () => {
   somDano.pause();
   somDano.currentTime = 0;
-};
+}
 
 // converte graus para radianos
 const degToRad = deg => deg * Math.PI / 180;
+
 // estado inicial do jogador
 const initialPlayer = () => ({
   x: canvas.width / 2,
@@ -192,8 +187,6 @@ const processEvents = (state, queue) => {
     return currentState;
   }, state);
 };
-
-
 
 //função para atualizar o estado do jogado
 const updatePlayer = (player, keys, dt, canvas) => {
@@ -382,7 +375,6 @@ const nextState = (state, keys, dt, canvas, ts) => {
   };
 };
 
-
 // função para renderizar o estado do jogo
 const render = (state) => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -546,14 +538,10 @@ playBtn.addEventListener("click", () => {
 // --- Inicialização ---
 // O estado inicial do jogo, antes de qualquer interação
 const estadoInicial = { ...initialState(), running: false };
-
 // Mostra o menu e esconde o jogo
 menu.style.display = "block";
 canvas.style.display = "none";
-
-
 // Renderiza o estado inicial (que não mostrará nada no canvas, o que está correto)
 render(estadoInicial);
-
 // Inicia o loop. Ele ficará esperando por eventos.
 requestAnimationFrame(ts => loop(estadoInicial, ts));
