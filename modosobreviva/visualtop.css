@@ -15,7 +15,7 @@ body {
   top: 50%;
   left: 50%; 
   transform: translate(-50%, -50%); 
-  z-index: -1;
+  z-index: 10;
   display: none;
   background: black;
 }
@@ -51,26 +51,29 @@ body {
 
 /* Estilo Retrô para o Botão de Mute */
 #mute-btn {
-    display: none; /* Esconde o botão por padrão */
-    position: absolute;
-    top: -710px;
-    left: 10px;
-    font-family: 'Press Start 2P', monospace; /* Fonte pixelada */
-    font-size: 14px;
-    color: #ff5470;
-    background-color: #232946;
-    border: 2px solid #ff5470;
-    padding: 8px 12px;
-    width: 140px; /* Ajuste de largura para o novo texto */
-    box-shadow: 0 4px 0 #c44259; /* Sombra 3D rosa escuro */
-    cursor: pointer;
-    position: relative;
-    transition: top 0.05s ease-in-out;
+  /* posicionamento será controlado por JS (fixed) */
+  position: fixed;
+  display: none;        /* começa oculto (HTML faz o mesmo); JS mostrará quando preciso */
+  background: #232946;
+  color: #fff;
+  border: 2px solid #1c8ddd;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  padding: 6px 10px;
+  cursor: pointer;
+  z-index: 9999;        /* garante ficar acima do canvas (canvas tem z-index:10) */
+  border-radius: 6px;
+  user-select: none;
 }
+
+#mute-btn:hover {
+  background: #1c8ddd;
+}
+
 /* Efeito de botão sendo pressionado */
 #mute-btn:active {
-    top: -710px;
-    box-shadow: 0 1px 0 #c44259;
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 #c44259;
 }
 
 #lives-container {
@@ -149,12 +152,12 @@ canvas {
       rgba(0,0,0,0.3) 3px
     );
   pointer-events: none; /* Permite que cliques atravessem o efeito */
-  border-radius: 15px; /* Simula a curvatura da tela */
+  border-radius: 20px; /* Simula a curvatura da tela */
 }
 
 /* Leve curvatura no canvas para completar o efeito */
 canvas {
-  border-radius: 15px;
+  border-radius: 20px;
 }
 
 .stars {
