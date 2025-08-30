@@ -1,23 +1,24 @@
-//SCRIPT DO MODO SOBRIVENTEEE DO JOGO SPACE INVADERS, TOP DAS GALÁXIAS (LITERALMENTE) :D
-//inports clássicos, N PD FALTAR ;)
 const canvas = document.querySelector("#ultimo-Sobrevivente");
 const ctx = canvas.getContext("2d");
 const playBtn = document.querySelector("#play-btn");
 const menu = document.querySelector("#menu");
 const muteBtn = document.querySelector("#mute-btn")
-const eventQueue = [];
 
 const bgImg = new Image();
 bgImg.src = "sprites/planodefundo.png"; 
+
 const playerImg = new Image();
 playerImg.src = "sprites/SpaceShip(192x192)_0003.png";
 const enemyImg = new Image();
 enemyImg.src = "sprites/Alien1(192x192).png";
-const musica = new Audio('sons/music.mp3');// musica de kim lightyear :)
+
+const musica = new Audio('sons/musica.mp3');// musica de kim lightyear
 musica.loop = true;
 musica.volume = 0.4;
+
 const somTiro = new Audio('sons/tiro.mp3');
 somTiro.volume = 0.2;
+
 const somDano = new Audio('sons/dano.mp3');
 somDano.volume = 0.2;
 const tocarDano = () => {
@@ -26,12 +27,67 @@ const tocarDano = () => {
   s.play();
 };
 
+const initialMouse = Object.freeze({ x: 0, y: 0 });
+
+
+
 // Ajuste funcional do tamanho do canvas
 const calcularCanvasSize = (largura, altura, proporcao) => {
   const ratio = largura / altura;
   return ratio > proporcao
     ? { width: altura * proporcao, height: altura }
     : { width: largura, height: largura / proporcao };
+};
+
+
+const computeMuteBtnCoords = (canvasElement, btnElement, margin = 16) => {
+  // usa getBoundingClientRect para posição real na viewport
+  const rect = canvasElement.getBoundingClientRect();
+  const btnRect = btnElement.getBoundingClientRect();
+  // left = canto direito do canvas - largura do botão - margem
+  const left = Math.round(rect.left + rect.width - btnRect.width - margin);
+  const top = Math.round(rect.top + margin);
+  return Object.freeze({ left, top });
+};
+
+/**
+ * Aplica objetos de posição ao botão (efeito colateral controlado).
+ * Retorna o botão para composição se for necessário.
+ */
+const applyMuteBtnCoords = (btnElement, coords) => {
+  btnElement.style.position = "fixed"; // garante posição fixa na viewport
+  btnElement.style.left = coords.left + "px";
+  btnElement.style.top = coords.top + "px";
+  btnElement.style.zIndex = "9999";
+  return btnElement;
+};
+
+/**
+ * Atualiza posição do botão de mutar em relação ao canvas.
+ * - Se o botão estiver com display:none, mostramos temporariamente (visibilidade:hidden)
+ *   para medir seu tamanho, depois restauramos o estado.
+ */
+const updateMuteBtnPosition = () => {
+  if (!muteBtn || !canvas) return;
+
+  const computed = getComputedStyle(muteBtn);
+  const wasDisplayNone = computed.display === "none";
+
+  if (wasDisplayNone) {
+    // Mostra temporariamente, sem que o usuário veja (visibilidade:hidden)
+    muteBtn.style.visibility = "hidden";
+    muteBtn.style.display = "block";
+  }
+
+  // calcula e aplica coordenadas de forma funcional
+  const coords = computeMuteBtnCoords(canvas, muteBtn, 16);
+  applyMuteBtnCoords(muteBtn, coords);
+
+  if (wasDisplayNone) {
+    // volta ao estado anterior
+    muteBtn.style.display = "none";
+    muteBtn.style.visibility = "";
+  }
 };
 
 const ajustarCanvas = () => {
@@ -50,6 +106,7 @@ const ajustarCanvas = () => {
   // Atualiza a posição do botão de mutar (efeito colateral isolado)
   updateMuteBtnPosition();
 };
+
 window.addEventListener("resize", ajustarCanvas);
 ajustarCanvas();
 
@@ -72,25 +129,27 @@ const tocarMusica = () => {
     musica.currentTime = 0;
     musica.play();
   }
-}
+};
+
 const pararMusica = () => {
   musica.pause();
   musica.currentTime = 0;
-}
+};
 
 const tocarTiro = () => {
   // Para permitir tiros rápidos, clone o áudio
   const s = somTiro.cloneNode();
   s.volume = somTiro.volume;
-  s.muted = somTiro.muted;
   s.play();
 };
 
 
 
+
+
+
 // converte graus para radianos
 const degToRad = deg => deg * Math.PI / 180;
-
 // estado inicial do jogador
 const initialPlayer = () => ({
   x: canvas.width / 2,
@@ -109,8 +168,8 @@ const initialPlayer = () => ({
 const initialState = () => ({
   running: false,
   lastTime: 0,
-  player: initialPlayer(),
   isMuted: false,
+  player: initialPlayer(),
   bullets: [],
   enemies: [],
   enemyBullets: [],
@@ -143,67 +202,7 @@ const spawnEnemy = canvas => {
   };
 };
 
-//Evento muted, cancelar o som (a cada click(depende do click do mouse no botão de mutar/desmutar), altera o boolean definido no state, invertendo seu valor lógico
-// Envia um evento para a fila quando o botão de mute é clicado
-muteBtn.addEventListener("click", () => {
-    eventQueue.push({ type: 'TOGGLE_MUTE' });
-});
 
-//função que servirá para controlar os novos estados do jogo 
-const processEvents = (state, queue) => {
-  return queue.reduce((currentState, event) => {
-    if (event.type === 'START_GAME') {
-      tocarMusica();
-      menu.style.display = 'none';
-      canvas.style.display = 'block';
-      muteBtn.style.display = 'block';
-       // Garante que o estado inicial de mute seja aplicado
-      if (currentState.isMuted) {
-          musica.muted = true;
-          somTiro.muted = true;
-          somDano.muted = true;
-          muteBtn.textContent = "🔊 Desmutar";
-      } else {
-          musica.muted = false;
-          somTiro.muted = false;
-          somDano.muted = false;
-          muteBtn.textContent = "🔇 Mutar";
-      }
-      return { ...initialState(), running: true, lastTime: 0 };
-    }
-     if (event.type === 'TOGGLE_MUTE') {
-        const isNowMuted = !currentState.isMuted;
-
-        musica.muted = isNowMuted;
-        somTiro.muted = isNowMuted;
-        somDano.muted = isNowMuted;
-        muteBtn.textContent = isNowMuted ? "🔊 Desmutar" : "🔇 Mutar";
-
-        return { ...currentState, isMuted: isNowMuted };
-    }
-
-    if (event.type === 'CANVAS_CLICK') {
-      const btnWidth = 240, btnHeight = 50;
-      const btnX = canvas.width / 2 - btnWidth / 2;
-      const btnY = canvas.height / 2 + 30;
-      console.log("Clique detectado:", event.x, event.y);
-
-    
-      // só reinicia se estiver no Game Over
-      if (!currentState.running) {
-        if (
-          event.x >= btnX && event.x <= btnX + btnWidth &&
-          event.y >= btnY && event.y <= btnY + btnHeight
-        ) {
-          tocarMusica();
-          return { ...initialState(), running: true, lastTime: 0 };
-        }
-      }
-    }
-
-    return currentState;
-  }, state);
-};
 
 //função para atualizar o estado do jogado
 const updatePlayer = (player, keys, dt, canvas) => {
@@ -412,23 +411,23 @@ const nextState = (state, keys, dt, canvas, ts, mouse) => {
 
 //BOTÃO MUTE
 muteBtn.addEventListener("click", () => {
-  state.isMuted = !state.isMuted; // Inverte o estado (true/false)
+  muteBtn.style.display = "block";
+  const isMuted = !rootState.current.game.isMuted;
 
-  if (state.isMuted) {
-    // Se estiver mutado, zera o volume de tudo
-    if (state.audio.masterGain) {
-      state.audio.masterGain.gain.value = 0; // Zera o volume do Web Audio (SFX, fundo)
-    }
-    playerShotSound.muted = true; // Muta o som de tiro do HTML Audio
-    muteBtn.textContent = "Desmutar"; // Muda o texto do botão
-  } else {
-    // Se não estiver mutado, restaura o volume
-    if (state.audio.masterGain) {
-      state.audio.masterGain.gain.value = 0.9; // Restaura o volume do Web Audio
-    }
-    playerShotSound.muted = false; // Desmuta o som de tiro
-    muteBtn.textContent = "Mutar Som"; // Restaura o texto do botão
-  }
+  const newGame = Object.freeze({ 
+    ...rootState.current.game, 
+    isMuted 
+  });
+  rootState.current = Object.freeze({
+    ...rootState.current,
+    game: newGame
+  });
+
+  musica.muted = isMuted;
+  somTiro.muted = isMuted;
+  somDano.muted = isMuted;
+
+  muteBtn.textContent = isMuted ? "Desmutar" : "Mutar Som";
 });
 
 // função para renderizar o estado do jogo
@@ -489,12 +488,12 @@ const render = (state) => {
 
   //  HUD
   ctx.fillStyle = "#fff";
-  ctx.font = "20px monospace";
-  ctx.fillText("Vidas: " + state.player.lives, 10, 25);
-  ctx.fillText("Score: " + state.score, 400, 25);
+  ctx.font = "16px monospace";
+  ctx.fillText("Vidas: " + state.player.lives, 10, 20);
+  ctx.fillText("Score: " + state.score, 10, 40);
 
   //  Tela de Game Over + Botão
-  if (!state.running && state.lastTime > 0) {
+  if (!state.running) {
      // --- Tela de Fundo Escurecida ---
     ctx.fillStyle = "rgba(0,0,0,0.75)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -563,67 +562,115 @@ function drawRect(x, y, w, h, color) {
 }
 
 // --- Loop funcional ---
-const loop = (state, ts) => {
-  const dt = Math.min(0.05, (ts - (state.lastTime || ts)) / 1000);
-  const newState = state.running
-    ? nextState(state, keys, dt, canvas, ts)
-    : { ...state, lastTime: ts };
+const loop = (rootState, ts) => {
+  const { game, mouse } = rootState.current;
+  const dt = Math.min(0.05, (ts - (game.lastTime || ts)) / 1000);
 
-  render(newState);
+  const newGame = game.running
+    ? nextState(game, keys, dt, canvas, ts, mouse)
+    : {
+        ...game,
+        lastTime: ts,
+        hoverRestart: isMouseOverRestart(mouse.x, mouse.y, canvas)
+      };
 
-  if (!newState.running) {
-    pararMusica();
-  }
-  if (newState.running) {
-    if (state.player.cooldown === 0 && keys["Space"]) tocarTiro();
-    if (newState.inimigosAtiraram) tocarTiro();
-    if (newState.foiAcertado) tocarDano();
-    if (newState.inimigoAcertado) tocarDano();
-  }
+  //  Controle de som: só toca se mudar de estado
+  if (newGame.foiAcertado && !game.ultimoDano) tocarDano();
+  if (newGame.inimigoAcertado && !game.ultimoHitInimigo) tocarDano(); // som do dano no inimigo
 
-  requestAnimationFrame(ts2 => loop(newState, ts2));
+  const updatedGame = Object.freeze({
+    ...newGame,
+    ultimoDano: newGame.foiAcertado,
+    ultimoHitInimigo: newGame.inimigoAcertado
+  });
+
+  rootState.current = Object.freeze({
+    ...rootState.current,
+    game: updatedGame
+  });
+
+  render(rootState.current.game);
+  requestAnimationFrame((ts2) => loop(rootState, ts2));
 };
 
 // --- Clique no botão de reiniciar ---
 canvas.addEventListener("click", (e) => {
   const rect = canvas.getBoundingClientRect();
-  const mouseX = e.clientX - rect.left;
-  const mouseY = e.clientY - rect.top;
-  const btnWidth = 180, btnHeight = 44;
-  const btnX = canvas.width / 2 - btnWidth / 2;
-  const btnY = canvas.height / 2 + 40;
-  if (
-    mouseX >= btnX && mouseX <= btnX + btnWidth &&
-    mouseY >= btnY && mouseY <= btnY + btnHeight
-  ) {
+
+  // Coordenadas corretas do mouse no canvas
+  const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
+  const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+  const { x, y, w, h } = gameOverButton(canvas);
+
+  // Debug opcional
+  console.log(`MouseX: ${mouseX}, MouseY: ${mouseY}, BtnX: ${x}, BtnY: ${y}`);
+
+  // Verifica se clicou dentro do botão
+  if (mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h) {
+    console.log("Botão de reiniciar clicado!");
     menu.style.display = "none";
     canvas.style.display = "block";
-    muteBtn.style.display = 'block';
+    muteBtn.style.display = "block";
     ajustarCanvas();
+    updateMuteBtnPosition();  // atualiza posição logo após ajustar canvas
     tocarMusica();
     canvas.focus && canvas.focus();
-    const novoEstado = { ...initialState(), running: true };
-    render(novoEstado);
-    requestAnimationFrame(ts => loop(novoEstado, ts));
+
+    const novoJogo = Object.freeze({ ...initialState(), running: true });
+    rootState.current = Object.freeze({
+      ...rootState.current,
+      game: novoJogo
+    });
+
+    // usa o rootState correto — NÃO usar 'novoEstado' (variável inexistente)
+    render(rootState.current.game);
+    requestAnimationFrame((ts) => loop(rootState, ts));
   }
 });
 
 
-// --- Clique no botão Play do menu (agora só enfileira o evento) ---
+// --- Clique no botão Play do menu ---
 playBtn.addEventListener("click", () => {
-  menu.style.display = "none";
+   menu.style.display = "none";
   canvas.style.display = "block";
   muteBtn.style.display = 'block';
   ajustarCanvas();
+  updateMuteBtnPosition();  // <-- garante que o botão vá para o canto superior direito do canvas
   tocarMusica();
   canvas.focus && canvas.focus();
   
-  const novoEstado = { ...initialState(), running: true };
-  render(novoEstado);
-  requestAnimationFrame(ts => loop(novoEstado, ts));
+const novoJogo = Object.freeze({
+    ...initialState(),
+    running: true
+  });
+
+  // Atualiza o rootState atual com o novo jogo
+  rootState.current = Object.freeze({
+    ...rootState.current,
+    game: novoJogo
+  });
+
+  // Inicia o loop só agora
+  requestAnimationFrame((ts) => loop(rootState, ts));
 });
 
 // Inicialização
-const estadoInicial = { ...initialState(), running: true };
-render(estadoInicial);
-requestAnimationFrame(ts => loop(estadoInicial, ts));
+const rootState = { current: Object.freeze({ 
+  ...initialRootState, 
+  game: { ...initialState(), running: false } 
+}) };
+
+
+
+// Inicializa listener de mouse
+addMouseListener(canvas, (event) => {
+  const newMouse = updateMouse(rootState.current.mouse, event, canvas);
+  rootState.current = Object.freeze({
+    ...rootState.current,
+    mouse: newMouse
+  });
+});
+
+// Renderiza apenas o menu
+render(rootState.current.game);
