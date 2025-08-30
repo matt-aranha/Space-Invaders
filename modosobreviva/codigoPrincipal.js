@@ -1,8 +1,9 @@
-//SCRIPT DO MODO SOBRIVENTEEE DO JOGO SPACE INVADERS, TOP DAS GALÁXIAS (LITERALMENTE) :D
+//SCRIPT DO MODO SOBREVIVENTEEE DO JOGO SPACE INVADERS, TOP DAS GALÁXIAS (LITERALMENTE) :D
 //inports clássicos, N PD FALTAR ;)
 const canvas = document.querySelector("#ultimo-Sobrevivente");
 const ctx = canvas.getContext("2d");
 const playBtn = document.querySelector("#play-btn");
+const retornarBtn = document.querySelector("#retornar-btn")
 const menu = document.querySelector("#menu");
 const muteBtn = document.querySelector("#mute-btn")
 const eventQueue = [];
@@ -15,7 +16,7 @@ const enemyImg = new Image();
 enemyImg.src = "sprites/Alien1(192x192).png";
 const musica = new Audio('sons/music.mp3');// musica de kim lightyear :)
 musica.loop = true;
-musica.volume = 0.4;
+musica.volume = 0.27;
 const somTiro = new Audio('sons/tiro.mp3');
 somTiro.volume = 0.2;
 const somDano = new Audio('sons/dano.mp3');
@@ -181,6 +182,16 @@ const processEvents = (state, queue) => {
           tocarMusica();
           return { ...initialState(), running: true, lastTime: 0 };
         }
+        // --- Retornar ---
+      const btX = canvas.width / 2 - btnWidth / 2;
+      const btY = canvas.height / 2 + 150;
+
+      if (
+      event.x >= btX && event.x <= btX + btnWidth &&
+      event.y >= btY && event.y <= btY + btnHeight
+    ) {
+        window.location.href = "../index.html";
+    }
       }
     }
 
@@ -220,7 +231,7 @@ const updateEnemies = (enemies, player, dt) =>
 // função para os inimigos atirarem
 const enemyShoot = (enemies, player, enemyBullets) =>
   enemies.reduce((bullets, e) => {
-    if (e.alive && Math.hypot(player.x - e.x, player.y - e.y) < 200 && Math.random() < 0.01) {
+    if (e.alive && Math.hypot(player.x - e.x, player.y - e.y) < 200 && Math.random() < 0.015) {
       const dx = player.x - e.x;
       const dy = player.y - e.y;
       const dist = Math.hypot(dx, dy) || 1;
@@ -483,6 +494,35 @@ const render = (state) => {
     // Reseta os alinhamentos para não afetar outros desenhos
     ctx.textAlign = "start";
     ctx.textBaseline = "alphabetic";
+
+    // --- Botão de Retornarar com Estilo Retrô ---
+    const btWidth = 240, btHeight = 50;
+    const btX = canvas.width / 2 - btWidth / 2;
+    const btY = canvas.height / 2 + 150;
+    const shadowOfset = 5; // Tamanho da "sombra 3D"
+
+    // Sombra do botão (desenhada primeiro, por baixo)
+    ctx.fillStyle = "#155dbbff"; // Rosa escuro para a sombra
+    ctx.fillRect(btX, btY, btWidth, btHeight);
+
+    // Corpo principal do botão (desenhado por cima, um pouco deslocado)
+    ctx.fillStyle = "#232946";
+    ctx.fillRect(btX, btY - shadowOfset, btWidth, btHeight);
+
+    // --- Subtexto de Instrução ---
+    ctx.font = "14px 'Press Start 2P'";
+    ctx.fillStyle = "#fff";
+    ctx.fillText("Clique no botão para retornar ao menu", canvas.width / 2 - 255, canvas.height / 1.5);
+
+    // Texto do botão
+    ctx.font = "18px 'Press Start 2P'";
+    ctx.fillStyle = "#fff"; // Texto branco para contraste
+    ctx.textBaseline = "middle"; // Alinha o texto verticalmente pelo meio
+    ctx.fillText("Retornar", canvas.width / 2 - btWidth / 3.5, btY - shadowOfset + (btHeight / 2));
+
+    // Reseta os alinhamentos para não afetar outros desenhos
+    ctx.textAlign = "start";
+    ctx.textBaseline = "alphabetic";
   }
 };
 
@@ -529,6 +569,7 @@ canvas.addEventListener("click", (e) => {
   eventQueue.push({ type: "CANVAS_CLICK", x, y });
 });
 
+
 // --- Clique no botão Play do menu (agora só enfileira o evento) ---
 playBtn.addEventListener("click", () => {
   // Adiciona um evento para iniciar o jogo na fila
@@ -545,3 +586,10 @@ canvas.style.display = "none";
 render(estadoInicial);
 // Inicia o loop. Ele ficará esperando por eventos.
 requestAnimationFrame(ts => loop(estadoInicial, ts));
+
+//Retornar ao menu
+// --- Botão Retornar ---
+retornarBtn.addEventListener("click", () => {
+  // Para o jogo
+  window.location.href = "../index.html";
+})

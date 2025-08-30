@@ -38,6 +38,30 @@ body {
     box-shadow: 0 0 20px #01831b, 0 0 40px  #01831b; /* Brilho verde escuro */
 }
 
+#retornar-btn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 24px;
+    padding: 15px 30px;
+    
+    /* Paleta de Cores Azul Adaptada */
+    background: black;
+    border: 2px solid #035002; /* Borda verde escuro */
+    color: #19c917;           /* Texto verde claro */
+    text-shadow: 0 0 10px #00ff3c; /* Leve brilho no texto */
+    
+    /* Estilo do Botão do Menu Principal */
+    cursor: pointer;
+    border-radius: 8px; /* Cantos arredondados */
+    transition: 0.3s;
+}
+
+/* Efeito de brilho no hover, adaptado para verde */
+#retornar-btn:hover {
+    background: #03b830; /* Fundo fica verde */
+    color: black;        /* Texto fica preto */
+    box-shadow: 0 0 20px #01831b, 0 0 40px  #01831b; /* Brilho verde escuro */
+}
+
 /* Estilo Retrô para o Botão de Mute */
 #mute-btn {
     display: none; /* Esconde o botão por padrão */
@@ -112,6 +136,14 @@ canvas {
 #menu h2 kbd {
     font-family: inherit; /* Herda a fonte do h2 */
     font-size: 2em; /* Mantém o mesmo tamanho do texto */
+}
+
+#menu h3 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1em; /* Tamanho menor para instruções */
+    color: #fff; /* Cor branca para boa leitura */
+    line-height: 1.5; /* Espaçamento entre linhas */
+    margin-top: 40px;
 }
 
 /* Container que segura o canvas e o efeito CRT */
