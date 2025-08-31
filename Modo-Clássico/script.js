@@ -795,50 +795,49 @@ canvas.addEventListener("click", function (e) {
 
 // --- Loop principal ---
 const loop = (ts) => {
-  if (!state.running) return;
-  const dt = Math.min(0.05, (ts - (state.lastTime || ts)) / 1000);
-  state.lastTime = ts;
-  if (!state.isPaused) {
-    update(dt);
-  };
-  render();
-  requestAnimationFrame(loop);
+    if (!state.running) return;
+    const dt = Math.min(0.05, (ts - (state.lastTime || ts)) / 1000);
+    state.lastTime = ts;
+    if (!state.isPaused) {
+        update(dt);
+    };
+    render();
+    requestAnimationFrame(loop);
 };
 
 // --- Play button ---
 playBtn.addEventListener("click", () => {
-  ensureAudio();
-  if (state.audio.ctx && state.audio.ctx.state === "suspended") { state.audio.ctx.resume() }
+      ensureAudio();
+      if (state.audio.ctx && state.audio.ctx.state === "suspended") { state.audio.ctx.resume() }
 
-  // Toca e pausa o som para "desbloquear" a permissão de áudio do navegador
-    // Guarda os volumes originais
-  const originalPlayerVolume = playerShotSound.volume;
-  const originalExplosionVolume = baseDestroyedSound.volume;
+      // Toca e pausa o som para "desbloquear" a permissão de áudio do navegador
+      const originalPlayerVolume = playerShotSound.volume;           // guarda o volume original do tiro
+      const originalExplosionVolume = baseDestroyedSound.volume;     // guarda o volume original da base explodindo
 
-    // Força o volume para 0 para não fazer barulho
-  playerShotSound.volume = 0;
-  baseDestroyedSound.volume = 0;
+      // Força o volume para 0 para não fazer barulho
+      playerShotSound.volume = 0;
+      baseDestroyedSound.volume = 0;
 
-    // Toca os sons (agora permitidos pelo clique)
-  playerShotSound.play().catch(() => {});
-  baseDestroyedSound.play().catch(() => {});
+      // Toca os sons (agora permitidos pelo clique)
+      playerShotSound.play().catch(() => {});
+      baseDestroyedSound.play().catch(() => {});
 
-    // Usa um pequeno timeout para pausar e restaurar os volumes originais
-  setTimeout(() => {
-      playerShotSound.pause();
-      playerShotSound.currentTime = 0;
-      playerShotSound.volume = originalPlayerVolume;
+      // Usa um pequeno timeout para pausar e restaurar os volumes originais
+      setTimeout(() => {
+          playerShotSound.pause();
+          playerShotSound.currentTime = 0;
+          playerShotSound.volume = originalPlayerVolume;
 
-      baseDestroyedSound.pause();
-      baseDestroyedSound.currentTime = 0;
-      baseDestroyedSound.volume = originalExplosionVolume;
-  }, 10); // Um atraso mínimo, apenas para garantir a execução
+          baseDestroyedSound.pause();
+          baseDestroyedSound.currentTime = 0;
+          baseDestroyedSound.volume = originalExplosionVolume;
+      }, 10); // Um atraso mínimo, apenas para garantir a execução
 
-  menu.style.display = "none";
-  canvas.style.display = "block";
-  muteBtn.style.display = 'block';
+      menu.style.display = "none";
+      canvas.style.display = "block";
+      muteBtn.style.display = 'block';
 
-  resetGame();    // reutiliza a função de reiniciar o jogo
+      resetGame();    // reutiliza a função de reiniciar o jogo
 });
 
 //Retornar ao menu
