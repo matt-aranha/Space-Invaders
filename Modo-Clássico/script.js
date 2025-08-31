@@ -785,4 +785,4 @@ playBtn.addEventListener("click", () => {
 retornarBtn.addEventListener("click", () => {
   // Para o jogo
   window.location.href = "../index.html";
-})
+});
