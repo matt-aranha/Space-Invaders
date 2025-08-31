@@ -40,52 +40,141 @@ baseDestroyedSound.src = "assets/explosao.mp3"
 baseDestroyedSound.volume = 0.6 // ajustar se precisar
 
 // Função que carrega as informações de cada entidade do game (atributos e mecânicas)
-const state = {
+const initialState = (canvas) => Object.freeze({
   running: false,
   lastTime: 0,
   isMuted: false,
-  player: { 
-      x: (canvas.width / 2) - 40, y: canvas.height - 80, w: 90, h: 70,
-      speed: 450,
-      cooldown: 0, 
-      lives: 3, 
-      invincible: 0,
-      animationFrame: 0,          // essas duas propriedades (AnimationFrame e lastAnimationFrameTime) são para atualizar os sprites da nave, p/ fazer a animação
-      lastAnimationFrameTime: 0 },
-  enemyBullets: [],
-  bullets: [],
+  player: Object.freeze({
+    x: (canvas.width / 2) - 40,
+    y: canvas.height - 80,
+    w: 90, h: 70,
+    speed: 450,
+    cooldown: 0,
+    lives: 3,
+    invincible: 0,
+    animationFrame: 0,
+    lastAnimationFrameTime: 0
+  }),
+  enemyBullets: Object.freeze([]),
+  bullets: Object.freeze([]),
   wave: 1,
   enemyFireRate: 0.0005,
-  enemies: (function spawn() {
-  const cols = 12, rows = 4;
+  enemies: Object.freeze((() => {
+    const cols = 12, rows = 4;
+    const typeMapping = [3, 2, 2, 1];
+    return Array.from({ length: cols * rows }, (_, i) => {
+      const row = Math.floor(i / cols);
+      const enemyType = typeMapping[row];
+      return Object.freeze({
+        x: 300 + (i % cols) * 60,
+        y: 40 + row * 40,
+        w: 64, h: 64,
+        alive: true,
+        type: enemyType
+      });
+    });
+  })()),
+  enemyDir: 1,
+  enemySpeed: 40,
+  score: 0,
+  audio: Object.freeze({
+    ctx: null,
+    masterGain: null,
+    bgOscs: Object.freeze([]),
+    tones: Object.freeze([65, 60, 55, 50]),
+    index: 0,
+    lastTime: 0
+  }),
+  base: Object.freeze((() => {
+    const cols = 3, rows = 1;
+    return Array.from({ length: cols * rows }, (_, i) => Object.freeze({
+      x: 170 + (i % cols) * ((canvas.width - 80) / cols),
+      y: 500 + Math.floor(i / cols) * 40,
+      w: 100, h: 80,
+      hp: 30, hpMax: 30,
+      hit: 0,
+      alive: true
+    }));
+  })()),
+  enemyAnimationFrame: 0,
+  lastEnemyFrameTime: 0
+});
+
+const withPatch = (obj, patch) => Object.freeze({ ...obj, ...patch });
+
+const withPlayer = (state, patch) =>
+  Object.freeze({ ...state, player: Object.freeze({ ...state.player, ...patch }) });
+
+const withAudio = (state, patch) =>
+  Object.freeze({ ...state, audio: Object.freeze({ ...state.audio, ...patch }) });
+
+const withEnemies = (state, mapFn) =>
+  Object.freeze({ ...state, enemies: Object.freeze(state.enemies.map(e => Object.freeze(mapFn(e)))) });
+
+const setEnemies = (state, enemies) =>
+  Object.freeze({ ...state, enemies: Object.freeze(enemies.map(Object.freeze)) });
+
+const setBases = (state, bases) =>
+  Object.freeze({ ...state, base: Object.freeze(bases.map(Object.freeze)) });
+
+const pushBullet = (state, bullet) =>
+  Object.freeze({ ...state, bullets: Object.freeze(state.bullets.concat(Object.freeze(bullet))) });
+
+const pushEnemyBullet = (state, bullet) =>
+  Object.freeze({ ...state, enemyBullets: Object.freeze(state.enemyBullets.concat(Object.freeze(bullet))) });
+
+const setBullets = (state, bullets) =>
+  Object.freeze({ ...state, bullets: Object.freeze(bullets.map(Object.freeze)) });
+
+const setEnemyBullets = (state, bullets) =>
+  Object.freeze({ ...state, enemyBullets: Object.freeze(bullets.map(Object.freeze)) });
+
+const setRunning = (state, running) => withPatch(state, { running });
+const setMuted = (state, isMuted) => withPatch(state, { isMuted });
+const setScore = (state, score) => withPatch(state, { score });
+const setLastTime = (state, lastTime) => withPatch(state, { lastTime });
+const setWave = (state, wave) => withPatch(state, { wave });
+const setEnemyDir = (state, enemyDir) => withPatch(state, { enemyDir });
+const setEnemySpeed = (state, enemySpeed) => withPatch(state, { enemySpeed });
+
+const spawnEnemies = (cols, rows) => {
+  const typeMapping = [3, 2, 2, 1];
   return Array.from({ length: cols * rows }, (_, i) => {
     const row = Math.floor(i / cols);
-    // Mapeia cada linha para um tipo de inimigo (clássico)
-    const typeMapping = [3, 2, 2, 1]; // Topo: tipo 3, Meio: tipo 2, Baixo: tipo 1, DPS temos a função que da diferentes scores a cada tipo
     const enemyType = typeMapping[row];
-    
-    return {
+    return Object.freeze({
       x: 300 + (i % cols) * 60,
       y: 40 + row * 40,
       w: 64, h: 64,
       alive: true,
-      type: enemyType // Usa o tipo mapeado
-    };
+      type: enemyType
+    });
   });
-})(),
-  enemyDir: 1, 
-  enemySpeed: 40, 
-  score: 0, 
-  audio: { ctx: null, masterGain: null, bgOscs: [],
-  tones: [65, 60, 55, 50], // notas do tema original (theu: "edu brabo, slk")
-  index: 0, lastTime: 0 },
-  base: (function spawn() { const cols = 3, rows = 1;
-     return Array.from({ length: cols * rows },
-     (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
-     y: 500 + Math.floor(i / cols) * 40, w: 100, h: 80, hp: 30, hpMax: 30, hit: 0, alive: true })); })(),
-  enemyAnimationFrame: 0,          // essas duas propriedades (frame e lastFrameTime) são para atualizar os sprites dos bichins, p/ fazer a animação
-  lastEnemyFrameTime: 0 
 };
+
+const spawnBases = (canvas, cols = 3, rows = 1, w = 120, h = 100) =>
+  Array.from({ length: cols * rows }, (_, i) => Object.freeze({
+    x: 170 + (i % cols) * ((canvas.width - 80) / cols),
+    y: 500 + Math.floor(i / cols) * 40,
+    w, h,
+    hp: 30, hpMax: 30, hit: 0, alive: true
+  }));
+
+const resetForNewWave = (state, canvas) =>
+  setBases(
+    withPatch(state, {
+      wave: state.wave + 1,
+      enemySpeed: state.enemySpeed + 10.5,
+      enemyFireRate: state.enemyFireRate * 1.12
+    }),
+    spawnBases(canvas, 3, 1, 100, 80).map(b => ({ ...b })) // mesma geometria do seu estado inicial
+  );
+
+const resetForStart = (canvas) => {
+  // estado novo em folha (sem reaproveitar antigo)
+  return initialState(canvas);
+};
+
 
 // -----VIDA------
 // Função que recebe o número de vidas e devolve as imagens corretas
@@ -182,13 +271,14 @@ const playInvaderTone = () => {
 };
 
 // --- Ações do jogo ---
-const tiro = () => {
-  const p = state.player;
-  if (p.cooldown > 0) return;
-  p.cooldown = 0.420;
-  state.bullets.push({ x: p.x + p.w / 2 - 2, y: p.y - 6, w: 4, h: 8, dy: -420 });
-  playAudioTiro(playerShotSound);
+const tiro = (state) => {
+  if (state.player.cooldown > 0) return state;
+  const s1 = withPlayer(state, { cooldown: 0.420 });
+  const s2 = pushBullet(s1, { x: s1.player.x + s1.player.w / 2 - 2, y: s1.player.y - 6, w: 4, h: 8, dy: -420 });
+  return s2;
 };
+// efeito (isolado, opcional no loop): () => playAudioTiro(playerShotSound);
+
 
 // Função para processar as colisões do tiro do jogador com a base
 function processPlayerBulletBase(bullet, base, idx) {
@@ -263,33 +353,23 @@ const regenerateBases = (bases) => {
 };
 
 // Função para verificar se algum inimigo chegou na base
-function checkEnemyBase(enemies, idx = 0) {
-  if (idx >= enemies.length) return;
-  const e = enemies[idx];
-  if (e.alive && e.y + e.h >= state.player.y) {
-    state.running = false;
-    playTone(60, 0.6, "sine", 0.12);
-    return;
-  }
-  checkEnemyBase(enemies, idx + 1);
-}
+const checkEnemyBase = (state) => {
+  const hit = state.enemies.some(e => e.alive && (e.y + e.h >= state.player.y));
+  return hit ? setRunning(state, false) : state;
+};
+// efeito quando game over: playTone(60, 0.6, "sine", 0.12)
 
 // Função tiro dos inimigos, chablau
-function enemyShoot() {
-  // Escolhe inimigos vivos aleatoriamente para atirar
-  state.enemies.forEach(e => {
-    if (e.alive && Math.random() < state.enemyFireRate) {
-      state.enemyBullets.push({
-        x: e.x + e.w / 2 - 2,
-        y: e.y + e.h,
-        w: 4,
-        h: 10,
-        dy: 220
-      });
-      playTone(320, 0.07, "triangle", 0.08);
-    }
-  });
-}
+const enemyShoot = (state) => {
+  const newBullets = state.enemies.reduce((acc, e) =>
+    (e.alive && Math.random() < state.enemyFireRate)
+      ? acc.concat({ x: e.x + e.w / 2 - 2, y: e.y + e.h, w: 4, h: 10, dy: 220 })
+      : acc
+  , []);
+  if (newBullets.length === 0) return state;
+  return setEnemyBullets(state, state.enemyBullets.concat(newBullets));
+};
+// efeito (para cada bala gerada): playTone(320, 0.07, "triangle", 0.08)
 
 // Função que calcula o próximo estado de animação da nave
 const updatePlayerAnimation = (playerState, dt, fps) => {
@@ -314,124 +394,155 @@ const updatePlayerAnimation = (playerState, dt, fps) => {
 const getPlayerImage = (animationFrame) => playerFrames[animationFrame];
 
 // Função (theu: GIGANTE!! edu: MT msm) que retorna as modificações do state inicial
-const update = (dt) => {
-  if (state.player.invincible > 0) {
-  state.player.invincible -= dt;
-}
-  // lógica da animação do jogador
-  const newAnimationState = updatePlayerAnimation(state.player, dt, 2.5);
-  state.player = {...state.player, ...newAnimationState};
+// Helpers: composição
 
-  // movimento e tiro dos inimigos
-  enemyShoot();
-  state.enemyBullets = state.enemyBullets.map(b => ({ ...b, y: b.y + b.dy * dt })).filter(b => b.y < canvas.height + 20);
-  //colisões dos tiros inimigos com player e com a base
-  state.enemyBullets.forEach(b => {
-    const p = state.player;
-    //player
-    if (
-      b.x < p.x + p.w &&
-      b.x + b.w > p.x &&
-      b.y < p.y + p.h &&
-      b.y + b.h > p.y
-    ) {
-      if (p.invincible <= 0) { // só leva dano se não estiver invencível
-        p.lives -= 1;
-        p.invincible = 1.5; // 1.5 segundos de invencibilidade
-        playTone(80, 0.2, "sawtooth", 0.15);
-        if (p.lives <= 0) {
-          state.running = false;
-    }
-  }
-    b.y = canvas.height + 100; // remove o tiro
-    return;   //já bateu no player, cabou-se
-  };
+const pipe = (x, ...fns) => fns.reduce((v, f) => f(v), x);
 
-  // contra a base (escudo)
-  processBulletBase(b, state.base, 0);
-});
 
-state.base.forEach(b => {
-    if (b.justDied){
-      playAudioTiro(baseDestroyedSound);
-      b.justDied = false;   // reseta o sinalizador
-    }
-  })
+// ---Updates do Player---
 
-// atualiza timer de flash da base
-  state.base = state.base.map(br => br.alive ? { ...br, hit: Math.max(0, (br.hit || 0) - dt) } : br);
-
-  // movimento do jogador
-  const dir = (keys["ArrowLeft"] || keys["KeyA"] ? -0.5 : 0) + (keys["ArrowRight"] || keys["KeyD"] ? 0.5 : 0);
-  state.player.x += dir * state.player.speed * dt;
-  if (state.player.x < 2) state.player.x = 2;
-  if (state.player.x + state.player.w > canvas.width - 2) state.player.x = canvas.width - 2 - state.player.w;
-
-  if (state.player.cooldown > 0) state.player.cooldown -= dt;
-  if (keys["Space"] || keys["KeyW"] || keys["ArrowUp"]) tiro();
-
-  // atualizar balas
-  state.bullets = state.bullets.map(b => ({ ...b, y: b.y + b.dy * dt })).filter(b => b.y > -20);
-
-  // mover inimigos e tratar troca de direção / queda
-  const alive = state.enemies.filter(e => e.alive);
-  if (alive.length === 0) {
-  state.wave += 1;
-  state.enemySpeed += 10.5;
-  state.enemyFireRate *= 1.12; // sobe a dificuldade
-  state.base = regenerateBases(state.base);
-  state.enemies = (function spawn() {
-  const cols = 12, rows = 4;
-  return Array.from({ length: cols * rows }, (_, i) => {
-    const row = Math.floor(i / cols);
-    // Mapeia cada linha para um tipo de inimigo (clássico)
-    const typeMapping = [3, 2, 2, 1]; // Topo: tipo 3, Meio: tipo 2, Baixo: tipo 1
-    const enemyType = typeMapping[row];
-    
-    return {
-      x: 300 + (i % cols) * 60,
-      y: 40 + row * 40,
-      w: 64, h: 64,
-      alive: true,
-      type: enemyType // Usa o tipo mapeado
-    };
+// cooldown e invencibilidade
+const updatePlayerCooldown = (state, dt) =>
+  withPlayer(state, {
+    invincible: Math.max(0, state.player.invincible - dt),
+    cooldown: Math.max(0, state.player.cooldown - dt)
   });
-})()
-} else {
-  const minX = Math.min(...alive.map(e => e.x));
-  const maxX = Math.max(...alive.map(e => e.x + e.w));
-  const willHit = (state.enemyDir > 0 && maxX + state.enemyDir * state.enemySpeed * dt > canvas.width - 10) ||
-                  (state.enemyDir < 0 && minX + state.enemyDir * state.enemySpeed * dt < 10);
-  if (willHit) {
-    state.enemyDir *= -1;
-    state.enemies = state.enemies.map(e => ({ ...e, y: e.y + 12 }));
-  } else {
-    state.enemies = state.enemies.map(e => ({ ...e, x: e.x + state.enemyDir * state.enemySpeed * dt }));
-  }
-}
 
-  // Lógica da animação dos invasores/aliens
-  state.lastEnemyFrameTime += dt;
-  const animationInterval = 0.5; // Intervalo de 0.5 segundos para a animação
-  if (state.lastEnemyFrameTime >= animationInterval) {
-    state.enemyAnimationFrame = (state.enemyAnimationFrame + 1) % 2; // Alterna entre 0 e 1
-    state.lastEnemyFrameTime -= animationInterval;
-}
-
-  // colisões (balas x inimigos) & (balas x base)
-  state.bullets.forEach(bullet => {
-    processEnemies(bullet, state.enemies, 0);
-    processPlayerBulletBase(bullet, state.base, 0);
-  });
-  
-  state.bullets = state.bullets.filter(b => b.y > -50);
-
-    // inimigo chega na base -> game over
-  checkEnemyBase(state.enemies);
-
-  //manter música tocando
-  playInvaderTone();
+// animação do player
+const updatePlayerAnimationFrame = (state, dt) => {
+  const anim = updatePlayerAnimation(state.player, dt, 2.5);
+  return withPlayer(state, anim);
 };
+
+// movimento do player (sem let)
+const updatePlayerMovement = (state, dt, keys, canvas) => {
+  const dir =
+    (keys["ArrowLeft"] || keys["KeyA"] ? -0.5 : 0) +
+    (keys["ArrowRight"] || keys["KeyD"] ? 0.5 : 0);
+
+  const proposedX = state.player.x + dir * state.player.speed * dt;
+  const clampedX = Math.max(2, Math.min(proposedX, canvas.width - 2 - state.player.w));
+
+  return withPlayer(state, { x: clampedX });
+};
+
+// tiro do player
+const updatePlayerShoot = (state, keys) => {
+  const wantsShoot = keys["Space"] || keys["KeyW"] || keys["ArrowUp"];
+  return wantsShoot ? tiro(state) : state;
+};
+
+
+// ---Updates dos Inimigos---
+
+
+// movimento dos inimigos (horizontal e descida quando bate borda)
+const updateEnemiesMovement = (state, dt, canvas) => {
+  const moved = state.enemies.map(e =>
+    Object.freeze({ ...e, x: e.x + state.enemySpeed * dt * state.enemyDir })
+  );
+
+  const hitLeft = moved.some(e => e.alive && e.x < 5);
+  const hitRight = moved.some(e => e.alive && e.x + e.w > canvas.width - 5);
+
+  if (hitLeft || hitRight) {
+    const newDir = -state.enemyDir;
+    const dropped = moved.map(e =>
+      Object.freeze({ ...e, y: e.y + 10, x: e.x })
+    );
+    return setEnemies(
+      withPatch(state, { enemyDir: newDir }),
+      dropped
+    );
+  }
+
+  return setEnemies(state, moved);
+};
+
+// inimigos atiram
+const updateEnemyShoot = (state) => enemyShoot(state);
+
+// animação dos inimigos
+const updateEnemyAnimationFrame = (state, dt) => {
+  const interval = 0.5;
+  const newLast = state.lastEnemyFrameTime + dt;
+
+  return newLast >= interval
+    ? withPatch(state, {
+        enemyAnimationFrame: (state.enemyAnimationFrame + 1) % 2,
+        lastEnemyFrameTime: newLast - interval
+      })
+    : withPatch(state, { lastEnemyFrameTime: newLast });
+};
+
+// checar se inimigos chegaram à base
+const updateEnemyBaseCheck = (state) => checkEnemyBase(state);
+
+// =======================================
+// Updates das Balas
+// =======================================
+
+// balas do player
+const updateBullets = (state, dt) =>
+  setBullets(
+    state,
+    state.bullets
+      .map(b => Object.freeze({ ...b, y: b.y + b.dy * dt }))
+      .filter(b => b.y > -20)
+  );
+
+// balas dos inimigos
+const updateEnemyBullets = (state, dt, canvas) =>
+  setEnemyBullets(
+    state,
+    state.enemyBullets
+      .map(b => Object.freeze({ ...b, y: b.y + b.dy * dt }))
+      .filter(b => b.y < canvas.height + 20)
+  );
+
+// =======================================
+// Updates de Colisões e Bases
+// =======================================
+
+// colisão de balas do player com inimigos
+const updateBulletEnemyCollision = (state) =>
+  checkCollisions(state); // deve ser refatorado também para não mutar
+
+// colisão de balas dos inimigos com player
+const updateBulletPlayerCollision = (state) =>
+  checkPlayerHit(state); // idem: deve ser puro
+
+// colisão de balas nas bases
+const updateBaseCollision = (state) =>
+  checkBaseCollisions(state); // idem
+
+// resetar para próxima wave se todos inimigos mortos
+const updateWaveReset = (state, canvas) => {
+  const allDead = state.enemies.every(e => !e.alive);
+  return allDead ? nextWave(state, canvas) : state;
+};
+
+// =======================================
+// Composição final do update
+// =======================================
+const updateGame = (state, dt, canvas, keys) =>
+  pipe(
+    state,
+    (s) => updatePlayerCooldown(s, dt),
+    (s) => updatePlayerAnimationFrame(s, dt),
+    (s) => updatePlayerMovement(s, dt, keys, canvas),
+    (s) => updatePlayerShoot(s, keys),
+    (s) => updateEnemiesMovement(s, dt, canvas),
+    (s) => updateEnemyShoot(s),
+    (s) => updateEnemyAnimationFrame(s, dt),
+    (s) => updateBullets(s, dt),
+    (s) => updateEnemyBullets(s, dt, canvas),
+    (s) => updateBulletEnemyCollision(s),
+    (s) => updateBulletPlayerCollision(s),
+    (s) => updateBaseCollision(s),
+    (s) => updateEnemyBaseCheck(s),
+    (s) => updateWaveReset(s, canvas)
+  );
 
 // Função que retorna o frame certo da bestafera (alien) (coé, kalil. não poder usar let é paia, ein... nem precisaria dessa função, era só meter o let na parte dos inimigos na função render e dale)
 const getEnemyImage = (enemyType, currentFrame) => {
@@ -449,26 +560,23 @@ const getEnemyImage = (enemyType, currentFrame) => {
 };
 
 //Evento muted, cancelar o som (a cada click(depende do click do mouse no botão de mutar/desmutar), altera o boolean definido no state, invertendo seu valor lógico
-muteBtn.addEventListener("click", () => {
-  state.isMuted = !state.isMuted; // Inverte o estado (true/false)
+const toggleMuteState = (state) => setMuted(state, !state.isMuted);
 
-  if (state.isMuted) {
-    // Se estiver mutado, zera o volume de tudo
-    if (state.audio.masterGain) {
-      state.audio.masterGain.gain.value = 0; // Zera o volume do Web Audio (SFX, fundo)
-    }
-    playerShotSound.muted = true; // Muta o som de tiro do HTML Audio
-    baseDestroyedSound.muted = true; // Muta o som da explosão do HTML Audio
-    muteBtn.textContent = "🔊 Desmutar"; // Muda o texto do botão
-  } else {
-    // Se não estiver mutado, restaura o volume
-    if (state.audio.masterGain) {
-      state.audio.masterGain.gain.value = 0.9; // Restaura o volume do Web Audio
-    }
-    playerShotSound.muted = false; // Desmuta o som de tiro
-    baseDestroyedSound.muted = false; // Desmuta o som da explosão
-    muteBtn.textContent = "🔇 Mutar"; // Restaura o texto do botão
+const applyMuteEffect = (state) => {
+  const isMuted = state.isMuted;
+  if (state.audio.masterGain) {
+    state.audio.masterGain.gain.value = isMuted ? 0 : 0.9;
   }
+  playerShotSound.muted = isMuted;
+  baseDestroyedSound.muted = isMuted;
+  muteBtn.textContent = isMuted ? "🔊 Desmutar" : "🔇 Mutar";
+};
+
+// IMPORTANTE: o handler agora NÃO toca no state global;
+// a atualização do estado acontecerá dentro do loop funcional (ver Seção 5).
+muteBtn.addEventListener("click", () => {
+  // Dispara uma ação (veremos como aplicar no loop)
+  pendingActions.push((s) => toggleMuteState(s)); // ver Seção 5 — pendingActions
 });
 
 // --- Render --- (mostrar,criar e desenhar na tela)
@@ -575,124 +683,67 @@ state.base.forEach(b => {
 };
 
 // --- Detecta clique no botão de reiniciar, como um evento de retorno ---
-canvas.addEventListener("click", function (e) {
-  if (state.running) return;
-  const rect = canvas.getBoundingClientRect();
-  const mouseX = e.clientX - rect.left;
-  const mouseY = e.clientY - rect.top;
-  const btnWidth = 180, btnHeight = 44;
-  const btnX = canvas.width / 2 - btnWidth / 2;
-  const btnY = canvas.height / 2 + 40;
-  if (
-    mouseX >= btnX && mouseX <= btnX + btnWidth &&
-    mouseY >= btnY && mouseY <= btnY + btnHeight
-  ) {
-    // Reinicia o jogo
+canvas.addEventListener("click", (e) => {
+  // ... seu cálculo de colisão com o botão Reiniciar ...
+  if (clicouNoBotao) {
     ensureAudio();
-    if (state.audio.ctx && state.audio.ctx.state === "suspended") state.audio.ctx.resume();
     menu.style.display = "none";
     canvas.style.display = "block";
-    muteBtn.style.display = 'block';
-    state.running = true;
-    state.lastTime = 0;
-    state.score = 0;
-    state.player.lives = 3;
-    state.enemyBullets = [];
-    state.bullets = [];
-    state.enemies = (function spawn() {
-      const cols = 9, rows = 4;
-      return Array.from({ length: cols * rows }, (_, i) => {
-        const row = Math.floor(i / cols);
-        const typeMapping = [3, 2, 2, 1];
-        const enemyType = typeMapping[row];
-        return {
-          x: 300 + (i % cols) * 60,
-          y: 40 + row * 40,
-          w: 64, h: 64,
-          alive: true,
-          type: enemyType
-        };
-      });
-    })();
+    muteBtn.style.display = "block";
 
-    state.base = (function spawn() { const cols = 3, rows = 1; return Array.from({ length: cols * rows }, (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
-      y: 500 + Math.floor(i / cols) * 40, w: 120, h: 100, hp: 30, hpMax: 30, hit: 0, alive: true
-    }));
-    })();
-    
-    // O requestAnimationFrame deve estar dentro do bloco de identação do IF para iniciar o loop 
-    requestAnimationFrame(loop); 
+    const s0 = resetForStart(canvas);
+    requestAnimationFrame((ts) => {
+      const sStart = Object.freeze({ ...s0, lastTime: ts, running: true });
+      render(sStart);
+      requestAnimationFrame(step(sStart, ts, keys, canvas));
+    });
   }
 });
 
 // --- Loop principal ---
-const loop = (ts) => {
-  if (!state.running) return;
-  const dt = Math.min(0.05, (ts - (state.lastTime || ts)) / 1000);
-  state.lastTime = ts;
-  update(dt);
-  render();
-  requestAnimationFrame(loop);
-};
+const step = (prevState, prevTs, keys, canvas) => (ts) => {
+  const dt = Math.min(0.05, (ts - (prevTs ?? ts)) / 1000);
 
+  // consome ações pendentes (mute, etc.)
+  const actions = pendingActions.splice(0, pendingActions.length);
+  const sA = reduceActions(prevState, actions);
+
+  // aplica lógica pura do jogo
+  const sB = updatePure(sA, dt, canvas, keys);
+
+  // efeitos (sons/DOM) ficam fora: ex.: se houve mute, aplicar
+  // applyMuteEffect(sB);  // chame aqui quando necessário
+
+  // render com o estado atual
+  render(sB);
+
+  // continua se running
+  if (!sB.running) return;
+
+  // encadeia próximo frame passando novo estado congelado
+  requestAnimationFrame(step(Object.freeze({ ...sB, lastTime: ts }), ts, keys, canvas));
+};
+// Fila de transformações puras de estado, usada pelos eventos do DOM
+const pendingActions = [];
+
+const reduceActions = (state, actions) =>
+  actions.reduce((s, fn) => fn(s), state);
 // --- Play button ---
 playBtn.addEventListener("click", () => {
-  ensureAudio();
-  if (state.audio.ctx && state.audio.ctx.state === "suspended") { state.audio.ctx.resume() }
+  ensureAudio(); // desbloqueia contexto de áudio
 
-  // Toca e pausa o som para "desbloquear" a permissão de áudio do navegador
-    // Guarda os volumes originais
-  const originalPlayerVolume = playerShotSound.volume;
-  const originalExplosionVolume = baseDestroyedSound.volume;
-
-    // Força o volume para 0 para não fazer barulho
-  playerShotSound.volume = 0;
-  baseDestroyedSound.volume = 0;
-
-    // Toca os sons (agora permitidos pelo clique)
-  playerShotSound.play().catch(() => {});
-  baseDestroyedSound.play().catch(() => {});
-
-    // Usa um pequeno timeout para pausar e restaurar os volumes originais
-  setTimeout(() => {
-      playerShotSound.pause();
-      playerShotSound.currentTime = 0;
-      playerShotSound.volume = originalPlayerVolume;
-
-      baseDestroyedSound.pause();
-      baseDestroyedSound.currentTime = 0;
-      baseDestroyedSound.volume = originalExplosionVolume;
-  }, 10); // Um atraso mínimo, apenas para garantir a execução
-
+  // Efeitos visuais iniciais
   menu.style.display = "none";
   canvas.style.display = "block";
-  muteBtn.style.display = 'block';
-  state.running = true;
-  state.lastTime = 0;
-  state.score = 0;
-  state.player.lives = 3;
-  state.enemyBullets = [];
-  state.bullets = [];
-  state.enemies = (function spawn() {
-    const cols = 9, rows = 4;
-    return Array.from({ length: cols * rows }, (_, i) => {
-      const row = Math.floor(i / cols);
-      const typeMapping = [3, 2, 2, 1];
-      const enemyType = typeMapping[row];
-      return {
-        x: 300 + (i % cols) * 60,
-        y: 40 + row * 40,
-        w: 64, h: 64,
-        alive: true,
-        type: enemyType
-      };
-    });
-  })();
-  state.base = (function spawn() { const cols = 3, rows = 1; return Array.from({ length: cols * rows }, (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
-    y: 500 + Math.floor(i / cols) * 40, w: 120, h: 100, hp: 30, hpMax: 30, hit: 0,alive: true
-  }));
-  })();
-  
-  // O requestAnimationFrame inicia o loop do jogo
-  requestAnimationFrame(loop);
+  muteBtn.style.display = "block";
+
+  // Estado inicial imutável
+  const s0 = resetForStart(canvas);
+
+  // Inicia o loop funcional
+  requestAnimationFrame((ts) => {
+    const sStart = Object.freeze({ ...s0, lastTime: ts, running: true });
+    render(sStart); 
+    requestAnimationFrame(step(sStart, ts, keys, canvas));
+  });
 });
