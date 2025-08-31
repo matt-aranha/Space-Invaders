@@ -8,31 +8,35 @@
             <link rel="icon" href="/Modo-Clássico/assets/icone(192x192).png">
             <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   
-</head>
-<body>
-      <div class="stars"></div>
-  </div>
-      <div id="menu">
-            <h1>MODO <br>SOBREVIVENTE</h1>
-            <h2>Use o 'W','A','S' e 'D' para mover-se e 'ESPAÇO' para atirar <br> CUIDADO! Os invasores chegam de todos os lados!</h2> <br>
-            <button id="play-btn">▶ Play</button> <br> <br>
-            <button id="retornar-btn">↩ Retornar</button> <br> <br>
-            <img src="/modosobreviva/sprites/Caveira.png">
-      </div>
+      </head>
 
-      <div id="game-container" style="position: relative; display: inline-block;">
-            <canvas id="ultimo-Sobrevivente" width="1200" height="720" style="display:none"></canvas>
-            <button id="mute-btn" >Mutar Som</button>
-      </div>
-     <audio id="bg-music" loop>
-    <source src="../modosobreviva/sons/music.mp3" type="audio/mpeg">
-  </audio>
-  <script>
-      const music = document.getElementById("bg-music");
-      music.volume = 0.07;
-      music.play();
-      { once: true };
-  </script>
-      <script src="codigoPrincipal.js"></script>
-</body>
+      <body>
+            <div class="stars"></div>
+
+            <div id="menu">
+                  <h1>MODO <br> SOBREVIVENTE</h1>
+                  <h2>Use o 'W','A','S' e 'D' para mover-se e 'ESPAÇO' para atirar <br> CUIDADO! Os invasores chegam de todos os lados!</h2> <br>
+                  <button id="play-btn">▶ Play</button> <br> <br>
+                  <button id="retornar-btn">↩ Retornar</button> <br> <br>
+                  <img src="/modosobreviva/sprites/Caveira.png">
+            </div>
+
+            <div id="game-container" style="position: relative; display: inline-block;">
+                  <canvas id="ultimo-Sobrevivente" width="1200" height="720" style="display:none"></canvas>
+                  <button id="mute-btn" >Mutar Som</button>
+            </div>
+
+            <audio id="bg-music" loop>
+                  <source src="../modosobreviva/sons/music.mp3" type="audio/mpeg">
+            </audio>
+
+            <script>
+                  const music = document.getElementById("bg-music");
+                  music.volume = 0.07;
+                  music.play();
+                  { once: true };
+            </script>
+
+            <script src="codigoPrincipal.js"></script>
+      </body>
 </html>
