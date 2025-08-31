@@ -563,176 +563,184 @@ muteBtn.addEventListener("click", () => {
 
 // --- Render --- (mostrar,criar e desenhar na tela)
 const drawRect = (x, y, w, h, color) => { ctx.fillStyle = color; ctx.fillRect(x, y, w, h); };
-const drawGlowingRect = (x, y, w, h, color, glowColor, blurAmount) =>
-  {   // (Theu: testando uma organização diferente de função, talvez fique mais visualmente agradável :D)
-    ctx.save()  //salva o estado atual
-    ctx.shadowColor = glowColor;
-    ctx.shadowBlur = blurAmount;
-    drawRect(x, y, w, h, color); // reutiliza a função original
-    ctx.restore(); // remove o brilho
-  };
+const drawGlowingRect = (x, y, w, h, color, glowColor, blurAmount) => {   // (Theu: testando uma organização diferente de função, talvez fique mais visualmente agradável :D)
+      ctx.save()                    //salva o estado atual
+      ctx.shadowColor = glowColor;
+      ctx.shadowBlur = blurAmount;
+      drawRect(x, y, w, h, color);  // reutiliza a função original
+  ctx.restore();                    // remove o brilho
+};
 
 const render = () => {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  updateLivesUI(state);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      updateLivesUI(state);
 
-  // Player
-  const currentPlayerImg = getPlayerImage(state.player.animationFrame);
-  if (state.player.invincible > 0) {
-    if (Math.floor(Date.now() / 100) % 2 === 0) {
-      ctx.drawImage(currentPlayerImg, state.player.x, state.player.y, state.player.w, state.player.h);
-    }
-  } else {
-    ctx.drawImage(currentPlayerImg, state.player.x, state.player.y, state.player.w, state.player.h);
-  }
-
-  // Player lives (IN PORTUGUESE, please ;-; : vidas) (ih, foi mal)
-  ctx.fillStyle = "#fff";
-  ctx.font = "16px 'Press Start 2P'";
-  ctx.fillText("Vidas: ", canvas.width - 150, 20);
+      // Player
+      const currentPlayerImg = getPlayerImage(state.player.animationFrame);
+      if (state.player.invincible > 0) {
+          if (Math.floor(Date.now() / 100) % 2 === 0) {
+              ctx.drawImage(currentPlayerImg, state.player.x, state.player.y, state.player.w, state.player.h);
+          }
+      } else {
+            ctx.drawImage(currentPlayerImg, state.player.x, state.player.y, state.player.w, state.player.h);
+        }
 
 
-  // Bullets
-  state.bullets.forEach(b => drawGlowingRect(b.x, b.y, b.w, b.h+10, "#227dd8ff", "#58a6ff", 15));
+      // Player lives (IN PORTUGUESE, please ;-; : vidas) (ih, foi mal '-')
+      ctx.fillStyle = "#fff";
+      ctx.font = "16px 'Press Start 2P'";
+      ctx.fillText("Vidas: ", canvas.width - 150, 20);
 
-  // Escudos (base)
-state.base.forEach(b => {
-  if (!b.alive) return;
 
-  // flash quando hit > 0
-  if (b.hit > 0) ctx.globalAlpha = 0.6;
-  ctx.drawImage(baseImg, b.x, b.y, b.w, b.h);
-  ctx.globalAlpha = 1;
+      // Bullets
+      state.bullets.forEach(b => drawGlowingRect(b.x, b.y, b.w, b.h+10, "#227dd8ff", "#58a6ff", 15));
 
-  // barra de vida (fundo + frente), aqui é referente a base
-  const barY = b.y - 10;
-  ctx.fillStyle = "red";
-  ctx.fillRect(b.x, barY, b.w, 5); // fundo
-  ctx.fillStyle = "lime";
-  ctx.fillRect(b.x, barY, (b.hp / b.hpMax) * b.w, 5); // vida proporcional
-});
 
-  // Enemy bullets
-  state.enemyBullets.forEach(b => drawGlowingRect(b.x, b.y, b.w, b.h+8, "#e00d0dff", "#ff5470", 15));
+      // Escudos (base)
+      state.base.forEach(b => {
+          if (!b.alive) return;
 
-  // Enemies
-  state.enemies.forEach(e => {
-   if (!e.alive) return;
-   const img = getEnemyImage(e.type, state.enemyAnimationFrame);
-   ctx.drawImage(img, e.x, e.y, e.w, e.h)
-  });
+          // flash quando hit > 0
+          if (b.hit > 0) ctx.globalAlpha = 0.6;
+          ctx.drawImage(baseImg, b.x, b.y, b.w, b.h);
+          ctx.globalAlpha = 1;
+
+          // barra de vida (fundo + frente), aqui é referente a base
+          const barY = b.y - 10;
+          ctx.fillStyle = "red";
+          ctx.fillRect(b.x, barY, b.w, 5); // fundo
+          ctx.fillStyle = "lime";
+          ctx.fillRect(b.x, barY, (b.hp / b.hpMax) * b.w, 5); // vida proporcional
+      });
+
+
+      // Enemy bullets
+      state.enemyBullets.forEach(b => drawGlowingRect(b.x, b.y, b.w, b.h+8, "#e00d0dff", "#ff5470", 15));
+
+
+      // Enemies
+      state.enemies.forEach(e => {
+          if (!e.alive) return;
+          const img = getEnemyImage(e.type, state.enemyAnimationFrame);
+          ctx.drawImage(img, e.x, e.y, e.w, e.h)
+      });
   
-  ctx.fillStyle = "#fff"; ctx.font = "16px 'Press Start 2P'"; ctx.fillText("Score: " + state.score, 550, 20);
+
+      // Score
+      ctx.fillStyle = "#fff"; ctx.font = "16px 'Press Start 2P'"; ctx.fillText("Score: " + state.score, 550, 20);
+
 
    // << MENU DE PAUSE >>
-if (state.isPaused) {
-    ctx.filter = "blur(5px)";     // Fundo borrado
-    ctx.drawImage(canvas, 0, 0);
-    ctx.filter = "none"           // Tira o blur do menu
+      if (state.isPaused) {
+          ctx.filter = "blur(5px)";     // Fundo borrado
+          ctx.drawImage(canvas, 0, 0);
+          ctx.filter = "none"           // Tira o blur do menu
 
-    // --- Tela de Pause ---
-    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.font = "48px 'Press Start 2P'";
-    ctx.textAlign = "center";
-    ctx.fillStyle = "#fff";
-    ctx.fillText("PAUSADO", canvas.width / 2, canvas.height / 2 - 100);
+          // --- Tela de Pause ---
+          ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.font = "48px 'Press Start 2P'";
+          ctx.textAlign = "center";
+          ctx.fillStyle = "#fff";
+          ctx.fillText("PAUSADO", canvas.width / 2, canvas.height / 2 - 100);
 
-    // --- Botão de Continuar ---
-    const btnWidth = 320, btnHeight = 50;
-    const continueBtnY = canvas.height / 2 - 25;
-    ctx.fillStyle = "#232946";
-    ctx.fillRect(canvas.width / 2 - btnWidth / 2, continueBtnY, btnWidth, btnHeight);
-    ctx.font = "18px 'Press Start 2P'";
-    ctx.fillStyle = "#fff";
-    ctx.textBaseline = "middle";
-    ctx.fillText("Continuar", canvas.width / 2, continueBtnY + (btnHeight / 2));
+          // --- Botão de Continuar ---
+          const btnWidth = 320, btnHeight = 50;
+          const continueBtnY = canvas.height / 2 - 25;
+          ctx.fillStyle = "#232946";
+          ctx.fillRect(canvas.width / 2 - btnWidth / 2, continueBtnY, btnWidth, btnHeight);
+          ctx.font = "18px 'Press Start 2P'";
+          ctx.fillStyle = "#fff";
+          ctx.textBaseline = "middle";
+          ctx.fillText("Continuar", canvas.width / 2, continueBtnY + (btnHeight / 2));
 
-    // --- Botão de Reiniciar ---
-    const restartBtnY = canvas.height / 2 + 50;
-    ctx.fillStyle = "#232946";
-    ctx.fillRect(canvas.width / 2 - btnWidth / 2, restartBtnY, btnWidth, btnHeight);
-    ctx.font = "18px 'Press Start 2P'";
-    ctx.fillStyle = "#fff";
-    ctx.textBaseline = "middle";
-    ctx.fillText("Reiniciar", canvas.width / 2, restartBtnY + (btnHeight / 2));
+          // --- Botão de Reiniciar ---
+          const restartBtnY = canvas.height / 2 + 50;
+          ctx.fillStyle = "#232946";
+          ctx.fillRect(canvas.width / 2 - btnWidth / 2, restartBtnY, btnWidth, btnHeight);
+          ctx.font = "18px 'Press Start 2P'";
+          ctx.fillStyle = "#fff";
+          ctx.textBaseline = "middle";
+          ctx.fillText("Reiniciar", canvas.width / 2, restartBtnY + (btnHeight / 2));
 
-    // --- Botão de Retornar ao Menu ---
-    const returnBtnY = canvas.height / 2 + 125;
-    ctx.fillStyle = "#232946";
-    ctx.fillRect(canvas.width / 2 - btnWidth / 2, returnBtnY, btnWidth, btnHeight);
-    ctx.font = "18px 'Press Start 2P'";
-    ctx.fillStyle = "#fff";
-    ctx.textBaseline = "middle";
-    ctx.fillText("Tela de Início", canvas.width / 2, returnBtnY + (btnHeight / 2));
+          // --- Botão de Retornar ao Menu ---
+          const returnBtnY = canvas.height / 2 + 125;
+          ctx.fillStyle = "#232946";
+          ctx.fillRect(canvas.width / 2 - btnWidth / 2, returnBtnY, btnWidth, btnHeight);
+          ctx.font = "18px 'Press Start 2P'";
+          ctx.fillStyle = "#fff";
+          ctx.textBaseline = "middle";
+          ctx.fillText("Tela de Início", canvas.width / 2, returnBtnY + (btnHeight / 2));
 
-    // Reseta alinhamentos para não afetar outros desenhos
-    ctx.textAlign = "start";
-    ctx.textBaseline = "alphabetic";
-  }
+          // Reseta alinhamentos para não afetar outros desenhos
+          ctx.textAlign = "start";
+          ctx.textBaseline = "alphabetic";
+      }
 
-  if (!state.running) {
-    // --- Texto "GAME OVER" com Estilo Retrô ---
-    ctx.font = "48px 'Press Start 2P'";
-    ctx.textAlign = "center";
 
-    // Efeito de sombra/contorno para o texto
-    ctx.fillStyle = "#fff"; // Cor do contorno
-    ctx.fillText("GAME OVER", canvas.width / 2 + 3, canvas.height / 2 - 50 + 3);
-    
-    // Texto principal
-    ctx.fillStyle = "#25f82fff"; // Cor do texto
-    ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 50);
+      if (!state.running) {
+        // --- Texto "GAME OVER" com Estilo Retrô ---
+        ctx.font = "48px 'Press Start 2P'";
+        ctx.textAlign = "center";
 
-    // --- Botão de Reiniciar com Estilo Retrô ---
-    const btnWidth = 240, btnHeight = 50;
-    const btnX = canvas.width / 2 - btnWidth / 2;
-    const btnY = canvas.height / 2 + 30;
-    const shadowOffset = 5; // Tamanho da "sombra 3D"
+        // Efeito de sombra/contorno para o texto
+        ctx.fillStyle = "#fff"; // Cor do contorno
+        ctx.fillText("GAME OVER", canvas.width / 2 + 3, canvas.height / 2 - 50 + 3);
+        
+        // Texto principal
+        ctx.fillStyle = "#25f82fff"; // Cor do texto
+        ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 50);
 
-    // Sombra do botão (desenhada primeiro, por baixo)
-    ctx.fillStyle = "#02a036ff"; // Rosa escuro para a sombra
-    ctx.fillRect(btnX, btnY, btnWidth, btnHeight);
+        // --- Botão de Reiniciar com Estilo Retrô ---
+        const btnWidth = 240, btnHeight = 50;
+        const btnX = canvas.width / 2 - btnWidth / 2;
+        const btnY = canvas.height / 2 + 30;
+        const shadowOffset = 5; // Tamanho da "sombra 3D"
 
-    // Corpo principal do botão (desenhado por cima, um pouco deslocado)
-    ctx.fillStyle = "#232946";
-    ctx.fillRect(btnX, btnY - shadowOffset, btnWidth, btnHeight);
+        // Sombra do botão (desenhada primeiro, por baixo)
+        ctx.fillStyle = "#02a036ff"; // Rosa escuro para a sombra
+        ctx.fillRect(btnX, btnY, btnWidth, btnHeight);
 
-    // Texto do botão
-    ctx.font = "18px 'Press Start 2P'";
-    ctx.fillStyle = "#fff"; // Texto branco para contraste
-    ctx.textBaseline = "middle"; // Alinha o texto verticalmente pelo meio
-    ctx.fillText("Reiniciar", canvas.width / 2, btnY - shadowOffset + (btnHeight / 2));
+        // Corpo principal do botão (desenhado por cima, um pouco deslocado)
+        ctx.fillStyle = "#232946";
+        ctx.fillRect(btnX, btnY - shadowOffset, btnWidth, btnHeight);
 
-    // Reseta os alinhamentos para não afetar outros desenhos
-    ctx.textAlign = "start";
-    ctx.textBaseline = "alphabetic";
+        // Texto do botão
+        ctx.font = "18px 'Press Start 2P'";
+        ctx.fillStyle = "#fff"; // Texto branco para contraste
+        ctx.textBaseline = "middle"; // Alinha o texto verticalmente pelo meio
+        ctx.fillText("Reiniciar", canvas.width / 2, btnY - shadowOffset + (btnHeight / 2));
 
-    // --- Botão de Retornar com Estilo Retrô ---
-    const btWidth = 240, btHeight = 50;
-    const btX = canvas.width / 2 - btWidth / 2;
-    const btY = canvas.height / 2 + 150;
-    const shadowOfset = 5; // Tamanho da "sombra 3D"
+        // Reseta os alinhamentos para não afetar outros desenhos
+        ctx.textAlign = "start";
+        ctx.textBaseline = "alphabetic";
 
-    // Sombra do botão (desenhada primeiro, por baixo)
-    ctx.fillStyle = "#02a036ff"; // Rosa escuro para a sombra
-    ctx.fillRect(btX, btY, btWidth, btHeight);
+        // --- Botão de Retornar com Estilo Retrô ---
+        const btWidth = 240, btHeight = 50;
+        const btX = canvas.width / 2 - btWidth / 2;
+        const btY = canvas.height / 2 + 150;
+        const shadowOfset = 5; // Tamanho da "sombra 3D"
 
-    // Corpo principal do botão (desenhado por cima, um pouco deslocado)
-    ctx.fillStyle = "#232946";
-    ctx.fillRect(btX, btY - shadowOfset, btWidth, btHeight);
+        // Sombra do botão (desenhada primeiro, por baixo)
+        ctx.fillStyle = "#02a036ff"; // Rosa escuro para a sombra
+        ctx.fillRect(btX, btY, btWidth, btHeight);
 
-    // Texto do botão
-    ctx.font = "18px 'Press Start 2P'";
-    ctx.fillStyle = "#fff"; // Texto branco para contraste
-    ctx.textBaseline = "middle"; // Alinha o texto verticalmente pelo meio
-    ctx.fillText("Retornar", canvas.width / 2 - btWidth / 3.5, btY - shadowOfset + (btHeight / 2));
+        // Corpo principal do botão (desenhado por cima, um pouco deslocado)
+        ctx.fillStyle = "#232946";
+        ctx.fillRect(btX, btY - shadowOfset, btWidth, btHeight);
 
-    // Reseta os alinhamentos para não afetar outros desenhos
-    ctx.textAlign = "start";
-    ctx.textBaseline = "alphabetic";
-}
+        // Texto do botão
+        ctx.font = "18px 'Press Start 2P'";
+        ctx.fillStyle = "#fff"; // Texto branco para contraste
+        ctx.textBaseline = "middle"; // Alinha o texto verticalmente pelo meio
+        ctx.fillText("Retornar", canvas.width / 2 - btWidth / 3.5, btY - shadowOfset + (btHeight / 2));
+
+        // Reseta os alinhamentos para não afetar outros desenhos
+        ctx.textAlign = "start";
+        ctx.textBaseline = "alphabetic";
+      }
 };
+
 
 // --- Detecta clique no botão de reiniciar, pause, continuar e retornar ao menu ---
 canvas.addEventListener("click", function (e) {
