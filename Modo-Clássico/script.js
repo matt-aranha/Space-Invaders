@@ -176,7 +176,7 @@ const playTone = (freq, duration = 0.08, type = "square", vol = 0.12, endFreq = 
       o.start();
       g.gain.setValueAtTime(vol, a.currentTime);
       if (endFreq !== null) {
-        o.frequency.exponentialRampToValueAtTime(endFreq, a.currentTime + duration);
+          o.frequency.exponentialRampToValueAtTime(endFreq, a.currentTime + duration);
       }
       g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + duration);
       o.stop(a.currentTime + duration + 0.02);
@@ -191,7 +191,7 @@ const playInvaderTone = () => {
       const timeBetweenBeats = Math.max(100, 550 - (state.enemies.filter(e => e.alive).length * 5));
 
       if (now - a.lastTime < timeBetweenBeats) {
-        return; // Ainda não é hora de tocar (segura onda ai :) )
+          return; // Ainda não é hora de tocar (segura onda ai :) )
       }
 
       // Pega a próxima nota da sequência
@@ -220,119 +220,118 @@ function processPlayerBulletBase(bullet, base, idx) {
       const b = base[idx];
       if (b.alive &&
           bullet.x < b.x + b.w && bullet.x + bullet.w > b.x &&
-          bullet.y < b.y + b.h && bullet.y + bullet.h > b.y)
-          {
-            bullet.y = -9999; // Remove o tiro do jogador
-            return;
+          bullet.y < b.y + b.h && bullet.y + bullet.h > b.y) {
+              bullet.y = -9999; // Remove o tiro do jogador
+              return;
           }
       processPlayerBulletBase(bullet, base, idx + 1);
 };
 
 // Função para processar colisões entre balas e inimigos
 function processBullets(bullets, enemies, idx = 0) {
-  if (idx >= bullets.length) return;
-  const b = bullets[idx];
-  processEnemies(b, enemies, 0);
-  processBullets(bullets, enemies, idx + 1);
+      if (idx >= bullets.length) return;
+      const b = bullets[idx];
+      processEnemies(b, enemies, 0);
+      processBullets(bullets, enemies, idx + 1);
 }
 
 // Função que relaciona os inimigos com os tiros que produzem assim também como se posicionam no canva
 const enemyPoints = {
-  1: 10,   // inimigo de baixo
-  2: 20,   // inimigo do meio
-  3: 30    // inimigo de cima
+      1: 10,   // inimigo de baixo
+      2: 20,   // inimigo do meio
+      3: 30    // inimigo de cima
 };
 
 // fUnção que processa inimigos
 function processEnemies(bullet, enemies, idx) {
-  if (idx >= enemies.length) return;
-  const e = enemies[idx];
-  if (e.alive &&
-    bullet.x < e.x + e.w && bullet.x + bullet.w > e.x &&
-    bullet.y < e.y + e.h && bullet.y + bullet.h > e.y) {
-    e.alive = false;
-    bullet.y = -9999; // marca pra remoção, saem do plano
-    state.score += enemyPoints[e.type];
-    playTone(600, 0.15, "sawtooth", 0.08, 50);;
-    return; // Para após a primeira colisão
-  }
-  processEnemies(bullet, enemies, idx + 1);
+      if (idx >= enemies.length) return;
+      const e = enemies[idx];
+      if (e.alive &&
+        bullet.x < e.x + e.w && bullet.x + bullet.w > e.x &&
+        bullet.y < e.y + e.h && bullet.y + bullet.h > e.y) {
+            e.alive = false;
+            bullet.y = -9999; // marca pra remoção, saem do plano
+            state.score += enemyPoints[e.type];
+            playTone(600, 0.15, "sawtooth", 0.08, 50);;
+            return; // Para após a primeira colisão
+        }
+      processEnemies(bullet, enemies, idx + 1);
 }
 
 // Função para processar colisão entre balas do inimigo e a base
 function processBulletBase(bullet, base, idx) {
-  if (idx >= base.length) return;
-  const e = base[idx];
-  if (e.alive &&
-      bullet.x < e.x + e.w && bullet.x + bullet.w > e.x &&
-      bullet.y < e.y + e.h && bullet.y + bullet.h > e.y) {
-    e.hp -= 1;             // perde vida
-    e.hit = 0.12;          // flash rápido ao ser atingida
-    bullet.y = canvas.height + 100; // remove o tiro (filtro pega)
-    if (e.hp <= 0) {
-      e.alive = false;
-      e.justDied = true;  // sinaliza que a base foi destruída
-    };
-    return; // evita múltiplos acertos no mesmo frame
-  };
-  processBulletBase(bullet, base, idx + 1);
+      if (idx >= base.length) return;
+      const e = base[idx];
+      if (e.alive &&
+          bullet.x < e.x + e.w && bullet.x + bullet.w > e.x &&
+          bullet.y < e.y + e.h && bullet.y + bullet.h > e.y) {
+              e.hp -= 1;             // perde vida
+              e.hit = 0.12;          // flash rápido ao ser atingida
+              bullet.y = canvas.height + 100; // remove o tiro (filtro pega)
+              if (e.hp <= 0) {
+                  e.alive = false;
+                  e.justDied = true;  // sinaliza que a base foi destruída
+                };
+              return; // evita múltiplos acertos no mesmo frame
+          };
+      processBulletBase(bullet, base, idx + 1);
 }
 
 // Função para detectar se a horda de aliens morreu e então regenerar o escudo
 const regenerateBases = (bases) => {
-  return bases.map(base => ({
-        ...base,        //copia a base original
-        hp: base.hpMax, //regenera o hp para o máximo
-        alive: true     // ressuscita o escudo que foi destruído
-  }));
+      return bases.map(base => ({
+            ...base,        //copia a base original
+            hp: base.hpMax, //regenera o hp para o máximo
+            alive: true     // ressuscita o escudo que foi destruído
+      }));
 };
 
 // Função para verificar se algum inimigo chegou na base
 function checkEnemyBase(enemies, idx = 0) {
-  if (idx >= enemies.length) return;
-  const e = enemies[idx];
-  if (e.alive && e.y + e.h >= state.player.y) {
-    state.running = false;
-    playTone(60, 0.6, "sine", 0.12);
-    return;
-  }
-  checkEnemyBase(enemies, idx + 1);
+      if (idx >= enemies.length) return;
+      const e = enemies[idx];
+      if (e.alive && e.y + e.h >= state.player.y) {
+          state.running = false;
+          playTone(60, 0.6, "sine", 0.12);
+          return;
+      }
+      checkEnemyBase(enemies, idx + 1);
 }
 
 // Função tiro dos inimigos, chablau
 function enemyShoot() {
-  // Escolhe inimigos vivos aleatoriamente para atirar
-  state.enemies.forEach(e => {
-    if (e.alive && Math.random() < state.enemyFireRate) {
-      state.enemyBullets.push({
-        x: e.x + e.w / 2 - 2,
-        y: e.y + e.h,
-        w: 4,
-        h: 10,
-        dy: 220
+      // Escolhe inimigos vivos aleatoriamente para atirar
+      state.enemies.forEach(e => {
+          if (e.alive && Math.random() < state.enemyFireRate) {
+              state.enemyBullets.push({
+                  x: e.x + e.w / 2 - 2,
+                  y: e.y + e.h,
+                  w: 4,
+                  h: 10,
+                  dy: 220
+              });
+            playTone(320, 0.07, "triangle", 0.08);
+          }
       });
-      playTone(320, 0.07, "triangle", 0.08);
-    }
-  });
 }
 
 // Função que calcula o próximo estado de animação da nave
 const updatePlayerAnimation = (playerState, dt, fps) => {
-  const interval = 1 / fps; // 2.5 FPS -> intervalo de 0.4s
-  const newLastAnimationFrameTime = playerState.lastAnimationFrameTime + dt;
+      const interval = 1 / fps;     // 2.5 FPS -> intervalo de 0.4s
+      const newLastAnimationFrameTime = playerState.lastAnimationFrameTime + dt;
 
-  if (newLastAnimationFrameTime >= interval) {
-    const newFrame = (playerState.animationFrame + 1) % 3; // 3 frames (0, 1, 2)
-    return {
-      animationFrame: newFrame,
-      lastAnimationFrameTime: newLastAnimationFrameTime - interval
-    };
-  }
-  
-  return {
-    animationFrame: playerState.animationFrame,
-    lastAnimationFrameTime: newLastAnimationFrameTime
-  };
+      if (newLastAnimationFrameTime >= interval) {
+          const newFrame = (playerState.animationFrame + 1) % 3; // 3 frames (0, 1, 2)
+          return {
+              animationFrame: newFrame,
+              lastAnimationFrameTime: newLastAnimationFrameTime - interval
+          };
+      }
+      
+      return {
+          animationFrame: playerState.animationFrame,
+          lastAnimationFrameTime: newLastAnimationFrameTime
+      };
 };
 
 // Função para selecionar a imagem correta da nave
@@ -341,504 +340,521 @@ const getPlayerImage = (animationFrame) => playerFrames[animationFrame];
 
 // Função para reiniciar o jogo (antes a gente tava reescrevendo tuuudo isso sempre que queríamos reiniciar o jogo, então fiz dela uma função a parte que é chamada nas outras :P  assim, se for pra mudar é só mudar aqui e show de bola)
 const resetGame = () => {
-  state.running = true;
-  state.isPaused = false;
-  state.lastTime = 0;
-  state.score = 0;
-  state.player.lives = 3;
-  state.enemyBullets = [];
-  state.bullets = [];
-  state.wave = 1;
-  state.enemySpeed = 40;
-  state.enemyFireRate = 0.0003;
-  state.player.x = (canvas.width / 2) - 40;
-  state.player.y = canvas.height - 80;
-  state.player.invincible = 0;
+      state.running = true;
+      state.isPaused = false;
+      state.lastTime = 0;
+      state.score = 0;
+      state.player.lives = 3;
+      state.enemyBullets = [];
+      state.bullets = [];
+      state.wave = 1;
+      state.enemySpeed = 40;
+      state.enemyFireRate = 0.0003;
+      state.player.x = (canvas.width / 2) - 40;
+      state.player.y = canvas.height - 80;
+      state.player.invincible = 0;
   
-  // Recria os inimigos e as bases
-  state.enemies = (function spawn() {
-    const cols = 9, rows = 4;
-    return Array.from({ length: cols * rows }, (_, i) => {
-      const row = Math.floor(i / cols);
-      const typeMapping = [3, 2, 2, 1];
-      const enemyType = typeMapping[row];
-      return {
-        x: 300 + (i % cols) * 60,
-        y: 40 + row * 40,
-        w: 64, h: 64,
-        alive: true,
-        type: enemyType
-      };
-    });
-  })();
+      // Recria os inimigos e as bases
+      state.enemies = (function spawn() {
+          const cols = 9, rows = 4;
+          return Array.from({ length: cols * rows }, (_, i) => {
+              const row = Math.floor(i / cols);
+              const typeMapping = [3, 2, 2, 1];
+              const enemyType = typeMapping[row];
+              return {
+                  x: 300 + (i % cols) * 60,
+                  y: 40 + row * 40,
+                  w: 64, h: 64,
+                  alive: true,
+                  type: enemyType
+              };
+          });
+      })();
 
-  state.base = (function spawn() { 
-    const cols = 3, rows = 1; 
-    return Array.from({ length: cols * rows }, (_, i) => ({ 
-      x: 170 + (i % cols) * ((canvas.width - 80) / cols),
-      y: 500 + Math.floor(i / cols) * 40, w: 120, h: 100, hp: 30, hpMax: 30, hit: 0, alive: true
-    }));
-  })();
+      state.base = (function spawn() { 
+          const cols = 3, rows = 1; 
+          return Array.from({ length: cols * rows }, (_, i) => ({ 
+              x: 170 + (i % cols) * ((canvas.width - 80) / cols),
+              y: 500 + Math.floor(i / cols) * 40,
+              w: 120,
+              h: 100,
+              hp: 30,
+              hpMax: 30,
+              hit: 0,
+              alive: true
+          }));
+      })();
 
-  // Garante que o loop de animação comece se não estiver rodando
-  requestAnimationFrame(loop);
+      // Garante que o loop de animação comece se não estiver rodando
+      requestAnimationFrame(loop);
 };
 
 // Função para pausar/despausar o joguin
 const togglePause = () => {
-  if (!state.running) return; // Não permite pausar se o jogo já terminou
-
-  state.isPaused = !state.isPaused;
+      if (!state.running) return;             // Não permite pausar se o jogo já terminou
+      state.isPaused = !state.isPaused;
 };
 
 // Nova tecla, agora o 'P' pausa o jogo
 document.addEventListener("keydown", e => {
-  if (e.code === 'KeyP') {
-    togglePause();
-  }
+      if (e.code === 'KeyP') {
+        togglePause();
+      }
 });
 
 // Esc também pausa
 document.addEventListener("keydown", e => {
-  if (e.code === 'Escape') {
-    togglePause();
-  }
+      if (e.code === 'Escape') {
+        togglePause();
+      }
 });
 
 
 // Função (theu: GIGANTE!! edu: MT msm) que retorna as modificações do state inicial
 const update = (dt) => {
-  if (state.player.invincible > 0) {
-  state.player.invincible -= dt;
-}
-  // lógica da animação do jogador
-  const newAnimationState = updatePlayerAnimation(state.player, dt, 2.5);
-  state.player = {...state.player, ...newAnimationState};
+      if (state.player.invincible > 0) {
+          state.player.invincible -= dt;
+      }
+      
+      // lógica da animação do jogador
+      const newAnimationState = updatePlayerAnimation(state.player, dt, 2.5);
+      state.player = {...state.player, ...newAnimationState};
 
-  // movimento e tiro dos inimigos
-  enemyShoot();
-  state.enemyBullets = state.enemyBullets.map(b => ({ ...b, y: b.y + b.dy * dt })).filter(b => b.y < canvas.height + 20);
-  //colisões dos tiros inimigos com player e com a base
-  state.enemyBullets.forEach(b => {
-    const p = state.player;
-    //player
-    if (
-      b.x < p.x + p.w &&
-      b.x + b.w > p.x &&
-      b.y < p.y + p.h &&
-      b.y + b.h > p.y
-    ) {
-      if (p.invincible <= 0) { // só leva dano se não estiver invencível
-        p.lives -= 1;
-        p.invincible = 1.5; // 1.5 segundos de invencibilidade
-        playTone(80, 0.2, "sawtooth", 0.15);
-        if (p.lives <= 0) {
-          state.running = false;
-    }
-  }
-    b.y = canvas.height + 100; // remove o tiro
-    return;   //já bateu no player, cabou-se
-  };
+      // movimento e tiro dos inimigos
+      enemyShoot();
+      state.enemyBullets = state.enemyBullets.map(b => ({ ...b, y: b.y + b.dy * dt })).filter(b => b.y < canvas.height + 20);
 
-  // contra a base (escudo)
-  processBulletBase(b, state.base, 0);
-});
+      //colisões dos tiros inimigos com player e com a base
+      state.enemyBullets.forEach(b => {
+          const p = state.player;
+          //player:
+          if (
+                b.x < p.x + p.w &&
+                b.x + b.w > p.x &&
+                b.y < p.y + p.h &&
+                b.y + b.h > p.y
+              ) {
+                  if (p.invincible <= 0) {                  // só leva dano se não estiver invencível
+                      p.lives -= 1;
+                      p.invincible = 1.5;                   // 1.5 segundos de invencibilidade
+                      playTone(80, 0.2, "sawtooth", 0.15);
+                      if (p.lives <= 0) {
+                          state.running = false;
+                      }
+                  } 
+                  b.y = canvas.height + 100;                // remove o tiro
+                  return;                                   //já bateu no player, cabou-se
+                };
 
-state.base.forEach(b => {
-    if (b.justDied){
-      playAudioTiro(baseDestroyedSound);
-      b.justDied = false;   // reseta o sinalizador
-    }
-  })
+          //base:
+          processBulletBase(b, state.base, 0);
+      });
 
-// atualiza timer de flash da base
-  state.base = state.base.map(br => br.alive ? { ...br, hit: Math.max(0, (br.hit || 0) - dt) } : br);
+      state.base.forEach(b => {
+          if (b.justDied){
+              playAudioTiro(baseDestroyedSound);
+              b.justDied = false;   // reseta o sinalizador
+          }
+      })
 
-  // movimento do jogador
-  const dir = (keys["ArrowLeft"] || keys["KeyA"] ? -0.5 : 0) + (keys["ArrowRight"] || keys["KeyD"] ? 0.5 : 0);
-  state.player.x += dir * state.player.speed * dt;
-  if (state.player.x < 2) state.player.x = 2;
-  if (state.player.x + state.player.w > canvas.width - 2) state.player.x = canvas.width - 2 - state.player.w;
+      // atualiza timer de flash da base
+      state.base = state.base.map(br => br.alive ? { ...br, hit: Math.max(0, (br.hit || 0) - dt) } : br);
 
-  if (state.player.cooldown > 0) state.player.cooldown -= dt;
-  if (keys["Space"] || keys["KeyW"] || keys["ArrowUp"]) tiro();
+      // movimento do jogador
+      const dir = (keys["ArrowLeft"] || keys["KeyA"] ? -0.5 : 0) + (keys["ArrowRight"] || keys["KeyD"] ? 0.5 : 0);
+      state.player.x += dir * state.player.speed * dt;
+      if (state.player.x < 2) state.player.x = 2;
+      if (state.player.x + state.player.w > canvas.width - 2) state.player.x = canvas.width - 2 - state.player.w;
 
-  // atualizar balas
-  state.bullets = state.bullets.map(b => ({ ...b, y: b.y + b.dy * dt })).filter(b => b.y > -20);
+      if (state.player.cooldown > 0) state.player.cooldown -= dt;
+      if (keys["Space"] || keys["KeyW"] || keys["ArrowUp"]) tiro();
 
-  // mover inimigos e tratar troca de direção / queda
-  const alive = state.enemies.filter(e => e.alive);
-  if (alive.length === 0) {
-  state.wave += 1;
-  state.enemySpeed += 10.5;
-  state.enemyFireRate *= 1.12; // sobe a dificuldade
-  state.base = regenerateBases(state.base);
-  state.enemies = (function spawn() {
-  const cols = 12, rows = 4;
-  return Array.from({ length: cols * rows }, (_, i) => {
-    const row = Math.floor(i / cols);
-    // Mapeia cada linha para um tipo de inimigo (clássico)
-    const typeMapping = [3, 2, 2, 1]; // Topo: tipo 3, Meio: tipo 2, Baixo: tipo 1
-    const enemyType = typeMapping[row];
-    
-    return {
-      x: 300 + (i % cols) * 60,
-      y: 40 + row * 40,
-      w: 64, h: 64,
-      alive: true,
-      type: enemyType // Usa o tipo mapeado
-    };
-  });
-})()
-} else {
-  const minX = Math.min(...alive.map(e => e.x));
-  const maxX = Math.max(...alive.map(e => e.x + e.w));
-  const willHit = (state.enemyDir > 0 && maxX + state.enemyDir * state.enemySpeed * dt > canvas.width - 10) ||
-                  (state.enemyDir < 0 && minX + state.enemyDir * state.enemySpeed * dt < 10);
-  if (willHit) {
-    state.enemyDir *= -1;
-    state.enemies = state.enemies.map(e => ({ ...e, y: e.y + 12 }));
-  } else {
-    state.enemies = state.enemies.map(e => ({ ...e, x: e.x + state.enemyDir * state.enemySpeed * dt }));
-  }
-}
+      // atualizar balas
+      state.bullets = state.bullets.map(b => ({ ...b, y: b.y + b.dy * dt })).filter(b => b.y > -20);
 
-  // Lógica da animação dos invasores/aliens
-  state.lastEnemyFrameTime += dt;
-  const animationInterval = 0.5; // Intervalo de 0.5 segundos para a animação
-  if (state.lastEnemyFrameTime >= animationInterval) {
-    state.enemyAnimationFrame = (state.enemyAnimationFrame + 1) % 2; // Alterna entre 0 e 1
-    state.lastEnemyFrameTime -= animationInterval;
-}
+      // mover inimigos e tratar troca de direção / queda
+      const alive = state.enemies.filter(e => e.alive);
+      if (alive.length === 0) {
+          state.wave += 1;
+          state.enemySpeed += 10.5;
+          state.enemyFireRate *= 1.12; // sobe a dificuldade
+          state.base = regenerateBases(state.base);
+          state.enemies = (function spawn() {
+              const cols = 12, rows = 4;
+              return Array.from({ length: cols * rows }, (_, i) => {
+                  const row = Math.floor(i / cols);
+                  // Mapeia cada linha para um tipo de inimigo (clássico)
+                  const typeMapping = [3, 2, 2, 1]; // Topo: tipo 3, Meio: tipo 2, Baixo: tipo 1
+                  const enemyType = typeMapping[row];
+              
+              return {
+                       x: 300 + (i % cols) * 60,
+                       y: 40 + row * 40,
+                       w: 64, h: 64,
+                       alive: true,
+                       type: enemyType // Usa o tipo mapeado
+                      };
+              });
+          })()
+      } else {
+            const minX = Math.min(...alive.map(e => e.x));
+            const maxX = Math.max(...alive.map(e => e.x + e.w));
+            const willHit = (state.enemyDir > 0 && maxX + state.enemyDir * state.enemySpeed * dt > canvas.width - 10) ||
+                            (state.enemyDir < 0 && minX + state.enemyDir * state.enemySpeed * dt < 10);
+            if (willHit) {
+              state.enemyDir *= -1;
+              state.enemies = state.enemies.map(e => ({ ...e, y: e.y + 12 }));
+            } else {
+                  state.enemies = state.enemies.map(e => ({ ...e, x: e.x + state.enemyDir * state.enemySpeed * dt }));
+              }
+        }
 
-  // colisões (balas x inimigos) & (balas x base)
-  state.bullets.forEach(bullet => {
-    processEnemies(bullet, state.enemies, 0);
-    processPlayerBulletBase(bullet, state.base, 0);
-  });
+      // Lógica da animação dos invasores/aliens
+      state.lastEnemyFrameTime += dt;
+      const animationInterval = 0.5; // Intervalo de 0.5 segundos para a animação
+      if (state.lastEnemyFrameTime >= animationInterval) {
+          state.enemyAnimationFrame = (state.enemyAnimationFrame + 1) % 2; // Alterna entre 0 e 1
+          state.lastEnemyFrameTime -= animationInterval;
+      }
+
+      // colisões (balas x inimigos) & (balas x base)
+      state.bullets.forEach(bullet => {
+          processEnemies(bullet, state.enemies, 0);
+          processPlayerBulletBase(bullet, state.base, 0);
+      });
   
-  state.bullets = state.bullets.filter(b => b.y > -50);
+      state.bullets = state.bullets.filter(b => b.y > -50);
 
-    // inimigo chega na base -> game over
-  checkEnemyBase(state.enemies);
+      // inimigo chega na base -> game over
+      checkEnemyBase(state.enemies);
 
-  //manter música tocando
-  playInvaderTone();
+      //manter música tocando
+      playInvaderTone();
 };
+
 
 // Função que retorna o frame certo da bestafera (alien) (coé, kalil. não poder usar let é paia, ein... nem precisaria dessa função, era só meter o let na parte dos inimigos na função render e dale)
 const getEnemyImage = (enemyType, currentFrame) => {
-  const isFrame1 = currentFrame === 0;
+      const isFrame1 = currentFrame === 0;
 
-  if (enemyType === 1) {
-      return isFrame1 ? enemyImg1 : enemyImg1_frame2;
-  }
-  if (enemyType === 2) {
-      return isFrame1 ? enemyImg2 : enemyImg2_frame2;
-  }
-  if (enemyType === 3) {
-      return isFrame1 ? enemyImg3 : enemyImg3_frame2
-  }
+      if (enemyType === 1) {
+          return isFrame1 ? enemyImg1 : enemyImg1_frame2;
+      }
+      if (enemyType === 2) {
+          return isFrame1 ? enemyImg2 : enemyImg2_frame2;
+      }
+      if (enemyType === 3) {
+          return isFrame1 ? enemyImg3 : enemyImg3_frame2
+      }
 };
 
-//Evento muted, cancelar o som (a cada click(depende do click do mouse no botão de mutar/desmutar), altera o boolean definido no state, invertendo seu valor lógico
+//Evento muted, cancelar o som a cada click (depende do click do mouse no botão de mutar/desmutar), altera o boolean definido no state, invertendo seu valor lógico
 muteBtn.addEventListener("click", () => {
-  state.isMuted = !state.isMuted; // Inverte o estado (true/false)
+      state.isMuted = !state.isMuted; // Inverte o estado (true/false)
 
-  if (state.isMuted) {
-    // Se estiver mutado, zera o volume de tudo
-    if (state.audio.masterGain) {
-      state.audio.masterGain.gain.value = 0; // Zera o volume do Web Audio (SFX, fundo)
-    }
-    playerShotSound.muted = true; // Muta o som de tiro do HTML Audio
-    baseDestroyedSound.muted = true; // Muta o som da explosão do HTML Audio
-    muteBtn.textContent = "🔊 Desmutar"; // Muda o texto do botão
-  } else {
-    // Se não estiver mutado, restaura o volume
-    if (state.audio.masterGain) {
-      state.audio.masterGain.gain.value = 0.9; // Restaura o volume do Web Audio
-    }
-    playerShotSound.muted = false; // Desmuta o som de tiro
-    baseDestroyedSound.muted = false; // Desmuta o som da explosão
-    muteBtn.textContent = "🔇 Mutar"; // Restaura o texto do botão
-  }
+      if (state.isMuted) {
+          // Se estiver mutado, zera o volume de tudo
+          if (state.audio.masterGain) {
+              state.audio.masterGain.gain.value = 0; // Zera o volume do Web Audio (SFX, fundo)
+          }
+          playerShotSound.muted = true; // Muta o som de tiro do HTML Audio
+          baseDestroyedSound.muted = true; // Muta o som da explosão do HTML Audio
+          muteBtn.textContent = "🔊 Desmutar"; // Muda o texto do botão
+      } else {
+            // Se não estiver mutado, restaura o volume
+            if (state.audio.masterGain) {
+                state.audio.masterGain.gain.value = 0.9; // Restaura o volume do Web Audio
+            }
+            playerShotSound.muted = false; // Desmuta o som de tiro
+            baseDestroyedSound.muted = false; // Desmuta o som da explosão
+            muteBtn.textContent = "🔇 Mutar"; // Restaura o texto do botão
+        }
 });
 
 // --- Render --- (mostrar,criar e desenhar na tela)
 const drawRect = (x, y, w, h, color) => { ctx.fillStyle = color; ctx.fillRect(x, y, w, h); };
-const drawGlowingRect = (x, y, w, h, color, glowColor, blurAmount) =>
-  {   // (Theu: testando uma organização diferente de função, talvez fique mais visualmente agradável :D)
-    ctx.save()  //salva o estado atual
-    ctx.shadowColor = glowColor;
-    ctx.shadowBlur = blurAmount;
-    drawRect(x, y, w, h, color); // reutiliza a função original
-    ctx.restore(); // remove o brilho
-  };
+const drawGlowingRect = (x, y, w, h, color, glowColor, blurAmount) => {   // (Theu: testando uma organização diferente de função, talvez fique mais visualmente agradável :D)
+      ctx.save()                    //salva o estado atual
+      ctx.shadowColor = glowColor;
+      ctx.shadowBlur = blurAmount;
+      drawRect(x, y, w, h, color);  // reutiliza a função original
+  ctx.restore();                    // remove o brilho
+};
 
 const render = () => {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  updateLivesUI(state);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      updateLivesUI(state);
 
-  // Player
-  const currentPlayerImg = getPlayerImage(state.player.animationFrame);
-  if (state.player.invincible > 0) {
-    if (Math.floor(Date.now() / 100) % 2 === 0) {
-      ctx.drawImage(currentPlayerImg, state.player.x, state.player.y, state.player.w, state.player.h);
-    }
-  } else {
-    ctx.drawImage(currentPlayerImg, state.player.x, state.player.y, state.player.w, state.player.h);
-  }
-
-  // Player lives (IN PORTUGUESE, please ;-; : vidas) (ih, foi mal)
-  ctx.fillStyle = "#fff";
-  ctx.font = "16px 'Press Start 2P'";
-  ctx.fillText("Vidas: ", canvas.width - 150, 20);
+      // Player
+      const currentPlayerImg = getPlayerImage(state.player.animationFrame);
+      if (state.player.invincible > 0) {
+          if (Math.floor(Date.now() / 100) % 2 === 0) {
+              ctx.drawImage(currentPlayerImg, state.player.x, state.player.y, state.player.w, state.player.h);
+          }
+      } else {
+            ctx.drawImage(currentPlayerImg, state.player.x, state.player.y, state.player.w, state.player.h);
+        }
 
 
-  // Bullets
-  state.bullets.forEach(b => drawGlowingRect(b.x, b.y, b.w, b.h+10, "#227dd8ff", "#58a6ff", 15));
+      // Player lives (IN PORTUGUESE, please ;-; : vidas) (ih, foi mal '-')
+      ctx.fillStyle = "#fff";
+      ctx.font = "16px 'Press Start 2P'";
+      ctx.fillText("Vidas: ", canvas.width - 150, 20);
 
-  // Escudos (base)
-state.base.forEach(b => {
-  if (!b.alive) return;
 
-  // flash quando hit > 0
-  if (b.hit > 0) ctx.globalAlpha = 0.6;
-  ctx.drawImage(baseImg, b.x, b.y, b.w, b.h);
-  ctx.globalAlpha = 1;
+      // Bullets
+      state.bullets.forEach(b => drawGlowingRect(b.x, b.y, b.w, b.h+10, "#227dd8ff", "#58a6ff", 15));
 
-  // barra de vida (fundo + frente), aqui é referente a base
-  const barY = b.y - 10;
-  ctx.fillStyle = "red";
-  ctx.fillRect(b.x, barY, b.w, 5); // fundo
-  ctx.fillStyle = "lime";
-  ctx.fillRect(b.x, barY, (b.hp / b.hpMax) * b.w, 5); // vida proporcional
-});
 
-  // Enemy bullets
-  state.enemyBullets.forEach(b => drawGlowingRect(b.x, b.y, b.w, b.h+8, "#e00d0dff", "#ff5470", 15));
+      // Escudos (base)
+      state.base.forEach(b => {
+          if (!b.alive) return;
 
-  // Enemies
-  state.enemies.forEach(e => {
-   if (!e.alive) return;
-   const img = getEnemyImage(e.type, state.enemyAnimationFrame);
-   ctx.drawImage(img, e.x, e.y, e.w, e.h)
-  });
+          // flash quando hit > 0
+          if (b.hit > 0) ctx.globalAlpha = 0.6;
+          ctx.drawImage(baseImg, b.x, b.y, b.w, b.h);
+          ctx.globalAlpha = 1;
+
+          // barra de vida (fundo + frente), aqui é referente a base
+          const barY = b.y - 10;
+          ctx.fillStyle = "red";
+          ctx.fillRect(b.x, barY, b.w, 5); // fundo
+          ctx.fillStyle = "lime";
+          ctx.fillRect(b.x, barY, (b.hp / b.hpMax) * b.w, 5); // vida proporcional
+      });
+
+
+      // Enemy bullets
+      state.enemyBullets.forEach(b => drawGlowingRect(b.x, b.y, b.w, b.h+8, "#e00d0dff", "#ff5470", 15));
+
+
+      // Enemies
+      state.enemies.forEach(e => {
+          if (!e.alive) return;
+          const img = getEnemyImage(e.type, state.enemyAnimationFrame);
+          ctx.drawImage(img, e.x, e.y, e.w, e.h)
+      });
   
-  ctx.fillStyle = "#fff"; ctx.font = "16px 'Press Start 2P'"; ctx.fillText("Score: " + state.score, 550, 20);
+
+      // Score
+      ctx.fillStyle = "#fff"; ctx.font = "16px 'Press Start 2P'"; ctx.fillText("Score: " + state.score, 550, 20);
+
 
    // << MENU DE PAUSE >>
-if (state.isPaused) {
-    ctx.filter = "blur(5px)";     // Fundo borrado
-    ctx.drawImage(canvas, 0, 0);
-    ctx.filter = "none"           // Tira o blur do menu
+      if (state.isPaused) {
+          ctx.filter = "blur(5px)";     // Fundo borrado
+          ctx.drawImage(canvas, 0, 0);
+          ctx.filter = "none"           // Tira o blur do menu
 
-    // --- Tela de Pause ---
-    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.font = "48px 'Press Start 2P'";
-    ctx.textAlign = "center";
-    ctx.fillStyle = "#fff";
-    ctx.fillText("PAUSADO", canvas.width / 2, canvas.height / 2 - 100);
+          // --- Tela de Pause ---
+          ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.font = "48px 'Press Start 2P'";
+          ctx.textAlign = "center";
+          ctx.fillStyle = "#fff";
+          ctx.fillText("PAUSADO", canvas.width / 2, canvas.height / 2 - 100);
 
-    // --- Botão de Continuar ---
-    const btnWidth = 320, btnHeight = 50;
-    const continueBtnY = canvas.height / 2 - 25;
-    ctx.fillStyle = "#232946";
-    ctx.fillRect(canvas.width / 2 - btnWidth / 2, continueBtnY, btnWidth, btnHeight);
-    ctx.font = "18px 'Press Start 2P'";
-    ctx.fillStyle = "#fff";
-    ctx.textBaseline = "middle";
-    ctx.fillText("Continuar", canvas.width / 2, continueBtnY + (btnHeight / 2));
+          // --- Botão de Continuar ---
+          const btnWidth = 320, btnHeight = 50;
+          const continueBtnY = canvas.height / 2 - 25;
+          ctx.fillStyle = "#232946";
+          ctx.fillRect(canvas.width / 2 - btnWidth / 2, continueBtnY, btnWidth, btnHeight);
+          ctx.font = "18px 'Press Start 2P'";
+          ctx.fillStyle = "#fff";
+          ctx.textBaseline = "middle";
+          ctx.fillText("Continuar", canvas.width / 2, continueBtnY + (btnHeight / 2));
 
-    // --- Botão de Reiniciar ---
-    const restartBtnY = canvas.height / 2 + 50;
-    ctx.fillStyle = "#232946";
-    ctx.fillRect(canvas.width / 2 - btnWidth / 2, restartBtnY, btnWidth, btnHeight);
-    ctx.font = "18px 'Press Start 2P'";
-    ctx.fillStyle = "#fff";
-    ctx.textBaseline = "middle";
-    ctx.fillText("Reiniciar", canvas.width / 2, restartBtnY + (btnHeight / 2));
+          // --- Botão de Reiniciar ---
+          const restartBtnY = canvas.height / 2 + 50;
+          ctx.fillStyle = "#232946";
+          ctx.fillRect(canvas.width / 2 - btnWidth / 2, restartBtnY, btnWidth, btnHeight);
+          ctx.font = "18px 'Press Start 2P'";
+          ctx.fillStyle = "#fff";
+          ctx.textBaseline = "middle";
+          ctx.fillText("Reiniciar", canvas.width / 2, restartBtnY + (btnHeight / 2));
 
-    // --- Botão de Retornar ao Menu ---
-    const returnBtnY = canvas.height / 2 + 125;
-    ctx.fillStyle = "#232946";
-    ctx.fillRect(canvas.width / 2 - btnWidth / 2, returnBtnY, btnWidth, btnHeight);
-    ctx.font = "18px 'Press Start 2P'";
-    ctx.fillStyle = "#fff";
-    ctx.textBaseline = "middle";
-    ctx.fillText("Tela de Início", canvas.width / 2, returnBtnY + (btnHeight / 2));
+          // --- Botão de Retornar ao Menu ---
+          const returnBtnY = canvas.height / 2 + 125;
+          ctx.fillStyle = "#232946";
+          ctx.fillRect(canvas.width / 2 - btnWidth / 2, returnBtnY, btnWidth, btnHeight);
+          ctx.font = "18px 'Press Start 2P'";
+          ctx.fillStyle = "#fff";
+          ctx.textBaseline = "middle";
+          ctx.fillText("Tela de Início", canvas.width / 2, returnBtnY + (btnHeight / 2));
 
-    // Reseta alinhamentos para não afetar outros desenhos
-    ctx.textAlign = "start";
-    ctx.textBaseline = "alphabetic";
-  }
+          // Reseta alinhamentos para não afetar outros desenhos
+          ctx.textAlign = "start";
+          ctx.textBaseline = "alphabetic";
+      }
 
-  if (!state.running) {
-    // --- Texto "GAME OVER" com Estilo Retrô ---
-    ctx.font = "48px 'Press Start 2P'";
-    ctx.textAlign = "center";
 
-    // Efeito de sombra/contorno para o texto
-    ctx.fillStyle = "#fff"; // Cor do contorno
-    ctx.fillText("GAME OVER", canvas.width / 2 + 3, canvas.height / 2 - 50 + 3);
-    
-    // Texto principal
-    ctx.fillStyle = "#25f82fff"; // Cor do texto
-    ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 50);
+      if (!state.running) {
+        // --- Texto "GAME OVER" com Estilo Retrô ---
+        ctx.font = "48px 'Press Start 2P'";
+        ctx.textAlign = "center";
 
-    // --- Botão de Reiniciar com Estilo Retrô ---
-    const btnWidth = 240, btnHeight = 50;
-    const btnX = canvas.width / 2 - btnWidth / 2;
-    const btnY = canvas.height / 2 + 30;
-    const shadowOffset = 5; // Tamanho da "sombra 3D"
+        // Efeito de sombra/contorno para o texto
+        ctx.fillStyle = "#fff"; // Cor do contorno
+        ctx.fillText("GAME OVER", canvas.width / 2 + 3, canvas.height / 2 - 50 + 3);
+        
+        // Texto principal
+        ctx.fillStyle = "#25f82fff"; // Cor do texto
+        ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 50);
 
-    // Sombra do botão (desenhada primeiro, por baixo)
-    ctx.fillStyle = "#02a036ff"; // Rosa escuro para a sombra
-    ctx.fillRect(btnX, btnY, btnWidth, btnHeight);
+        // --- Botão de Reiniciar com Estilo Retrô ---
+        const btnWidth = 240, btnHeight = 50;
+        const btnX = canvas.width / 2 - btnWidth / 2;
+        const btnY = canvas.height / 2 + 30;
+        const shadowOffset = 5; // Tamanho da "sombra 3D"
 
-    // Corpo principal do botão (desenhado por cima, um pouco deslocado)
-    ctx.fillStyle = "#232946";
-    ctx.fillRect(btnX, btnY - shadowOffset, btnWidth, btnHeight);
+        // Sombra do botão (desenhada primeiro, por baixo)
+        ctx.fillStyle = "#02a036ff"; // Rosa escuro para a sombra
+        ctx.fillRect(btnX, btnY, btnWidth, btnHeight);
 
-    // Texto do botão
-    ctx.font = "18px 'Press Start 2P'";
-    ctx.fillStyle = "#fff"; // Texto branco para contraste
-    ctx.textBaseline = "middle"; // Alinha o texto verticalmente pelo meio
-    ctx.fillText("Reiniciar", canvas.width / 2, btnY - shadowOffset + (btnHeight / 2));
+        // Corpo principal do botão (desenhado por cima, um pouco deslocado)
+        ctx.fillStyle = "#232946";
+        ctx.fillRect(btnX, btnY - shadowOffset, btnWidth, btnHeight);
 
-    // Reseta os alinhamentos para não afetar outros desenhos
-    ctx.textAlign = "start";
-    ctx.textBaseline = "alphabetic";
+        // Texto do botão
+        ctx.font = "18px 'Press Start 2P'";
+        ctx.fillStyle = "#fff"; // Texto branco para contraste
+        ctx.textBaseline = "middle"; // Alinha o texto verticalmente pelo meio
+        ctx.fillText("Reiniciar", canvas.width / 2, btnY - shadowOffset + (btnHeight / 2));
 
-    // --- Botão de Retornar com Estilo Retrô ---
-    const btWidth = 240, btHeight = 50;
-    const btX = canvas.width / 2 - btWidth / 2;
-    const btY = canvas.height / 2 + 150;
-    const shadowOfset = 5; // Tamanho da "sombra 3D"
+        // Reseta os alinhamentos para não afetar outros desenhos
+        ctx.textAlign = "start";
+        ctx.textBaseline = "alphabetic";
 
-    // Sombra do botão (desenhada primeiro, por baixo)
-    ctx.fillStyle = "#02a036ff"; // Rosa escuro para a sombra
-    ctx.fillRect(btX, btY, btWidth, btHeight);
+        // --- Botão de Retornar com Estilo Retrô ---
+        const btWidth = 240, btHeight = 50;
+        const btX = canvas.width / 2 - btWidth / 2;
+        const btY = canvas.height / 2 + 150;
+        const shadowOfset = 5; // Tamanho da "sombra 3D"
 
-    // Corpo principal do botão (desenhado por cima, um pouco deslocado)
-    ctx.fillStyle = "#232946";
-    ctx.fillRect(btX, btY - shadowOfset, btWidth, btHeight);
+        // Sombra do botão (desenhada primeiro, por baixo)
+        ctx.fillStyle = "#02a036ff"; // Rosa escuro para a sombra
+        ctx.fillRect(btX, btY, btWidth, btHeight);
 
-    // Texto do botão
-    ctx.font = "18px 'Press Start 2P'";
-    ctx.fillStyle = "#fff"; // Texto branco para contraste
-    ctx.textBaseline = "middle"; // Alinha o texto verticalmente pelo meio
-    ctx.fillText("Retornar", canvas.width / 2 - btWidth / 3.5, btY - shadowOfset + (btHeight / 2));
+        // Corpo principal do botão (desenhado por cima, um pouco deslocado)
+        ctx.fillStyle = "#232946";
+        ctx.fillRect(btX, btY - shadowOfset, btWidth, btHeight);
 
-    // Reseta os alinhamentos para não afetar outros desenhos
-    ctx.textAlign = "start";
-    ctx.textBaseline = "alphabetic";
-}
+        // Texto do botão
+        ctx.font = "18px 'Press Start 2P'";
+        ctx.fillStyle = "#fff"; // Texto branco para contraste
+        ctx.textBaseline = "middle"; // Alinha o texto verticalmente pelo meio
+        ctx.fillText("Retornar", canvas.width / 2 - btWidth / 3.5, btY - shadowOfset + (btHeight / 2));
+
+        // Reseta os alinhamentos para não afetar outros desenhos
+        ctx.textAlign = "start";
+        ctx.textBaseline = "alphabetic";
+      }
 };
+
 
 // --- Detecta clique no botão de reiniciar, pause, continuar e retornar ao menu ---
 canvas.addEventListener("click", function (e) {
-  const rect = canvas.getBoundingClientRect();
-  const mouseX = e.clientX - rect.left;
-  const mouseY = e.clientY - rect.top;
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
 
-  // Lógica para quando o jogo ESTÁ PAUSADO
-  if (state.isPaused) {
-    const btnWidth = 320, btnHeight = 50;
-    const btnX = canvas.width / 2 - btnWidth / 2;
+      // Lógica para quando o jogo ESTÁ PAUSADO
+      if (state.isPaused) {
+          const btnWidth = 320, btnHeight = 50;
+          const btnX = canvas.width / 2 - btnWidth / 2;
+          const continueBtnY = canvas.height / 2 - 25;
+          const restartBtnY = canvas.height / 2 + 50;
+          const returnBtnY = canvas.height / 2 + 125;
 
-    const continueBtnY = canvas.height / 2 - 25;
-    const restartBtnY = canvas.height / 2 + 50;
-    const returnBtnY = canvas.height / 2 + 125;
+          // Checa clique no botão "Continuar"
+          if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= continueBtnY && mouseY <= continueBtnY + btnHeight) {
+              togglePause();
+          }
 
-    // Checa clique no botão "Continuar"
-    if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= continueBtnY && mouseY <= continueBtnY + btnHeight) {
-      togglePause();
-    }
-    // Checa clique no botão "Reiniciar"
-    else if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= restartBtnY && mouseY <= restartBtnY + btnHeight) {
-      resetGame();
-    }
-    // Checa clique no botão "Retornar ao Menu"
-    else if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= returnBtnY && mouseY <= returnBtnY + btnHeight) {
-      window.location.href = "../index.html";
-    }
-  }
-  // Lógica para a tela de GAME OVER (só executa se não estiver pausado)
-  else if (!state.running) {
-    const btnWidth = 240, btnHeight = 50; // Largura do botão de reiniciar do game over
-    const btnX = canvas.width / 2 - btnWidth / 2;
-    const btnY = canvas.height / 2 + 30;
+          // Checa clique no botão "Reiniciar"
+          else if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= restartBtnY && mouseY <= restartBtnY + btnHeight) {
+              resetGame();
+          }
+
+          // Checa clique no botão "Retornar ao Menu"
+          else if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= returnBtnY && mouseY <= returnBtnY + btnHeight) {
+              window.location.href = "../index.html";
+          }
+      }
+
+      // Lógica para a tela de GAME OVER (só executa se não estiver pausado)
+      else if (!state.running) {
+          const btnWidth = 240, btnHeight = 50; // Largura do botão de reiniciar do game over
+          const btnX = canvas.width / 2 - btnWidth / 2;
+          const btnY = canvas.height / 2 + 30;
     
-    // Checa clique no botão "Reiniciar" do Game Over
-    if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= btnY -5 && mouseY <= btnY + btnHeight) { // Pequeno ajuste no Y por causa do seu efeito de sombra
-        resetGame();
-    }
+          // Checa clique no botão "Reiniciar" do Game Over
+          if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= btnY -5 && mouseY <= btnY + btnHeight) { // Pequeno ajuste no Y por causa do seu efeito de sombra
+              resetGame();
+          }
     
-    // Checa clique no botão "Retornar" do Game Over
-    const btWidth = 240, btHeight = 50;
-    const btX = canvas.width / 2 - btWidth / 2;
-    const btY = canvas.height / 2 + 150;
-    if (mouseX >= btX && mouseX <= btX + btWidth && mouseY >= btY && mouseY <= btY + btHeight) {
-        window.location.href = "../index.html";
-    }
-  }
+          // Checa clique no botão "Retornar" do Game Over
+          const btWidth = 240, btHeight = 50;
+          const btX = canvas.width / 2 - btWidth / 2;
+          const btY = canvas.height / 2 + 150;
+          if (mouseX >= btX && mouseX <= btX + btWidth && mouseY >= btY && mouseY <= btY + btHeight) {
+              window.location.href = "../index.html";
+          }
+      }   
 });
 
 // --- Loop principal ---
 const loop = (ts) => {
-  if (!state.running) return;
-  const dt = Math.min(0.05, (ts - (state.lastTime || ts)) / 1000);
-  state.lastTime = ts;
-  if (!state.isPaused) {
-    update(dt);
-  };
-  render();
-  requestAnimationFrame(loop);
+    if (!state.running) return;
+    const dt = Math.min(0.05, (ts - (state.lastTime || ts)) / 1000);
+    state.lastTime = ts;
+    if (!state.isPaused) {
+        update(dt);
+    };
+    render();
+    requestAnimationFrame(loop);
 };
 
 // --- Play button ---
 playBtn.addEventListener("click", () => {
-  menuMusic.pause(); //pausa a música do menu
-  menuMusic.currentTime = 0;
-  ensureAudio();
-  if (state.audio.ctx && state.audio.ctx.state === "suspended") { state.audio.ctx.resume() }
+    menuMusic.pause(); //pausa a música do menu
+    menuMusic.currentTime = 0;
+    ensureAudio();
+    if (state.audio.ctx && state.audio.ctx.state === "suspended") { state.audio.ctx.resume() }
 
-  // Toca e pausa o som para "desbloquear" a permissão de áudio do navegador
-    // Guarda os volumes originais
-  const originalPlayerVolume = playerShotSound.volume;
-  const originalExplosionVolume = baseDestroyedSound.volume;
+    // Toca e pausa o som para "desbloquear" a permissão de áudio do navegador
+      // Guarda os volumes originais
+    const originalPlayerVolume = playerShotSound.volume;
+    const originalExplosionVolume = baseDestroyedSound.volume;
 
-    // Força o volume para 0 para não fazer barulho
-  playerShotSound.volume = 0;
-  baseDestroyedSound.volume = 0;
+      // Força o volume para 0 para não fazer barulho
+    playerShotSound.volume = 0;
+    baseDestroyedSound.volume = 0;
 
-    // Toca os sons (agora permitidos pelo clique)
-  playerShotSound.play().catch(() => {});
-  baseDestroyedSound.play().catch(() => {});
+      // Toca os sons (agora permitidos pelo clique)
+    playerShotSound.play().catch(() => {});
+    baseDestroyedSound.play().catch(() => {});
 
-    // Usa um pequeno timeout para pausar e restaurar os volumes originais
-  setTimeout(() => {
-      playerShotSound.pause();
-      playerShotSound.currentTime = 0;
-      playerShotSound.volume = originalPlayerVolume;
+      // Usa um pequeno timeout para pausar e restaurar os volumes originais
+    setTimeout(() => {
+        playerShotSound.pause();
+        playerShotSound.currentTime = 0;
+        playerShotSound.volume = originalPlayerVolume;
 
-      baseDestroyedSound.pause();
-      baseDestroyedSound.currentTime = 0;
-      baseDestroyedSound.volume = originalExplosionVolume;
-  }, 10); // Um atraso mínimo, apenas para garantir a execução
+        baseDestroyedSound.pause();
+        baseDestroyedSound.currentTime = 0;
+        baseDestroyedSound.volume = originalExplosionVolume;
+    }, 10); // Um atraso mínimo, apenas para garantir a execução
 
-  menu.style.display = "none";
-  canvas.style.display = "block";
-  muteBtn.style.display = 'block';
+    menu.style.display = "none";
+    canvas.style.display = "block";
+    muteBtn.style.display = 'block';
 
-  resetGame();    // reutiliza a função de reiniciar o jogo
+    resetGame();    // reutiliza a função de reiniciar o jogo
 });
 
 //Retornar ao menu
 // --- Botão Retornar das intruções ---
 retornarBtn.addEventListener("click", () => {
-  // Para o jogo
-  window.location.href = "../index.html";
+      window.location.href = "../index.html";     // para o jogo (theu: para o jogo? não seria para o menu? :o)
 });
