@@ -744,51 +744,53 @@ const render = () => {
 
 // --- Detecta clique no botão de reiniciar, pause, continuar e retornar ao menu ---
 canvas.addEventListener("click", function (e) {
-  const rect = canvas.getBoundingClientRect();
-  const mouseX = e.clientX - rect.left;
-  const mouseY = e.clientY - rect.top;
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
 
-  // Lógica para quando o jogo ESTÁ PAUSADO
-  if (state.isPaused) {
-    const btnWidth = 320, btnHeight = 50;
-    const btnX = canvas.width / 2 - btnWidth / 2;
+      // Lógica para quando o jogo ESTÁ PAUSADO
+      if (state.isPaused) {
+          const btnWidth = 320, btnHeight = 50;
+          const btnX = canvas.width / 2 - btnWidth / 2;
+          const continueBtnY = canvas.height / 2 - 25;
+          const restartBtnY = canvas.height / 2 + 50;
+          const returnBtnY = canvas.height / 2 + 125;
 
-    const continueBtnY = canvas.height / 2 - 25;
-    const restartBtnY = canvas.height / 2 + 50;
-    const returnBtnY = canvas.height / 2 + 125;
+          // Checa clique no botão "Continuar"
+          if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= continueBtnY && mouseY <= continueBtnY + btnHeight) {
+              togglePause();
+          }
 
-    // Checa clique no botão "Continuar"
-    if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= continueBtnY && mouseY <= continueBtnY + btnHeight) {
-      togglePause();
-    }
-    // Checa clique no botão "Reiniciar"
-    else if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= restartBtnY && mouseY <= restartBtnY + btnHeight) {
-      resetGame();
-    }
-    // Checa clique no botão "Retornar ao Menu"
-    else if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= returnBtnY && mouseY <= returnBtnY + btnHeight) {
-      window.location.href = "../index.html";
-    }
-  }
-  // Lógica para a tela de GAME OVER (só executa se não estiver pausado)
-  else if (!state.running) {
-    const btnWidth = 240, btnHeight = 50; // Largura do botão de reiniciar do game over
-    const btnX = canvas.width / 2 - btnWidth / 2;
-    const btnY = canvas.height / 2 + 30;
+          // Checa clique no botão "Reiniciar"
+          else if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= restartBtnY && mouseY <= restartBtnY + btnHeight) {
+              resetGame();
+          }
+
+          // Checa clique no botão "Retornar ao Menu"
+          else if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= returnBtnY && mouseY <= returnBtnY + btnHeight) {
+              window.location.href = "../index.html";
+          }
+      }
+
+      // Lógica para a tela de GAME OVER (só executa se não estiver pausado)
+      else if (!state.running) {
+          const btnWidth = 240, btnHeight = 50; // Largura do botão de reiniciar do game over
+          const btnX = canvas.width / 2 - btnWidth / 2;
+          const btnY = canvas.height / 2 + 30;
     
-    // Checa clique no botão "Reiniciar" do Game Over
-    if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= btnY -5 && mouseY <= btnY + btnHeight) { // Pequeno ajuste no Y por causa do seu efeito de sombra
-        resetGame();
-    }
+          // Checa clique no botão "Reiniciar" do Game Over
+          if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= btnY -5 && mouseY <= btnY + btnHeight) { // Pequeno ajuste no Y por causa do seu efeito de sombra
+              resetGame();
+          }
     
-    // Checa clique no botão "Retornar" do Game Over
-    const btWidth = 240, btHeight = 50;
-    const btX = canvas.width / 2 - btWidth / 2;
-    const btY = canvas.height / 2 + 150;
-    if (mouseX >= btX && mouseX <= btX + btWidth && mouseY >= btY && mouseY <= btY + btHeight) {
-        window.location.href = "../index.html";
-    }
-  }
+          // Checa clique no botão "Retornar" do Game Over
+          const btWidth = 240, btHeight = 50;
+          const btX = canvas.width / 2 - btWidth / 2;
+          const btY = canvas.height / 2 + 150;
+          if (mouseX >= btX && mouseX <= btX + btWidth && mouseY >= btY && mouseY <= btY + btHeight) {
+              window.location.href = "../index.html";
+          }
+      }   
 });
 
 // --- Loop principal ---
