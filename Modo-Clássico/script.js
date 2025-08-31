@@ -6,6 +6,7 @@ const playBtn = document.querySelector("#play-btn");
 const retornarBtn = document.querySelector("#retornar-btn")
 const menu = document.querySelector("#menu");
 const muteBtn = document.querySelector("#mute-btn")
+const menuMusic = document.getElementById('bg-music');
 
 // arquivos dos jogadores e dos inimigos, suas respectivas bases, cenário... :D
 const playerImg = new Image();
@@ -133,6 +134,15 @@ const keys = {};
         keys[key] = false;
       });
     });
+    document.addEventListener("contextmenu", e => {
+    // Previne o menu padrão de aparecer
+    e.preventDefault(); 
+    
+    // Reseta todas as teclas, corrigindo o bug do movimento contínuo
+    Object.keys(keys).forEach(key => {
+        keys[key] = false;
+    });
+});
 
 // --- Áudio (WebAudio), mecanica de audio exportada ---
 const ensureAudio = () => {
@@ -790,6 +800,8 @@ const loop = (ts) => {
 
 // --- Play button ---
 playBtn.addEventListener("click", () => {
+  menuMusic.pause(); //pausa a música do menu
+  menuMusic.currentTime = 0;
   ensureAudio();
   if (state.audio.ctx && state.audio.ctx.state === "suspended") { state.audio.ctx.resume() }
 

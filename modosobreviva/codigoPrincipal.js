@@ -4,6 +4,7 @@ const playBtn = document.querySelector("#play-btn");
 const retornarBtn = document.querySelector("#retornar-btn")
 const menu = document.querySelector("#menu");
 const muteBtn = document.querySelector("#mute-btn")
+const menuMusic = document.getElementById('bg-music');
 
 const bgImg = new Image();
 bgImg.src = "sprites/planodefundo.png"; 
@@ -15,7 +16,7 @@ enemyImg.src = "sprites/Alien1(192x192).png";
 
 const musica = new Audio('sons/musica.mp3');// musica de kim lightyear
 musica.loop = true;
-musica.volume = 0.3;
+musica.volume = 0.25;
 
 const somTiro = new Audio('sons/tiro.mp3');
 somTiro.volume = 0.2;
@@ -29,8 +30,6 @@ const tocarDano = () => {
 };
 
 const initialMouse = Object.freeze({ x: 0, y: 0 });
-
-
 
 // Ajuste funcional do tamanho do canvas
 const calcularCanvasSize = (largura, altura, proporcao) => {
@@ -118,10 +117,26 @@ const gameOverButton = (canvas) => ({
   w: 240,
   h: 50
 });
+const gameOverReturnButton = (canvas) => ({
+  x: canvas.width / 2 - 120,
+  y: canvas.height / 2 + 110, // <-- Posição Y mais baixa que o botão de reiniciar
+  w: 240,
+  h: 50
+})
 
-const isMouseOverRestart = (mouseX, mouseY, canvas) => {
-  const { x, y, w, h } = gameOverButton(canvas);
-  return mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h;
+const isMouseOverAnyGameOverButton = (mouseX, mouseY, canvas) => {
+  const restartBtn = gameOverButton(canvas);
+  const returnBtn = gameOverReturnButton(canvas);
+
+  // Verifica se o mouse está sobre o botão de Reiniciar
+  const overRestart = mouseX >= restartBtn.x && mouseX <= restartBtn.x + restartBtn.w &&
+                      mouseY >= restartBtn.y && mouseY <= restartBtn.y + restartBtn.h;
+
+  // Verifica se o mouse está sobre o botão de Retornar
+  const overReturn = mouseX >= returnBtn.x && mouseX <= returnBtn.x + returnBtn.w &&
+                     mouseY >= returnBtn.y && mouseY <= returnBtn.y + returnBtn.h;
+  
+  return overRestart || overReturn; // Retorna true se estiver sobre qualquer um dos dois
 };
 
 // funções para tocar música e som de tiro
@@ -168,6 +183,7 @@ const initialPlayer = () => ({
 // estado inicial do jogo
 const initialState = () => ({
   running: false,
+  isPaused: false,
   lastTime: 0,
   isMuted: false,
   player: initialPlayer(),
@@ -189,6 +205,11 @@ const initialRootState = Object.freeze({
 const keys = {};
 document.addEventListener("keydown", e => { keys[e.code] = true; });
 document.addEventListener("keyup", e => { keys[e.code] = false; });
+document.addEventListener("keydown", e => {
+  if (e.code === 'Escape') {
+    togglePause();
+  }
+});
 
 // função para criar um inimigo em uma posição aleatória na borda do canvas
 const spawnEnemy = canvas => {
@@ -201,6 +222,23 @@ const spawnEnemy = canvas => {
     speed: 60 + Math.random() * 60,
     alive: true
   };
+};
+
+//função para pausar the game .-.
+const togglePause = () => {
+  const currentGame = rootState.current.game;
+  // Só permite pausar se o jogo estiver rodando
+  if (!currentGame.running) return; 
+
+  const newGame = Object.freeze({
+    ...currentGame,
+    isPaused: !currentGame.isPaused // Inverte o valor de isPaused
+  });
+
+  rootState.current = Object.freeze({
+    ...rootState.current,
+    game: newGame
+  });
 };
 
 
@@ -393,7 +431,7 @@ const nextState = (state, keys, dt, canvas, ts, mouse) => {
 
   const running = playerHitResult.player.lives > 0;
 
-  const hoverRestart = !running && isMouseOverRestart(mouse.x, mouse.y, canvas);
+  const hoverRestart = !running && isMouseOverAnyGameOverButton(mouse.x, mouse.y, canvas);
   return {
     ...state,
     player: playerHitResult.player,
@@ -428,7 +466,7 @@ muteBtn.addEventListener("click", () => {
   somTiro.muted = isMuted;
   somDano.muted = isMuted;
 
-  muteBtn.textContent = isMuted ? "Desmutar" : "Mutar Som";
+  muteBtn.textContent = isMuted ? "🔊 Desmutar" : "🔇 Mutar Som";
 });
 
 // função para renderizar o estado do jogo
@@ -493,22 +531,65 @@ const render = (state) => {
   ctx.fillText("Vidas: " + state.player.lives, 10, 20);
   ctx.fillText("Score: " + state.score, 10, 40);
 
+  // << MENU DE PAUSE >>
+if (state.isPaused) {
+    ctx.filter = "blur(5px)";     // Fundo borrado
+    ctx.drawImage(canvas, 0, 0);
+    ctx.filter = "none"           // Tira o blur do menu
+
+    // --- Tela de Pause ---
+    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.font = "48px 'Press Start 2P'";
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#fff";
+    ctx.fillText("PAUSADO", canvas.width / 2, canvas.height / 2 - 100);
+
+    // --- Botão de Continuar ---
+    const btnWidth = 320, btnHeight = 50;
+    const continueBtnY = canvas.height / 2 - 25;
+    ctx.fillStyle = "#232946";
+    ctx.fillRect(canvas.width / 2 - btnWidth / 2, continueBtnY, btnWidth, btnHeight);
+    ctx.font = "18px 'Press Start 2P'";
+    ctx.fillStyle = "#fff";
+    ctx.textBaseline = "middle";
+    ctx.fillText("Continuar", canvas.width / 2, continueBtnY + (btnHeight / 2));
+
+    // --- Botão de Reiniciar ---
+    const restartBtnY = canvas.height / 2 + 50;
+    ctx.fillStyle = "#232946";
+    ctx.fillRect(canvas.width / 2 - btnWidth / 2, restartBtnY, btnWidth, btnHeight);
+    ctx.font = "18px 'Press Start 2P'";
+    ctx.fillStyle = "#fff";
+    ctx.textBaseline = "middle";
+    ctx.fillText("Reiniciar", canvas.width / 2, restartBtnY + (btnHeight / 2));
+
+    // --- Botão de Retornar ao Menu ---
+    const returnBtnY = canvas.height / 2 + 125;
+    ctx.fillStyle = "#232946";
+    ctx.fillRect(canvas.width / 2 - btnWidth / 2, returnBtnY, btnWidth, btnHeight);
+    ctx.font = "18px 'Press Start 2P'";
+    ctx.fillStyle = "#fff";
+    ctx.textBaseline = "middle";
+    ctx.fillText("Tela de Início", canvas.width / 2, returnBtnY + (btnHeight / 2));
+
+    // Reseta alinhamentos para não afetar outros desenhos
+    ctx.textAlign = "start";
+    ctx.textBaseline = "alphabetic";
+}
+
   //  Tela de Game Over + Botão
   if (!state.running) {
-     // --- Tela de Fundo Escurecida ---
+    // --- Tela de Fundo Escurecida ---
     ctx.fillStyle = "rgba(0,0,0,0.75)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+    
     // --- Texto "GAME OVER" com Estilo Retrô ---
     ctx.font = "48px 'Press Start 2P'";
     ctx.textAlign = "center";
-
-    // Efeito de sombra/contorno para o texto
-    ctx.fillStyle = "#fff"; // Cor do contorno
+    ctx.fillStyle = "#fff";
     ctx.fillText("GAME OVER", canvas.width / 2 + 3, canvas.height / 2 - 50 + 3);
-    
-    // Texto principal
-    ctx.fillStyle = "#ff1818"; // Cor do texto
+    ctx.fillStyle = "#ff1818";
     ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 50);
 
     // --- Subtexto de Instrução ---
@@ -516,37 +597,52 @@ const render = (state) => {
     ctx.fillStyle = "#fff";
     ctx.fillText("Clique no botão para reiniciar", canvas.width / 2, canvas.height / 2);
 
-    // --- Botão de Reiniciar com Estilo Retrô ---
-    // const btnWidth = 240, btnHeight = 50;
-    // --- Botão de Reiniciar ---
-   const { x: btnX, y: btnY, w: btnWidth, h: btnHeight } = gameOverButton(canvas);
-   const scale = state.hoverRestart ? 1.1 : 1.0; // aumenta 10% se hover
-   const centerX = btnX + btnWidth / 2;
-   const centerY = btnY + btnHeight / 2;
+    const restartBtn = gameOverButton(canvas); // <-- Pega as coordenadas da função
+    const scale = state.hoverRestart ? 1.1 : 1.0;
+    const centerX = restartBtn.x + restartBtn.w / 2;
+    const centerY = restartBtn.y + restartBtn.h / 2;
 
-   ctx.save();
-   ctx.translate(centerX, centerY);
-   ctx.scale(scale, scale);
-   ctx.translate(-centerX, -centerY);
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.scale(scale, scale);
+    ctx.translate(-centerX, -centerY);
 
-   const shadowOffset = 5;
-   ctx.fillStyle = "#860101";
-   ctx.fillRect(btnX, btnY, btnWidth, btnHeight);
+    const shadowOffset = 5;
+    ctx.fillStyle = "#860101";
+    ctx.fillRect(restartBtn.x, restartBtn.y, restartBtn.w, restartBtn.h);
+    ctx.fillStyle = "#232946";
+    ctx.fillRect(restartBtn.x, restartBtn.y - shadowOffset, restartBtn.w, restartBtn.h);
 
-   ctx.fillStyle = "#232946";
-   ctx.fillRect(btnX, btnY - shadowOffset, btnWidth, btnHeight);
+    ctx.font = "18px 'Press Start 2P'";
+    ctx.fillStyle = "#fff";
+    ctx.textBaseline = "middle";
+    ctx.fillText("Reiniciar", centerX, restartBtn.y - shadowOffset + (restartBtn.h / 2));
+    ctx.restore();
 
-   ctx.font = "18px 'Press Start 2P'";
-   ctx.fillStyle = "#fff";
-   ctx.textAlign = "center";
-   ctx.textBaseline = "middle";
-   ctx.fillText("Reiniciar", canvas.width / 2, btnY - shadowOffset + (btnHeight / 2));
+    const returnBtn = gameOverReturnButton(canvas);
+    // Use a mesma variável `scale` para o botão de retornar
+    const centerX_return = returnBtn.x + returnBtn.w / 2;
+    const centerY_return = returnBtn.y + returnBtn.h / 2;
 
-   ctx.restore();
+    ctx.save();
+    ctx.translate(centerX_return, centerY_return);
+    ctx.scale(scale, scale); // <-- Aplica a mesma escala aqui!
+    ctx.translate(-centerX_return, -centerY_return);
+
+    ctx.fillStyle = "#860101";
+    ctx.fillRect(returnBtn.x, returnBtn.y, returnBtn.w, returnBtn.h);
+    ctx.fillStyle = "#232946";
+    ctx.fillRect(returnBtn.x, returnBtn.y - shadowOffset, returnBtn.w, returnBtn.h); // Use o shadowOffset
+
+    ctx.font = "18px 'Press Start 2P'";
+    ctx.fillStyle = "#fff";
+    ctx.textBaseline = "middle";
+    ctx.fillText("Retornar", centerX_return, returnBtn.y - shadowOffset + (returnBtn.h / 2)); // Use o shadowOffset
+    ctx.restore();
 
     // Reseta os alinhamentos para não afetar outros desenhos
-   ctx.textAlign = "start";
-   ctx.textBaseline = "alphabetic";
+    ctx.textAlign = "start";
+    ctx.textBaseline = "alphabetic";
   }
 };
 
@@ -565,74 +661,113 @@ function drawRect(x, y, w, h, color) {
 // --- Loop funcional ---
 const loop = (rootState, ts) => {
   const { game, mouse } = rootState.current;
-  const dt = Math.min(0.05, (ts - (game.lastTime || ts)) / 1000);
+  let newGame; // Usamos 'let' para poder reatribuir o estado
 
-  const newGame = game.running
-    ? nextState(game, keys, dt, canvas, ts, mouse)
-    : {
-        ...game,
-        lastTime: ts,
-        hoverRestart: isMouseOverRestart(mouse.x, mouse.y, canvas)
-      };
+  // CASO 1: O jogo está rodando e NÃO está pausado
+  if (game.running && !game.isPaused) {
+    const dt = Math.min(0.05, (ts - (game.lastTime || ts)) / 1000);
+    const nextGame = nextState(game, keys, dt, canvas, ts, mouse);
 
-  //  Controle de som: só toca se mudar de estado
-  if (newGame.foiAcertado && !game.ultimoDano) tocarDano();
-  if (newGame.inimigoAcertado && !game.ultimoHitInimigo) tocarDano(); // som do dano no inimigo
+    // Controle de som: só toca se mudar de estado
+    if (nextGame.foiAcertado && !game.ultimoDano) tocarDano();
+    if (nextGame.inimigoAcertado && !game.ultimoHitInimigo) tocarDano();
 
-  const updatedGame = Object.freeze({
-    ...newGame,
-    ultimoDano: newGame.foiAcertado,
-    ultimoHitInimigo: newGame.inimigoAcertado
-  });
+    // Atualiza o estado com base no resultado da lógica do jogo
+    newGame = Object.freeze({
+      ...nextGame,
+      ultimoDano: nextGame.foiAcertado,
+      ultimoHitInimigo: nextGame.inimigoAcertado
+    });
 
+  // CASO 2: O jogo está PAUSADO ou em GAME OVER
+  } else {
+    // A única coisa que fazemos é atualizar o tempo e o estado do mouse sobre os botões
+    newGame = Object.freeze({
+      ...game,
+      lastTime: ts,
+      hoverRestart: !game.running && isMouseOverAnyGameOverButton(mouse.x, mouse.y, canvas)
+    });
+  }
+
+  // Atualiza o estado global com o novo estado do jogo
   rootState.current = Object.freeze({
     ...rootState.current,
-    game: updatedGame
+    game: newGame
   });
 
+  // Renderiza o estado atual (seja jogo, pause ou game over)
   render(rootState.current.game);
+  // Pede o próximo frame para continuar o loop
   requestAnimationFrame((ts2) => loop(rootState, ts2));
 };
 
 // --- Clique no botão de reiniciar ---
+const resetGame = () => {
+  tocarMusica(); // Garante que a música comece
+  const novoJogo = Object.freeze({ ...initialState(), running: true });
+  rootState.current = Object.freeze({
+    ...rootState.current,
+    game: novoJogo
+  });
+};
+
+// --- Clique no canvas ---
 canvas.addEventListener("click", (e) => {
   const rect = canvas.getBoundingClientRect();
-
-  // Coordenadas corretas do mouse no canvas
   const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
   const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
 
-  const { x, y, w, h } = gameOverButton(canvas);
+  const currentGame = rootState.current.game;
 
-  // Debug opcional
-  console.log(`MouseX: ${mouseX}, MouseY: ${mouseY}, BtnX: ${x}, BtnY: ${y}`);
+  if (currentGame.isPaused) {
+    const btnWidth = 320, btnHeight = 50;
+    const btnX = canvas.width / 2 - btnWidth / 2;
+    const continueBtnY = canvas.height / 2 - 25;
+    const restartBtnY = canvas.height / 2 + 50;
+    const returnBtnY = canvas.height / 2 + 125;
 
-  // Verifica se clicou dentro do botão
-  if (mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h) {
-    console.log("Botão de reiniciar clicado!");
-    menu.style.display = "none";
-    canvas.style.display = "block";
-    muteBtn.style.display = "block";
-    ajustarCanvas();
-    updateMuteBtnPosition();  // atualiza posição logo após ajustar canvas
-    tocarMusica();
-    canvas.focus && canvas.focus();
+    // Checa clique no botão "Continuar"
+    if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= continueBtnY && mouseY <= continueBtnY + btnHeight) {
+      togglePause(); // Simplesmente despausa o jogo
+    }
+    // Checa clique no botão "Reiniciar"
+    else if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= restartBtnY && mouseY <= restartBtnY + btnHeight) {
+      resetGame(); // Reinicia o jogo
+    }
+    // Checa clique no botão "Retornar ao Menu"
+    else if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= returnBtnY && mouseY <= returnBtnY + btnHeight) {
+      window.location.href = "../index.html"; // Volta para a página inicial
+    }
+    return; // Impede que o código de game over execute
+  }
+ 
+  // Lógica para a tela de GAME OVER (só executa se não estiver pausado)
+   if (!currentGame.running) {
+    const restartBtn = gameOverButton(canvas); // <-- Pega as coordenadas da função
+    const returnBtn = gameOverReturnButton(canvas); // <-- Pega as coordenadas da NOVA função
 
-    const novoJogo = Object.freeze({ ...initialState(), running: true });
-    rootState.current = Object.freeze({
-      ...rootState.current,
-      game: novoJogo
-    });
-
-    // usa o rootState correto — NÃO usar 'novoEstado' (variável inexistente)
-    render(rootState.current.game);
-    requestAnimationFrame((ts) => loop(rootState, ts));
+    // Verifica se clicou dentro do botão de reiniciar
+    if (mouseX >= restartBtn.x && mouseX <= restartBtn.x + restartBtn.w && 
+        mouseY >= restartBtn.y && mouseY <= restartBtn.y + restartBtn.h) {
+      
+      console.log("Botão de reiniciar do Game Over clicado!");
+      resetGame(); // Reutiliza a função de reset
+    }
+    // Verifica se clicou dentro do botão de retornar
+    else if (mouseX >= returnBtn.x && mouseX <= returnBtn.x + returnBtn.w && 
+             mouseY >= returnBtn.y && mouseY <= returnBtn.y + returnBtn.h) {
+      
+      console.log("Botão de retornar do Game Over clicado!");
+      window.location.href = "../index.html";
+    }
   }
 });
 
 
 // --- Clique no botão Play do menu ---
 playBtn.addEventListener("click", () => {
+  menuMusic.pause();
+  menuMusic.currentTime = 0;
    menu.style.display = "none";
   canvas.style.display = "block";
   muteBtn.style.display = 'block';
