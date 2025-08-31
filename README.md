@@ -1,4 +1,4 @@
-# Space Invaders 👾 <img alt="Alien" heigth="32" width="32" src="/Modo-Clássico/assets/icone(192x192).png" style="border: none;">
+# Space Invaders <img alt="Alien" heigth="32" width="32" src="/Modo-Clássico/assets/icone(192x192).png" style="border: none;">
 
  Esse projeto foi desenvolvido por mim, **Mateus Aranha** (@matt_aranha), **Eduardo Guimarães** (@eduardoguimaraes-coder) e **Renato Veloso** (@RenatoVPF), ao longo da matéria de **Programação Funcional**, ministrada pelo **Prof. Dr. Kalil Bispo.**
 <p align="center"> 
