@@ -489,7 +489,7 @@ const render = (state) => {
 
   //  HUD
   ctx.fillStyle = "#fff";
-  ctx.font = "16px monospace";
+  ctx.font = "16px 'Press Start 2P'";
   ctx.fillText("Vidas: " + state.player.lives, 10, 20);
   ctx.fillText("Score: " + state.score, 10, 40);
 
