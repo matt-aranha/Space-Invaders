@@ -20,8 +20,8 @@ body {
 
 .credits-container h1 {
   font-size: 4em;
-  color: #ff1818;
-  text-shadow: 3px 3px 0px #860101;
+  color: #00aaff;
+  text-shadow: 3px 3px 0px #024f9b;
   margin-bottom: 40px;
 }
 
@@ -33,8 +33,8 @@ body {
 /* Estilo do botão de Retornar */
 button {
   background: rgb(0, 0, 0);
-  border: 2px solid #860101;
-  color: #ff1818;
+  border: 2px solid #024f9b;
+  color: #00aaff;
   padding: 15px 30px;
   font-size: 16px;
   font-family: 'Press Start 2P', cursive;
@@ -45,9 +45,9 @@ button {
 }
 
 button:hover {
-  background: #ff1e1e;
+  background: #00aaff;
   color: black;
-  box-shadow: 0 0 20px #8a0000, 0 0 40px #8a0000;
+  box-shadow: 0 0 20px #024f9b, 0 0 40px #024f9b;
 }
 
 /* Animação de estrelas no fundo (mesma da página principal) */

@@ -29,48 +29,39 @@ body {
     font-family: 'Press Start 2P', monospace;
     font-size: 24px;
     padding: 15px 30px;
-    
-    /* Paleta de Cores Azul Adaptada */
     background: black;
-    border: 2px solid #024f9b; /* Borda azul escuro */
-    color: #00aaff;           /* Texto azul ciano */
-    text-shadow: 0 0 10px #00aaff; /* Leve brilho no texto */
-    
-    /* Estilo do Botão do Menu Principal */
+    border: 2px solid #860101; 
+    color: #ff1818;          
+    text-shadow: 0 0 10px #fc3535; 
     cursor: pointer;
-    border-radius: 8px; /* Cantos arredondados */
+    border-radius: 8px;
     transition: 0.3s;
 }
 
-/* Efeito de brilho no hover, adaptado para azul */
+/* Efeito de brilho no hover */
 #retornar-btn:hover {
-    background: #00aaff; /* Fundo fica ciano */
-    color: black;        /* Texto fica preto */
-    box-shadow: 0 0 20px #024f9b, 0 0 40px #024f9b; /* Brilho azul escuro */
+    background: #ff1818; 
+    color: black;       
+    box-shadow: 0 0 20px #860101, 0 0 40px #860101; 
 }
 
 #retornar-btn {
     font-family: 'Press Start 2P', monospace;
     font-size: 24px;
     padding: 15px 30px;
-    
-    /* Paleta de Cores Azul Adaptada */
     background: black;
-    border: 2px solid #024f9b; /* Borda azul escuro */
-    color: #00aaff;           /* Texto azul ciano */
-    text-shadow: 0 0 10px #00aaff; /* Leve brilho no texto */
-    
-    /* Estilo do Botão do Menu Principal */
+    border: 2px solid #860101; 
+    color: #ff1818;           
+    text-shadow: 0 0 10px #ff1818; 
     cursor: pointer;
-    border-radius: 8px; /* Cantos arredondados */
+    border-radius: 8px;
     transition: 0.3s;
 }
 
-/* Efeito de brilho no hover, adaptado para azul */
 #play-btn:hover {
-    background: #00aaff; /* Fundo fica ciano */
-    color: black;        /* Texto fica preto */
-    box-shadow: 0 0 20px #024f9b, 0 0 40px #024f9b; /* Brilho azul escuro */
+    background: #ff1818; 
+    color: black;
+    box-shadow: 0 0 20px #860101, 0 0 40px #860101;
 }
 
 /* Estilo Retrô para o Botão de Mute */
@@ -131,32 +122,32 @@ canvas {
 /* Estilo para o título principal do jogo */
 #menu h1 {
     font-family: 'Press Start 2P', monospace;
-    font-size: 5em; /* Tamanho grande para o título */
-    color: rgb(0, 170, 255); /* Verde clássico de arcade */
-    text-shadow: 4px 4px 0px #024f9b; /* Efeito de sombra 3D */
+    font-size: 5em; 
+    color: #ff1818; 
+    text-shadow: 4px 4px 0px #860101;
     line-height: 1.2;
 }
 
 /* Estilo para o texto de instrução */
 #menu h2 {
     font-family: 'Press Start 2P', monospace;
-    font-size: 1em; /* Tamanho menor para instruções */
-    color: #fff; /* Cor branca para boa leitura */
-    line-height: 1.5; /* Espaçamento entre linhas */
+    font-size: 1em; 
+    color: #fff; 
+    line-height: 1.5;
     margin-top: 40px;
 }
 
 /* Garante que o texto dentro da tag <kbd> também use a fonte */
 #menu h2 kbd {
     font-family: inherit; /* Herda a fonte do h2 */
-    font-size: 2em; /* Mantém o mesmo tamanho do texto */
+    font-size: 2em;
 }
 
 #menu h3 {
     font-family: 'Press Start 2P', monospace;
-    font-size: 1em; /* Tamanho menor para instruções */
-    color: #fff; /* Cor branca para boa leitura */
-    line-height: 1.5; /* Espaçamento entre linhas */
+    font-size: 1em;
+    color: #fff;
+    line-height: 1.5;
     margin-top: 40px;
 }
 
@@ -164,7 +155,7 @@ canvas {
 #game-container {
   position: relative;
   display: inline-block; /* Ajusta o tamanho ao conteúdo */
-  box-shadow: 0 0 40px rgba(255, 84, 112, 0.5); /* Brilho neon opcional */
+  box-shadow: 0 0 40px rgba(255, 84, 112, 0.5);
 }
 
 /* Efeito CRT (scanlines e vinheta) */
