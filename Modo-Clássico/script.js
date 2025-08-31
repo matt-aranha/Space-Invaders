@@ -42,51 +42,67 @@ baseDestroyedSound.volume = 0.4 // ajustar se precisar ED: baixei de 0.6 p/ 0.4,
 
 // Função que carrega as informações de cada entidade do game (atributos e mecânicas)
 const state = {
-  running: false,
-  isPaused: false,
-  lastTime: 0,
-  isMuted: false,
-  player: { 
-      x: (canvas.width / 2) - 40, y: canvas.height - 80, w: 90, h: 70,
-      speed: 450,
-      cooldown: 0, 
-      lives: 3, 
-      invincible: 0,
-      animationFrame: 0,          // essas duas propriedades (AnimationFrame e lastAnimationFrameTime) são para atualizar os sprites da nave, p/ fazer a animação
-      lastAnimationFrameTime: 0 },
-  enemyBullets: [],
-  bullets: [],
-  wave: 1,
-  enemyFireRate: 0.0005,
-  enemies: (function spawn() {
-  const cols = 12, rows = 4;
-  return Array.from({ length: cols * rows }, (_, i) => {
-    const row = Math.floor(i / cols);
-    // Mapeia cada linha para um tipo de inimigo (clássico)
-    const typeMapping = [3, 2, 2, 1]; // Topo: tipo 3, Meio: tipo 2, Baixo: tipo 1, DPS temos a função que da diferentes scores a cada tipo
-    const enemyType = typeMapping[row];
+      running: false,
+      isPaused: false,
+      lastTime: 0,
+      isMuted: false,
+      player: { 
+                x: (canvas.width / 2) - 40, y: canvas.height - 80, w: 90, h: 70,
+                speed: 450,
+                cooldown: 0, 
+                lives: 3, 
+                invincible: 0,
+                animationFrame: 0,          // essas duas propriedades (AnimationFrame e lastAnimationFrameTime) são para atualizar os sprites da nave, p/ fazer a animação
+                lastAnimationFrameTime: 0
+              },
+      enemyBullets: [],
+      bullets: [],
+      wave: 1,
+      enemyFireRate: 0.0005,
+      enemies: (function spawn()  {
+                                    const cols = 12, rows = 4;
+                                    return Array.from({ length: cols * rows }, (_, i) =>
+                                      {
+                                        const row = Math.floor(i / cols);
+                                        // Mapeia cada linha para um tipo de inimigo (clássico)
+                                        const typeMapping = [3, 2, 2, 1]; // Topo: tipo 3, Meio: tipo 2, Baixo: tipo 1, DPS temos a função que da diferentes scores a cada tipo
+                                        const enemyType = typeMapping[row];
     
-    return {
-      x: 300 + (i % cols) * 60,
-      y: 40 + row * 40,
-      w: 64, h: 64,
-      alive: true,
-      type: enemyType // Usa o tipo mapeado
-    };
-  });
-})(),
-  enemyDir: 1, 
-  enemySpeed: 40, 
-  score: 0, 
-  audio: { ctx: null, masterGain: null, bgOscs: [],
-  tones: [65, 60, 55, 50], // notas do tema original (theu: "edu brabo, slk")
-  index: 0, lastTime: 0 },
-  base: (function spawn() { const cols = 3, rows = 1;
-     return Array.from({ length: cols * rows },
-     (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
-     y: 500 + Math.floor(i / cols) * 40, w: 100, h: 80, hp: 30, hpMax: 30, hit: 0, alive: true })); })(),
-  enemyAnimationFrame: 0,          // essas duas propriedades (frame e lastFrameTime) são para atualizar os sprites dos bichins, p/ fazer a animação
-  lastEnemyFrameTime: 0 
+                                        return  {
+                                                  x: 300 + (i % cols) * 60,
+                                                  y: 40 + row * 40,
+                                                  w: 64, h: 64,
+                                                  alive: true,
+                                                  type: enemyType // Usa o tipo mapeado
+                                                };
+                                      });
+                                  })(),
+      enemyDir: 1, 
+      enemySpeed: 40, 
+      score: 0, 
+      audio:  {
+                ctx: null,
+                masterGain: null,
+                bgOscs: [],
+                tones: [65, 60, 55, 50], // notas do tema original (theu: "edu brabo, slk")
+                index: 0, lastTime: 0
+              },
+      base: (function spawn() {
+                                const cols = 3, rows = 1;
+                                return Array.from({ length: cols * rows }, (_, i) => 
+                                ({
+                                    x: 170 + (i % cols) * ((canvas.width - 80) / cols),
+                                    y: 500 + Math.floor(i / cols) * 40,
+                                    w: 100, 
+                                    h: 80, 
+                                    hp: 30, 
+                                    hpMax: 30, 
+                                    hit: 0, 
+                                    alive: true
+                                  }));
+                              })(),
+      enemyAnimationFrame: 0,          // essas duas propriedades (frame e lastFrameTime) são para atualizar os sprites dos bichins, p/ fazer a animação
+      lastEnemyFrameTime: 0 
 };
 
 // -----VIDA------
