@@ -1,6 +1,9 @@
+//SCRIPT DO MODO SOBREVIVENTEEE DO JOGO SPACE INVADERS, TOP DAS GALÁXIAS (LITERALMENTE) :D
+//inports clássicos, N PD FALTAR ;)
 const canvas = document.querySelector("#ultimo-Sobrevivente");
 const ctx = canvas.getContext("2d");
 const playBtn = document.querySelector("#play-btn");
+const retornarBtn = document.querySelector("#retornar-btn")
 const menu = document.querySelector("#menu");
 const muteBtn = document.querySelector("#mute-btn")
 
@@ -14,7 +17,7 @@ enemyImg.src = "sprites/Alien1(192x192).png";
 
 const musica = new Audio('sons/musica.mp3');// musica de kim lightyear
 musica.loop = true;
-musica.volume = 0.4;
+musica.volume = 0.27;
 
 const somTiro = new Audio('sons/tiro.mp3');
 somTiro.volume = 0.2;
@@ -202,7 +205,38 @@ const spawnEnemy = canvas => {
   };
 };
 
+    if (event.type === 'CANVAS_CLICK') {
+      const btnWidth = 240, btnHeight = 50;
+      const btnX = canvas.width / 2 - btnWidth / 2;
+      const btnY = canvas.height / 2 + 30;
+      console.log("Clique detectado:", event.x, event.y);
 
+    
+      // só reinicia se estiver no Game Over
+      if (!currentState.running) {
+        if (
+          event.x >= btnX && event.x <= btnX + btnWidth &&
+          event.y >= btnY && event.y <= btnY + btnHeight
+        ) {
+          tocarMusica();
+          return { ...initialState(), running: true, lastTime: 0 };
+        }
+        // --- Retornar ---
+      const btX = canvas.width / 2 - btnWidth / 2;
+      const btY = canvas.height / 2 + 150;
+
+      if (
+      event.x >= btX && event.x <= btX + btnWidth &&
+      event.y >= btY && event.y <= btY + btnHeight
+    ) {
+        window.location.href = "../index.html";
+    }
+      }
+    }
+
+    return currentState;
+  }, state);
+};
 
 //função para atualizar o estado do jogado
 const updatePlayer = (player, keys, dt, canvas) => {
@@ -543,9 +577,37 @@ const render = (state) => {
 
    ctx.restore();
 
+    ctx.textAlign = "start";
+    ctx.textBaseline = "alphabetic";
+
+    // --- Botão de Retornarar com Estilo Retrô ---
+    const btWidth = 240, btHeight = 50;
+    const btX = canvas.width / 2 - btWidth / 2;
+    const btY = canvas.height / 2 + 150;
+    const shadowOfset = 5; // Tamanho da "sombra 3D"
+
+    // Sombra do botão (desenhada primeiro, por baixo)
+    ctx.fillStyle = "#155dbbff"; // Rosa escuro para a sombra
+    ctx.fillRect(btX, btY, btWidth, btHeight);
+
+    // Corpo principal do botão (desenhado por cima, um pouco deslocado)
+    ctx.fillStyle = "#232946";
+    ctx.fillRect(btX, btY - shadowOfset, btWidth, btHeight);
+
+    // --- Subtexto de Instrução ---
+    ctx.font = "14px 'Press Start 2P'";
+    ctx.fillStyle = "#fff";
+    ctx.fillText("Clique no botão para retornar ao menu", canvas.width / 2 - 255, canvas.height / 1.5);
+
+    // Texto do botão
+    ctx.font = "18px 'Press Start 2P'";
+    ctx.fillStyle = "#fff"; // Texto branco para contraste
+    ctx.textBaseline = "middle"; // Alinha o texto verticalmente pelo meio
+    ctx.fillText("Retornar", canvas.width / 2 - btWidth / 3.5, btY - shadowOfset + (btHeight / 2));
+
     // Reseta os alinhamentos para não afetar outros desenhos
-   ctx.textAlign = "start";
-   ctx.textBaseline = "alphabetic";
+    ctx.textAlign = "start";
+    ctx.textBaseline = "alphabetic";
   }
 };
 
@@ -630,7 +692,7 @@ canvas.addEventListener("click", (e) => {
 });
 
 
-// --- Clique no botão Play do menu ---
+// --- Clique no botão Play do menu (agora só enfileira o evento) ---
 playBtn.addEventListener("click", () => {
    menu.style.display = "none";
   canvas.style.display = "block";
@@ -671,6 +733,24 @@ addMouseListener(canvas, (event) => {
     mouse: newMouse
   });
 });
+
+// --- Inicialização ---
+// O estado inicial do jogo, antes de qualquer interação
+const estadoInicial = { ...initialState(), running: false };
+// Mostra o menu e esconde o jogo
+menu.style.display = "block";
+canvas.style.display = "none";
+// Renderiza o estado inicial (que não mostrará nada no canvas, o que está correto)
+render(estadoInicial);
+// Inicia o loop. Ele ficará esperando por eventos.
+requestAnimationFrame(ts => loop(estadoInicial, ts));
+
+//Retornar ao menu
+// --- Botão Retornar ---
+retornarBtn.addEventListener("click", () => {
+  // Para o jogo
+  window.location.href = "../index.html";
+})
 
 // Renderiza apenas o menu
 render(rootState.current.game);
