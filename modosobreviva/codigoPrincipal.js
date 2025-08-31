@@ -508,7 +508,7 @@ const render = (state) => {
     ctx.fillText("GAME OVER", canvas.width / 2 + 3, canvas.height / 2 - 50 + 3);
     
     // Texto principal
-    ctx.fillStyle = "#1c8dddff"; // Cor do texto
+    ctx.fillStyle = "#ff1818"; // Cor do texto
     ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 50);
 
     // --- Subtexto de Instrução ---
@@ -530,7 +530,7 @@ const render = (state) => {
    ctx.translate(-centerX, -centerY);
 
    const shadowOffset = 5;
-   ctx.fillStyle = "#155dbbff";
+   ctx.fillStyle = "#860101";
    ctx.fillRect(btnX, btnY, btnWidth, btnHeight);
 
    ctx.fillStyle = "#232946";
