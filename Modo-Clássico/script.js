@@ -307,21 +307,21 @@ function enemyShoot() {
 
 // Função que calcula o próximo estado de animação da nave
 const updatePlayerAnimation = (playerState, dt, fps) => {
-  const interval = 1 / fps; // 2.5 FPS -> intervalo de 0.4s
-  const newLastAnimationFrameTime = playerState.lastAnimationFrameTime + dt;
+      const interval = 1 / fps;     // 2.5 FPS -> intervalo de 0.4s
+      const newLastAnimationFrameTime = playerState.lastAnimationFrameTime + dt;
 
-  if (newLastAnimationFrameTime >= interval) {
-    const newFrame = (playerState.animationFrame + 1) % 3; // 3 frames (0, 1, 2)
-    return {
-      animationFrame: newFrame,
-      lastAnimationFrameTime: newLastAnimationFrameTime - interval
-    };
-  }
-  
-  return {
-    animationFrame: playerState.animationFrame,
-    lastAnimationFrameTime: newLastAnimationFrameTime
-  };
+      if (newLastAnimationFrameTime >= interval) {
+          const newFrame = (playerState.animationFrame + 1) % 3; // 3 frames (0, 1, 2)
+          return {
+              animationFrame: newFrame,
+              lastAnimationFrameTime: newLastAnimationFrameTime - interval
+          };
+      }
+      
+      return {
+          animationFrame: playerState.animationFrame,
+          lastAnimationFrameTime: newLastAnimationFrameTime
+      };
 };
 
 // Função para selecionar a imagem correta da nave
@@ -330,47 +330,53 @@ const getPlayerImage = (animationFrame) => playerFrames[animationFrame];
 
 // Função para reiniciar o jogo (antes a gente tava reescrevendo tuuudo isso sempre que queríamos reiniciar o jogo, então fiz dela uma função a parte que é chamada nas outras :P  assim, se for pra mudar é só mudar aqui e show de bola)
 const resetGame = () => {
-  state.running = true;
-  state.isPaused = false;
-  state.lastTime = 0;
-  state.score = 0;
-  state.player.lives = 3;
-  state.enemyBullets = [];
-  state.bullets = [];
-  state.wave = 1;
-  state.enemySpeed = 40;
-  state.enemyFireRate = 0.0003;
-  state.player.x = (canvas.width / 2) - 40;
-  state.player.y = canvas.height - 80;
-  state.player.invincible = 0;
+      state.running = true;
+      state.isPaused = false;
+      state.lastTime = 0;
+      state.score = 0;
+      state.player.lives = 3;
+      state.enemyBullets = [];
+      state.bullets = [];
+      state.wave = 1;
+      state.enemySpeed = 40;
+      state.enemyFireRate = 0.0003;
+      state.player.x = (canvas.width / 2) - 40;
+      state.player.y = canvas.height - 80;
+      state.player.invincible = 0;
   
-  // Recria os inimigos e as bases
-  state.enemies = (function spawn() {
-    const cols = 9, rows = 4;
-    return Array.from({ length: cols * rows }, (_, i) => {
-      const row = Math.floor(i / cols);
-      const typeMapping = [3, 2, 2, 1];
-      const enemyType = typeMapping[row];
-      return {
-        x: 300 + (i % cols) * 60,
-        y: 40 + row * 40,
-        w: 64, h: 64,
-        alive: true,
-        type: enemyType
-      };
-    });
-  })();
+      // Recria os inimigos e as bases
+      state.enemies = (function spawn() {
+          const cols = 9, rows = 4;
+          return Array.from({ length: cols * rows }, (_, i) => {
+              const row = Math.floor(i / cols);
+              const typeMapping = [3, 2, 2, 1];
+              const enemyType = typeMapping[row];
+              return {
+                  x: 300 + (i % cols) * 60,
+                  y: 40 + row * 40,
+                  w: 64, h: 64,
+                  alive: true,
+                  type: enemyType
+              };
+          });
+      })();
 
-  state.base = (function spawn() { 
-    const cols = 3, rows = 1; 
-    return Array.from({ length: cols * rows }, (_, i) => ({ 
-      x: 170 + (i % cols) * ((canvas.width - 80) / cols),
-      y: 500 + Math.floor(i / cols) * 40, w: 120, h: 100, hp: 30, hpMax: 30, hit: 0, alive: true
-    }));
-  })();
+      state.base = (function spawn() { 
+          const cols = 3, rows = 1; 
+          return Array.from({ length: cols * rows }, (_, i) => ({ 
+              x: 170 + (i % cols) * ((canvas.width - 80) / cols),
+              y: 500 + Math.floor(i / cols) * 40,
+              w: 120,
+              h: 100,
+              hp: 30,
+              hpMax: 30,
+              hit: 0,
+              alive: true
+          }));
+      })();
 
-  // Garante que o loop de animação comece se não estiver rodando
-  requestAnimationFrame(loop);
+      // Garante que o loop de animação comece se não estiver rodando
+      requestAnimationFrame(loop);
 };
 
 // Função para pausar/despausar o joguin
