@@ -3,6 +3,7 @@
 const canvas = document.querySelector("#space-invaders");
 const ctx = canvas.getContext("2d");
 const playBtn = document.querySelector("#play-btn");
+const retornarBtn = document.querySelector("#retornar-btn")
 const menu = document.querySelector("#menu");
 const muteBtn = document.querySelector("#mute-btn")
 
@@ -37,7 +38,7 @@ playerShotSound.src = "assets/tiro-nave.mp3";
 playerShotSound.volume = 0.40    //ajustar se precisar
 const baseDestroyedSound = new Audio();
 baseDestroyedSound.src = "assets/explosao.mp3"
-baseDestroyedSound.volume = 0.6 // ajustar se precisar
+baseDestroyedSound.volume = 0.4 // ajustar se precisar ED: baixei de 0.6 p/ 0.4, pq tava mt alto, me dando susto direto kkkk
 
 // Função que carrega as informações de cada entidade do game (atributos e mecânicas)
 const state = {
@@ -473,7 +474,6 @@ muteBtn.addEventListener("click", () => {
 
 // --- Render --- (mostrar,criar e desenhar na tela)
 const drawRect = (x, y, w, h, color) => { ctx.fillStyle = color; ctx.fillRect(x, y, w, h); };
-
 const render = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   updateLivesUI(state);
@@ -526,6 +526,40 @@ state.base.forEach(b => {
   
   ctx.fillStyle = "#fff"; ctx.font = "16px 'Press Start 2P'"; ctx.fillText("Score: " + state.score, 550, 20);
 
+   // << NOVO INÍCIO: Desenha a tela de pause se o jogo estiver pausado
+  if (state.isPaused) {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.font = "48px 'Press Start 2P'";
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#fff";
+    ctx.fillText("PAUSADO", canvas.width / 2, canvas.height / 2 - 100);
+
+    // --- Botão de Retornar ao Jogo ---
+    const resumeBtnWidth = 320, resumeBtnHeight = 50;
+    const resumeBtnX = canvas.width / 2 - resumeBtnWidth / 2;
+    const resumeBtnY = canvas.height / 2 - 25;
+    ctx.fillStyle = "#232946";
+    ctx.fillRect(resumeBtnX, resumeBtnY, resumeBtnWidth, resumeBtnHeight);
+    ctx.font = "18px 'Press Start 2P'";
+    ctx.fillStyle = "#fff";
+    ctx.textBaseline = "middle";
+    ctx.fillText("Retornar ao Jogo", canvas.width / 2, resumeBtnY + (resumeBtnHeight / 2));
+
+    // --- Botão de Voltar ao Menu ---
+    const menuBtnWidth = 320, menuBtnHeight = 50;
+    const menuBtnX = canvas.width / 2 - menuBtnWidth / 2;
+    const menuBtnY = canvas.height / 2 + 50;
+    ctx.fillStyle = "#232946";
+    ctx.fillRect(menuBtnX, menuBtnY, menuBtnWidth, menuBtnHeight);
+    ctx.fillStyle = "#fff";
+    ctx.fillText("Voltar ao Menu", canvas.width / 2, menuBtnY + (menuBtnHeight / 2));
+
+    ctx.textAlign = "start";
+    ctx.textBaseline = "alphabetic";
+  }
+
   if (!state.running) {
     // --- Tela de Fundo Escurecida ---
     ctx.fillStyle = "rgba(0,0,0,0.75)";
@@ -567,6 +601,35 @@ state.base.forEach(b => {
     ctx.fillStyle = "#fff"; // Texto branco para contraste
     ctx.textBaseline = "middle"; // Alinha o texto verticalmente pelo meio
     ctx.fillText("Reiniciar", canvas.width / 2, btnY - shadowOffset + (btnHeight / 2));
+
+    // Reseta os alinhamentos para não afetar outros desenhos
+    ctx.textAlign = "start";
+    ctx.textBaseline = "alphabetic";
+
+    // --- Botão de Retornar com Estilo Retrô ---
+    const btWidth = 240, btHeight = 50;
+    const btX = canvas.width / 2 - btWidth / 2;
+    const btY = canvas.height / 2 + 150;
+    const shadowOfset = 5; // Tamanho da "sombra 3D"
+
+    // Sombra do botão (desenhada primeiro, por baixo)
+    ctx.fillStyle = "#02a036ff"; // Rosa escuro para a sombra
+    ctx.fillRect(btX, btY, btWidth, btHeight);
+
+    // Corpo principal do botão (desenhado por cima, um pouco deslocado)
+    ctx.fillStyle = "#232946";
+    ctx.fillRect(btX, btY - shadowOfset, btWidth, btHeight);
+
+    // --- Subtexto de Instrução ---
+    ctx.font = "14px 'Press Start 2P'";
+    ctx.fillStyle = "#fff";
+    ctx.fillText("Clique no botão para retornar ao menu", canvas.width / 2 -255, canvas.height / 1.5);
+
+    // Texto do botão
+    ctx.font = "18px 'Press Start 2P'";
+    ctx.fillStyle = "#fff"; // Texto branco para contraste
+    ctx.textBaseline = "middle"; // Alinha o texto verticalmente pelo meio
+    ctx.fillText("Retornar", canvas.width / 2 - btWidth / 3.5, btY - shadowOfset + (btHeight / 2));
 
     // Reseta os alinhamentos para não afetar outros desenhos
     ctx.textAlign = "start";
@@ -622,6 +685,17 @@ canvas.addEventListener("click", function (e) {
     
     // O requestAnimationFrame deve estar dentro do bloco de identação do IF para iniciar o loop 
     requestAnimationFrame(loop); 
+  }
+  // --- Retornar ---
+  const btWidth = 240, btHeight = 50;
+  const btX = canvas.width / 2 - btWidth / 2;
+  const btY = canvas.height / 2 + 150;
+  if (
+    mouseX >= btX && mouseX <= btX + btWidth &&
+    mouseY >= btY && mouseY <= btY + btHeight
+  ) {
+    // Redireciona para o menu principal
+    window.location.href = "../index.html";
   }
 });
 
@@ -696,3 +770,10 @@ playBtn.addEventListener("click", () => {
   // O requestAnimationFrame inicia o loop do jogo
   requestAnimationFrame(loop);
 });
+
+//Retornar ao menu
+// --- Botão Retornar das intruções ---
+retornarBtn.addEventListener("click", () => {
+  // Para o jogo
+  window.location.href = "../index.html";
+})
