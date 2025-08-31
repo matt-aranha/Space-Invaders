@@ -1,6 +1,7 @@
 const canvas = document.querySelector("#ultimo-Sobrevivente");
 const ctx = canvas.getContext("2d");
 const playBtn = document.querySelector("#play-btn");
+const retornarBtn = document.querySelector("#retornar-btn")
 const menu = document.querySelector("#menu");
 const muteBtn = document.querySelector("#mute-btn")
 
@@ -14,7 +15,7 @@ enemyImg.src = "sprites/Alien1(192x192).png";
 
 const musica = new Audio('sons/musica.mp3');// musica de kim lightyear
 musica.loop = true;
-musica.volume = 0.4;
+musica.volume = 0.3;
 
 const somTiro = new Audio('sons/tiro.mp3');
 somTiro.volume = 0.2;
@@ -238,7 +239,7 @@ const enemyShoot = (enemies, player, enemyBullets) => {
   return enemies.reduce((bullets, enemy) => {
     const distancia = Math.hypot(player.x - enemy.x, player.y - enemy.y);
 
-    if (enemy.alive && distancia < 300 && Math.random() < 0.01) {
+    if (enemy.alive && distancia < 300 && Math.random() < 0.001) {
       const ang = Math.atan2(player.y - enemy.y, player.x - enemy.x);
       const bullet = {
         x: enemy.x,
@@ -322,7 +323,7 @@ const processPlayerHit = (player, enemyBullets, ts) => {
 
   return {
     player: hits > 0
-      ? { ...player, lives: player.lives - hits, invulneravelAte: ts + 2000 } // dois segundos de invulnerabilidade
+      ? { ...player, lives: player.lives - hits, invulneravelAte: ts + 3000 } // três segundos de invulnerabilidade
       : player,
     enemyBullets: newBullets,
     foiAcertado: hits > 0
@@ -488,7 +489,7 @@ const render = (state) => {
 
   //  HUD
   ctx.fillStyle = "#fff";
-  ctx.font = "16px monospace";
+  ctx.font = "16px 'Press Start 2P'";
   ctx.fillText("Vidas: " + state.player.lives, 10, 20);
   ctx.fillText("Score: " + state.score, 10, 40);
 
@@ -507,7 +508,7 @@ const render = (state) => {
     ctx.fillText("GAME OVER", canvas.width / 2 + 3, canvas.height / 2 - 50 + 3);
     
     // Texto principal
-    ctx.fillStyle = "#1c8dddff"; // Cor do texto
+    ctx.fillStyle = "#ff1818"; // Cor do texto
     ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 50);
 
     // --- Subtexto de Instrução ---
@@ -529,7 +530,7 @@ const render = (state) => {
    ctx.translate(-centerX, -centerY);
 
    const shadowOffset = 5;
-   ctx.fillStyle = "#155dbbff";
+   ctx.fillStyle = "#860101";
    ctx.fillRect(btnX, btnY, btnWidth, btnHeight);
 
    ctx.fillStyle = "#232946";
@@ -674,3 +675,10 @@ addMouseListener(canvas, (event) => {
 
 // Renderiza apenas o menu
 render(rootState.current.game);
+
+//Retornar ao menu
+// --- Botão Retornar das intruções ---
+retornarBtn.addEventListener("click", () => {
+  // Para o jogo
+  window.location.href = "../index.html";
+})

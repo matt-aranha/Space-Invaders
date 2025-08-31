@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+      <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Créditos - Space Invaders</title>
+            <link rel="stylesheet" href="style.css">
+            <link rel="icon" href="/Modo-Clássico/assets/icone(192x192).png">
+            <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+      </head>
+
+      <body>
+            <div class="stars"></div>
+
+            <div class="credits-container">
+                  <h1>CREDITOS</h1>
+                  <p>
+                      Criado pelos alunos:  <br>
+                      Eduardo Souza, 
+                      Mateus Aranha e 
+                      Renato Veloso <br> <br>
+                      Engenharia de Computação - UFS <br>
+                      Prof. Dr. Khalil Bispo <br> <br>
+                      © 2025. Todos os direitos reservados.<br>
+                      Universidade Federal de Sergipe. <br> <br>
+                  </p>
+                  <button onclick="window.location.href='../index.html'">↩ RETORNAR</button>
+            </div>
+
+            <audio id="bg-music" loop>
+                  <source src="../modosobreviva/sons/music.mp3" type="audio/mpeg">
+            </audio>
+            
+            <script>
+                  const music = document.getElementById("bg-music");
+                  music.volume = 0.07;
+                  music.play();
+                  { once: true };
+            </script>
+      </body>
+</html>

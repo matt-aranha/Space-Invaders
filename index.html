@@ -1,47 +1,44 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Space Invaders</title>
-  <link rel="stylesheet" href="styleprincipal.css">
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-</head>
-<body>
-  <div class="stars"></div>
-  <div class="logo">
-    <img src="/Modo-Clássico/assets/Logo.png" height="600" width="650">
-  </div>
-  <div class="container">
-    <header>
-      <p>Bem-vindo à nossa versão do jogo!</p>
-      <p>Selecione o modo de jogo abaixo:</p>
-    </header> 
-    <div class="buttons">
-      <button onclick="window.location.href='Modo-Clássico/index.html'">CLASSICO</button>
-      <button onclick="window.location.href='modosobreviva/index.html'">SOBREVIVENTE</button>
-    </div>
-  </div>
-  <!-- Créditos -->
-  <footer class="credits">
-    <p>
-      Criado pelos alunos:  <br>
-      Eduardo Souza, 
-      Mateus Aranha e 
-      Renato Veloso <br>
-      
-      <br>Curso: Engenharia de Computação - UFS <br>
-      Prof. Dr. Khalil Bispo
-    </p>
-  </footer>
-  <audio id="bg-music" autoplay loop>
-    <source src="modosobreviva/sons/musica.mp3" type="audio/mpeg">
-  </audio>
-  <script>
-    const music = document.getElementById("bg-music");
-      music.volume = 0.07;
-      music.play();// Garante que música só toca após interação (exigência de navegadores)
-    { once: true };
-  </script>
-</body>
+      <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Space Invaders</title>
+            <link rel="stylesheet" href="styleprincipal.css">
+            <link rel="icon" type="image/png" href="Modo-Clássico/assets/icone(192x192).png">
+            <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+      </head>
+
+      <body>
+            <div class="stars"></div>
+            
+            <div class="logo">
+                  <img src="/Modo-Clássico/assets/Logo.png" height="600" width="650">
+            </div>
+
+            <div class="container">
+                  <header>
+                        <p>Bem-vindo à nossa versão do jogo!</p>
+                        <p>Selecione o modo de jogo abaixo:</p>
+                        <br>
+                  </header> 
+
+                  <div class="buttons">
+                        <button onclick="window.location.href='Modo-Clássico/index.html'">CLASSICO</button>
+                        <button onclick="window.location.href='modosobreviva/index.html'">SOBREVIVENTE</button>
+                        <button onclick="window.location.href='Creditos/index.html'">CREDITOS</button>
+                  </div>
+            </div>
+
+            <audio id="bg-music" loop>
+                  <source src="modosobreviva/sons/music.mp3" type="audio/mpeg">
+            </audio>
+  
+            <script>
+                  const music = document.getElementById("bg-music");
+                  music.volume = 0.2;
+                  music.play();
+                  { once: true };
+              </script>
+      </body>
 </html>

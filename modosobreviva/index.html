@@ -1,30 +1,42 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head> 
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Space Invaders</title>
-  <link rel="stylesheet" href="visualtop.css">
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-</head>
-<body>
-      <div class="stars"></div>
-  </div>
-      <div id="menu">
-            <h1>MODO <br>SOBREVIVENTE</h1>
-            <button id="play-btn">▶ Play</button>
-            <h2>Use o 'W','A','S' e 'D' para mover-se e 'ESPAÇO' para atirar</h2>
-            <img src="/modosobreviva/sprites/Caveira.png">
-      </div>
+      <head> 
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Modo Sobrevivente - Space Invaders</title>
+            <link rel="stylesheet" href="visualtop.css">
+            <link rel="icon" href="/Modo-Clássico/assets/icone(192x192).png">
+            <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  
+      </head>
 
-      <div id="game-container" style="position: relative; display: inline-block;">
-            <canvas id="ultimo-Sobrevivente" width="1200" height="720" style="display:none"></canvas>
-            <button id="mute-btn" >Mutar Som</button>
-      </div>
+      <body>
+            <div class="stars"></div>
 
-     
-      <audio id="bg-music" src="/modosobreviva/sons/musica.mp3" loop></audio>
-      
-      <script src="codigoPrincipal.js"></script>
-</body>
+            <div id="menu">
+                  <h1>MODO <br> SOBREVIVENTE</h1>
+                  <h2>Use o 'W','A','S' e 'D' para mover-se e 'ESPAÇO' para atirar <br> CUIDADO! Os invasores chegam de todos os lados!</h2> <br>
+                  <button id="play-btn">▶ Play</button> <br> <br>
+                  <button id="retornar-btn">↩ Retornar</button> <br> <br>
+                  <img src="/modosobreviva/sprites/Caveira.png">
+            </div>
+
+            <div id="game-container" style="position: relative; display: inline-block;">
+                  <canvas id="ultimo-Sobrevivente" width="1200" height="720" style="display:none"></canvas>
+                  <button id="mute-btn" >Mutar Som</button>
+            </div>
+
+            <audio id="bg-music" loop>
+                  <source src="../modosobreviva/sons/music.mp3" type="audio/mpeg">
+            </audio>
+
+            <script>
+                  const music = document.getElementById("bg-music");
+                  music.volume = 0.07;
+                  music.play();
+                  { once: true };
+            </script>
+
+            <script src="codigoPrincipal.js"></script>
+      </body>
 </html>
