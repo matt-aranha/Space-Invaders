@@ -166,7 +166,7 @@ const playTone = (freq, duration = 0.08, type = "square", vol = 0.12, endFreq = 
       o.start();
       g.gain.setValueAtTime(vol, a.currentTime);
       if (endFreq !== null) {
-        o.frequency.exponentialRampToValueAtTime(endFreq, a.currentTime + duration);
+          o.frequency.exponentialRampToValueAtTime(endFreq, a.currentTime + duration);
       }
       g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + duration);
       o.stop(a.currentTime + duration + 0.02);
@@ -181,7 +181,7 @@ const playInvaderTone = () => {
       const timeBetweenBeats = Math.max(100, 550 - (state.enemies.filter(e => e.alive).length * 5));
 
       if (now - a.lastTime < timeBetweenBeats) {
-        return; // Ainda não é hora de tocar (segura onda ai :) )
+          return; // Ainda não é hora de tocar (segura onda ai :) )
       }
 
       // Pega a próxima nota da sequência
@@ -210,100 +210,99 @@ function processPlayerBulletBase(bullet, base, idx) {
       const b = base[idx];
       if (b.alive &&
           bullet.x < b.x + b.w && bullet.x + bullet.w > b.x &&
-          bullet.y < b.y + b.h && bullet.y + bullet.h > b.y)
-          {
-            bullet.y = -9999; // Remove o tiro do jogador
-            return;
+          bullet.y < b.y + b.h && bullet.y + bullet.h > b.y) {
+              bullet.y = -9999; // Remove o tiro do jogador
+              return;
           }
       processPlayerBulletBase(bullet, base, idx + 1);
 };
 
 // Função para processar colisões entre balas e inimigos
 function processBullets(bullets, enemies, idx = 0) {
-  if (idx >= bullets.length) return;
-  const b = bullets[idx];
-  processEnemies(b, enemies, 0);
-  processBullets(bullets, enemies, idx + 1);
+      if (idx >= bullets.length) return;
+      const b = bullets[idx];
+      processEnemies(b, enemies, 0);
+      processBullets(bullets, enemies, idx + 1);
 }
 
 // Função que relaciona os inimigos com os tiros que produzem assim também como se posicionam no canva
 const enemyPoints = {
-  1: 10,   // inimigo de baixo
-  2: 20,   // inimigo do meio
-  3: 30    // inimigo de cima
+      1: 10,   // inimigo de baixo
+      2: 20,   // inimigo do meio
+      3: 30    // inimigo de cima
 };
 
 // fUnção que processa inimigos
 function processEnemies(bullet, enemies, idx) {
-  if (idx >= enemies.length) return;
-  const e = enemies[idx];
-  if (e.alive &&
-    bullet.x < e.x + e.w && bullet.x + bullet.w > e.x &&
-    bullet.y < e.y + e.h && bullet.y + bullet.h > e.y) {
-    e.alive = false;
-    bullet.y = -9999; // marca pra remoção, saem do plano
-    state.score += enemyPoints[e.type];
-    playTone(600, 0.15, "sawtooth", 0.08, 50);;
-    return; // Para após a primeira colisão
-  }
-  processEnemies(bullet, enemies, idx + 1);
+      if (idx >= enemies.length) return;
+      const e = enemies[idx];
+      if (e.alive &&
+        bullet.x < e.x + e.w && bullet.x + bullet.w > e.x &&
+        bullet.y < e.y + e.h && bullet.y + bullet.h > e.y) {
+            e.alive = false;
+            bullet.y = -9999; // marca pra remoção, saem do plano
+            state.score += enemyPoints[e.type];
+            playTone(600, 0.15, "sawtooth", 0.08, 50);;
+            return; // Para após a primeira colisão
+        }
+      processEnemies(bullet, enemies, idx + 1);
 }
 
 // Função para processar colisão entre balas do inimigo e a base
 function processBulletBase(bullet, base, idx) {
-  if (idx >= base.length) return;
-  const e = base[idx];
-  if (e.alive &&
-      bullet.x < e.x + e.w && bullet.x + bullet.w > e.x &&
-      bullet.y < e.y + e.h && bullet.y + bullet.h > e.y) {
-    e.hp -= 1;             // perde vida
-    e.hit = 0.12;          // flash rápido ao ser atingida
-    bullet.y = canvas.height + 100; // remove o tiro (filtro pega)
-    if (e.hp <= 0) {
-      e.alive = false;
-      e.justDied = true;  // sinaliza que a base foi destruída
-    };
-    return; // evita múltiplos acertos no mesmo frame
-  };
-  processBulletBase(bullet, base, idx + 1);
+      if (idx >= base.length) return;
+      const e = base[idx];
+      if (e.alive &&
+          bullet.x < e.x + e.w && bullet.x + bullet.w > e.x &&
+          bullet.y < e.y + e.h && bullet.y + bullet.h > e.y) {
+              e.hp -= 1;             // perde vida
+              e.hit = 0.12;          // flash rápido ao ser atingida
+              bullet.y = canvas.height + 100; // remove o tiro (filtro pega)
+              if (e.hp <= 0) {
+                  e.alive = false;
+                  e.justDied = true;  // sinaliza que a base foi destruída
+                };
+              return; // evita múltiplos acertos no mesmo frame
+          };
+      processBulletBase(bullet, base, idx + 1);
 }
 
 // Função para detectar se a horda de aliens morreu e então regenerar o escudo
 const regenerateBases = (bases) => {
-  return bases.map(base => ({
-        ...base,        //copia a base original
-        hp: base.hpMax, //regenera o hp para o máximo
-        alive: true     // ressuscita o escudo que foi destruído
-  }));
+      return bases.map(base => ({
+            ...base,        //copia a base original
+            hp: base.hpMax, //regenera o hp para o máximo
+            alive: true     // ressuscita o escudo que foi destruído
+      }));
 };
 
 // Função para verificar se algum inimigo chegou na base
 function checkEnemyBase(enemies, idx = 0) {
-  if (idx >= enemies.length) return;
-  const e = enemies[idx];
-  if (e.alive && e.y + e.h >= state.player.y) {
-    state.running = false;
-    playTone(60, 0.6, "sine", 0.12);
-    return;
-  }
-  checkEnemyBase(enemies, idx + 1);
+      if (idx >= enemies.length) return;
+      const e = enemies[idx];
+      if (e.alive && e.y + e.h >= state.player.y) {
+          state.running = false;
+          playTone(60, 0.6, "sine", 0.12);
+          return;
+      }
+      checkEnemyBase(enemies, idx + 1);
 }
 
 // Função tiro dos inimigos, chablau
 function enemyShoot() {
-  // Escolhe inimigos vivos aleatoriamente para atirar
-  state.enemies.forEach(e => {
-    if (e.alive && Math.random() < state.enemyFireRate) {
-      state.enemyBullets.push({
-        x: e.x + e.w / 2 - 2,
-        y: e.y + e.h,
-        w: 4,
-        h: 10,
-        dy: 220
+      // Escolhe inimigos vivos aleatoriamente para atirar
+      state.enemies.forEach(e => {
+          if (e.alive && Math.random() < state.enemyFireRate) {
+              state.enemyBullets.push({
+                  x: e.x + e.w / 2 - 2,
+                  y: e.y + e.h,
+                  w: 4,
+                  h: 10,
+                  dy: 220
+              });
+            playTone(320, 0.07, "triangle", 0.08);
+          }
       });
-      playTone(320, 0.07, "triangle", 0.08);
-    }
-  });
 }
 
 // Função que calcula o próximo estado de animação da nave
