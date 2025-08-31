@@ -495,7 +495,7 @@ const render = () => {
 
 
   // Bullets
-  state.bullets.forEach(b => drawRect(b.x, b.y, b.w, b.h, "#58a6ff"));
+  state.bullets.forEach(b => drawRect(b.x, b.y, b.w, b.h+10, "#58a6ff"));
 
   // Escudos (base)
 state.base.forEach(b => {
@@ -515,7 +515,7 @@ state.base.forEach(b => {
 });
 
   // Enemy bullets
-  state.enemyBullets.forEach(b => drawRect(b.x, b.y, b.w, b.h, "#ff5470"));
+  state.enemyBullets.forEach(b => drawRect(b.x, b.y, b.w, b.h+8, "#ff5470"));
 
   // Enemies
   state.enemies.forEach(e => {
