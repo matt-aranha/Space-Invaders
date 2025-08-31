@@ -5,7 +5,5 @@
     <img alt="Space-Invaders Logo" height="400" width="450" src="/Modo-Clássico/assets/Logo.png" style="border: none;">
 </p>
 
-
-
 ## Divirta-se: https://spaceinvaderspfufs.netlify.app/
 #### **© 2025. Todos os direitos reservados. Universidade Federal de Sergipe.**
