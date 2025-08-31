@@ -323,7 +323,7 @@ const processPlayerHit = (player, enemyBullets, ts) => {
 
   return {
     player: hits > 0
-      ? { ...player, lives: player.lives - hits, invulneravelAte: ts + 2000 } // dois segundos de invulnerabilidade
+      ? { ...player, lives: player.lives - hits, invulneravelAte: ts + 3000 } // três segundos de invulnerabilidade
       : player,
     enemyBullets: newBullets,
     foiAcertado: hits > 0
