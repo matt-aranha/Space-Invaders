@@ -63,16 +63,3 @@ button:hover {
   color: black;
   box-shadow: 0 0 20px #8a0000, 0 0 40px #8a0000;
 }
-
-.credits {
-  position: fixed;
-  bottom: 10px;
-  left: 10px;
-  font-size: 10px;
-  color: #ffc400;
-  text-align: left;
-  text-shadow: 0 0 5px #8a0000, 0 0 10px #ffffff;
-  font-family: 'Press Start 2P', cursive;
-  line-height: 1.6;
-  opacity: 0.8;
-}
