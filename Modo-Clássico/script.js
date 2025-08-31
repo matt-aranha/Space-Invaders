@@ -43,6 +43,7 @@ baseDestroyedSound.volume = 0.4 // ajustar se precisar ED: baixei de 0.6 p/ 0.4,
 // Função que carrega as informações de cada entidade do game (atributos e mecânicas)
 const state = {
   running: false,
+  isPaused: false,
   lastTime: 0,
   isMuted: false,
   player: { 
@@ -115,8 +116,7 @@ document.addEventListener("keyup", e => { keys[e.code] = false; });
 //Para evitar o bug clássico  de jogos de navegador (quando o foco do navegador muda e O script n reconhece a mudança e mantém pressionado a última tecla mesmo tendo a soltado)
 //Como o bug do mouse ou troca de janela, esse evento é registrado e as teclas congeladas simplesmente param
   window.addEventListener("blur", () => {
-  // Reseta todas as teclas para 'false' se o jogador clicar fora da tela (aqui cabou-se o problema do botão direito do mouse ;) )
-  // ou ainda a janela perder o foco. Isso previne o bug da "tecla presa".
+  // Reseta todas as teclas para 'false' se o jogador clicar fora da tela (aqui cabou-se o problema do botão direito do mouse ;) )  (theu: boaaa, edu!)
   Object.keys(keys).forEach(key => {
     keys[key] = false;
   });
@@ -313,6 +313,67 @@ const updatePlayerAnimation = (playerState, dt, fps) => {
 
 // Função para selecionar a imagem correta da nave
 const getPlayerImage = (animationFrame) => playerFrames[animationFrame];
+
+
+// Função para reiniciar o jogo (antes a gente tava reescrevendo tuuudo isso sempre que queríamos reiniciar o jogo, então fiz dela uma função a parte que é chamada nas outras :P  assim, se for pra mudar é só mudar aqui e show de bola)
+const resetGame = () => {
+  state.running = true;
+  state.isPaused = false;
+  state.lastTime = 0;
+  state.score = 0;
+  state.player.lives = 3;
+  state.enemyBullets = [];
+  state.bullets = [];
+  state.wave = 1;
+  state.enemySpeed = 40;
+  state.enemyFireRate = 0.0003;
+  state.player.x = (canvas.width / 2) - 40;
+  state.player.y = canvas.height - 80;
+  state.player.invincible = 0;
+  
+  // Recria os inimigos e as bases
+  state.enemies = (function spawn() {
+    const cols = 9, rows = 4;
+    return Array.from({ length: cols * rows }, (_, i) => {
+      const row = Math.floor(i / cols);
+      const typeMapping = [3, 2, 2, 1];
+      const enemyType = typeMapping[row];
+      return {
+        x: 300 + (i % cols) * 60,
+        y: 40 + row * 40,
+        w: 64, h: 64,
+        alive: true,
+        type: enemyType
+      };
+    });
+  })();
+
+  state.base = (function spawn() { 
+    const cols = 3, rows = 1; 
+    return Array.from({ length: cols * rows }, (_, i) => ({ 
+      x: 170 + (i % cols) * ((canvas.width - 80) / cols),
+      y: 500 + Math.floor(i / cols) * 40, w: 120, h: 100, hp: 30, hpMax: 30, hit: 0, alive: true
+    }));
+  })();
+
+  // Garante que o loop de animação comece se não estiver rodando
+  requestAnimationFrame(loop);
+};
+
+// Função para pausar/despausar o joguin
+const togglePause = () => {
+  if (!state.running) return; // Não permite pausar se o jogo já terminou
+
+  state.isPaused = !state.isPaused;
+};
+
+// Nova tecla, agora o 'P' pausa o jogo
+document.addEventListener("keydown", e => {
+  if (e.code === 'KeyP') {
+    togglePause();
+  }
+});
+
 
 // Função (theu: GIGANTE!! edu: MT msm) que retorna as modificações do state inicial
 const update = (dt) => {
@@ -535,45 +596,54 @@ state.base.forEach(b => {
   
   ctx.fillStyle = "#fff"; ctx.font = "16px 'Press Start 2P'"; ctx.fillText("Score: " + state.score, 550, 20);
 
-   // << NOVO INÍCIO: Desenha a tela de pause se o jogo estiver pausado
-  if (state.isPaused) {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+   // << MENU DE PAUSE >>
+if (state.isPaused) {
+    ctx.filter = "blur(5px)";     // Fundo borrado
+    ctx.drawImage(canvas, 0, 0);
+    ctx.filter = "none"           // Tira o blur do menu
 
+    // --- Tela de Pause ---
+    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.font = "48px 'Press Start 2P'";
     ctx.textAlign = "center";
     ctx.fillStyle = "#fff";
     ctx.fillText("PAUSADO", canvas.width / 2, canvas.height / 2 - 100);
 
-    // --- Botão de Retornar ao Jogo ---
-    const resumeBtnWidth = 320, resumeBtnHeight = 50;
-    const resumeBtnX = canvas.width / 2 - resumeBtnWidth / 2;
-    const resumeBtnY = canvas.height / 2 - 25;
+    // --- Botão de Continuar ---
+    const btnWidth = 320, btnHeight = 50;
+    const continueBtnY = canvas.height / 2 - 25;
     ctx.fillStyle = "#232946";
-    ctx.fillRect(resumeBtnX, resumeBtnY, resumeBtnWidth, resumeBtnHeight);
+    ctx.fillRect(canvas.width / 2 - btnWidth / 2, continueBtnY, btnWidth, btnHeight);
     ctx.font = "18px 'Press Start 2P'";
     ctx.fillStyle = "#fff";
     ctx.textBaseline = "middle";
-    ctx.fillText("Retornar ao Jogo", canvas.width / 2, resumeBtnY + (resumeBtnHeight / 2));
+    ctx.fillText("Continuar", canvas.width / 2, continueBtnY + (btnHeight / 2));
 
-    // --- Botão de Voltar ao Menu ---
-    const menuBtnWidth = 320, menuBtnHeight = 50;
-    const menuBtnX = canvas.width / 2 - menuBtnWidth / 2;
-    const menuBtnY = canvas.height / 2 + 50;
+    // --- Botão de Reiniciar ---
+    const restartBtnY = canvas.height / 2 + 50;
     ctx.fillStyle = "#232946";
-    ctx.fillRect(menuBtnX, menuBtnY, menuBtnWidth, menuBtnHeight);
+    ctx.fillRect(canvas.width / 2 - btnWidth / 2, restartBtnY, btnWidth, btnHeight);
+    ctx.font = "18px 'Press Start 2P'";
     ctx.fillStyle = "#fff";
-    ctx.fillText("Voltar ao Menu", canvas.width / 2, menuBtnY + (menuBtnHeight / 2));
+    ctx.textBaseline = "middle";
+    ctx.fillText("Reiniciar", canvas.width / 2, restartBtnY + (btnHeight / 2));
 
+    // --- Botão de Retornar ao Menu ---
+    const returnBtnY = canvas.height / 2 + 125;
+    ctx.fillStyle = "#232946";
+    ctx.fillRect(canvas.width / 2 - btnWidth / 2, returnBtnY, btnWidth, btnHeight);
+    ctx.font = "18px 'Press Start 2P'";
+    ctx.fillStyle = "#fff";
+    ctx.textBaseline = "middle";
+    ctx.fillText("Tela de Início", canvas.width / 2, returnBtnY + (btnHeight / 2));
+
+    // Reseta alinhamentos para não afetar outros desenhos
     ctx.textAlign = "start";
     ctx.textBaseline = "alphabetic";
   }
 
   if (!state.running) {
-    // --- Tela de Fundo Escurecida ---
-    ctx.fillStyle = "rgba(0,0,0,0.75)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
     // --- Texto "GAME OVER" com Estilo Retrô ---
     ctx.font = "48px 'Press Start 2P'";
     ctx.textAlign = "center";
@@ -585,11 +655,6 @@ state.base.forEach(b => {
     // Texto principal
     ctx.fillStyle = "#25f82fff"; // Cor do texto
     ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 50);
-
-    // --- Subtexto de Instrução ---
-    ctx.font = "14px 'Press Start 2P'";
-    ctx.fillStyle = "#fff";
-    ctx.fillText("Clique no botão para reiniciar", canvas.width / 2, canvas.height / 2);
 
     // --- Botão de Reiniciar com Estilo Retrô ---
     const btnWidth = 240, btnHeight = 50;
@@ -629,11 +694,6 @@ state.base.forEach(b => {
     ctx.fillStyle = "#232946";
     ctx.fillRect(btX, btY - shadowOfset, btWidth, btHeight);
 
-    // --- Subtexto de Instrução ---
-    ctx.font = "14px 'Press Start 2P'";
-    ctx.fillStyle = "#fff";
-    ctx.fillText("Clique no botão para retornar ao menu", canvas.width / 2 -255, canvas.height / 1.5);
-
     // Texto do botão
     ctx.font = "18px 'Press Start 2P'";
     ctx.fillStyle = "#fff"; // Texto branco para contraste
@@ -646,65 +706,52 @@ state.base.forEach(b => {
 }
 };
 
-// --- Detecta clique no botão de reiniciar, como um evento de retorno ---
+// --- Detecta clique no botão de reiniciar, pause, continuar e retornar ao menu ---
 canvas.addEventListener("click", function (e) {
-  if (state.running) return;
   const rect = canvas.getBoundingClientRect();
   const mouseX = e.clientX - rect.left;
   const mouseY = e.clientY - rect.top;
-  const btnWidth = 180, btnHeight = 44;
-  const btnX = canvas.width / 2 - btnWidth / 2;
-  const btnY = canvas.height / 2 + 40;
-  if (
-    mouseX >= btnX && mouseX <= btnX + btnWidth &&
-    mouseY >= btnY && mouseY <= btnY + btnHeight
-  ) {
-    // Reinicia o jogo
-    ensureAudio();
-    if (state.audio.ctx && state.audio.ctx.state === "suspended") state.audio.ctx.resume();
-    menu.style.display = "none";
-    canvas.style.display = "block";
-    muteBtn.style.display = 'block';
-    state.running = true;
-    state.lastTime = 0;
-    state.score = 0;
-    state.player.lives = 3;
-    state.enemyBullets = [];
-    state.bullets = [];
-    state.enemies = (function spawn() {
-      const cols = 9, rows = 4;
-      return Array.from({ length: cols * rows }, (_, i) => {
-        const row = Math.floor(i / cols);
-        const typeMapping = [3, 2, 2, 1];
-        const enemyType = typeMapping[row];
-        return {
-          x: 300 + (i % cols) * 60,
-          y: 40 + row * 40,
-          w: 64, h: 64,
-          alive: true,
-          type: enemyType
-        };
-      });
-    })();
 
-    state.base = (function spawn() { const cols = 3, rows = 1; return Array.from({ length: cols * rows }, (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
-      y: 500 + Math.floor(i / cols) * 40, w: 120, h: 100, hp: 30, hpMax: 30, hit: 0, alive: true
-    }));
-    })();
-    
-    // O requestAnimationFrame deve estar dentro do bloco de identação do IF para iniciar o loop 
-    requestAnimationFrame(loop); 
+  // Lógica para quando o jogo ESTÁ PAUSADO
+  if (state.isPaused) {
+    const btnWidth = 320, btnHeight = 50;
+    const btnX = canvas.width / 2 - btnWidth / 2;
+
+    const continueBtnY = canvas.height / 2 - 25;
+    const restartBtnY = canvas.height / 2 + 50;
+    const returnBtnY = canvas.height / 2 + 125;
+
+    // Checa clique no botão "Continuar"
+    if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= continueBtnY && mouseY <= continueBtnY + btnHeight) {
+      togglePause();
+    }
+    // Checa clique no botão "Reiniciar"
+    else if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= restartBtnY && mouseY <= restartBtnY + btnHeight) {
+      resetGame();
+    }
+    // Checa clique no botão "Retornar ao Menu"
+    else if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= returnBtnY && mouseY <= returnBtnY + btnHeight) {
+      window.location.href = "../index.html";
+    }
   }
-  // --- Retornar ---
-  const btWidth = 240, btHeight = 50;
-  const btX = canvas.width / 2 - btWidth / 2;
-  const btY = canvas.height / 2 + 150;
-  if (
-    mouseX >= btX && mouseX <= btX + btWidth &&
-    mouseY >= btY && mouseY <= btY + btHeight
-  ) {
-    // Redireciona para o menu principal
-    window.location.href = "../index.html";
+  // Lógica para a tela de GAME OVER (só executa se não estiver pausado)
+  else if (!state.running) {
+    const btnWidth = 240, btnHeight = 50; // Largura do botão de reiniciar do game over
+    const btnX = canvas.width / 2 - btnWidth / 2;
+    const btnY = canvas.height / 2 + 30;
+    
+    // Checa clique no botão "Reiniciar" do Game Over
+    if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= btnY -5 && mouseY <= btnY + btnHeight) { // Pequeno ajuste no Y por causa do seu efeito de sombra
+        resetGame();
+    }
+    
+    // Checa clique no botão "Retornar" do Game Over
+    const btWidth = 240, btHeight = 50;
+    const btX = canvas.width / 2 - btWidth / 2;
+    const btY = canvas.height / 2 + 150;
+    if (mouseX >= btX && mouseX <= btX + btWidth && mouseY >= btY && mouseY <= btY + btHeight) {
+        window.location.href = "../index.html";
+    }
   }
 });
 
@@ -713,7 +760,9 @@ const loop = (ts) => {
   if (!state.running) return;
   const dt = Math.min(0.05, (ts - (state.lastTime || ts)) / 1000);
   state.lastTime = ts;
-  update(dt);
+  if (!state.isPaused) {
+    update(dt);
+  };
   render();
   requestAnimationFrame(loop);
 };
@@ -750,34 +799,8 @@ playBtn.addEventListener("click", () => {
   menu.style.display = "none";
   canvas.style.display = "block";
   muteBtn.style.display = 'block';
-  state.running = true;
-  state.lastTime = 0;
-  state.score = 0;
-  state.player.lives = 3;
-  state.enemyBullets = [];
-  state.bullets = [];
-  state.enemies = (function spawn() {
-    const cols = 9, rows = 4;
-    return Array.from({ length: cols * rows }, (_, i) => {
-      const row = Math.floor(i / cols);
-      const typeMapping = [3, 2, 2, 1];
-      const enemyType = typeMapping[row];
-      return {
-        x: 300 + (i % cols) * 60,
-        y: 40 + row * 40,
-        w: 64, h: 64,
-        alive: true,
-        type: enemyType
-      };
-    });
-  })();
-  state.base = (function spawn() { const cols = 3, rows = 1; return Array.from({ length: cols * rows }, (_, i) => ({ x: 170 + (i % cols) * ((canvas.width - 80) / cols),
-    y: 500 + Math.floor(i / cols) * 40, w: 120, h: 100, hp: 30, hpMax: 30, hit: 0,alive: true
-  }));
-  })();
-  
-  // O requestAnimationFrame inicia o loop do jogo
-  requestAnimationFrame(loop);
+
+  resetGame();    // reutiliza a função de reiniciar o jogo
 });
 
 //Retornar ao menu
