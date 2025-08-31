@@ -239,7 +239,7 @@ const enemyShoot = (enemies, player, enemyBullets) => {
   return enemies.reduce((bullets, enemy) => {
     const distancia = Math.hypot(player.x - enemy.x, player.y - enemy.y);
 
-    if (enemy.alive && distancia < 300 && Math.random() < 0.01) {
+    if (enemy.alive && distancia < 300 && Math.random() < 0.001) {
       const ang = Math.atan2(player.y - enemy.y, player.x - enemy.x);
       const bullet = {
         x: enemy.x,
