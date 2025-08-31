@@ -1,6 +1,7 @@
 const canvas = document.querySelector("#ultimo-Sobrevivente");
 const ctx = canvas.getContext("2d");
 const playBtn = document.querySelector("#play-btn");
+const retornarBtn = document.querySelector("#retornar-btn")
 const menu = document.querySelector("#menu");
 const muteBtn = document.querySelector("#mute-btn")
 
@@ -14,7 +15,7 @@ enemyImg.src = "sprites/Alien1(192x192).png";
 
 const musica = new Audio('sons/musica.mp3');// musica de kim lightyear
 musica.loop = true;
-musica.volume = 0.4;
+musica.volume = 0.3;
 
 const somTiro = new Audio('sons/tiro.mp3');
 somTiro.volume = 0.2;
@@ -674,3 +675,10 @@ addMouseListener(canvas, (event) => {
 
 // Renderiza apenas o menu
 render(rootState.current.game);
+
+//Retornar ao menu
+// --- Botão Retornar das intruções ---
+retornarBtn.addEventListener("click", () => {
+  // Para o jogo
+  window.location.href = "../index.html";
+})
