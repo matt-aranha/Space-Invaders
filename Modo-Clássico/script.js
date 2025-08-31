@@ -42,182 +42,180 @@ baseDestroyedSound.volume = 0.4 // ajustar se precisar ED: baixei de 0.6 p/ 0.4,
 
 // Função que carrega as informações de cada entidade do game (atributos e mecânicas)
 const state = {
-      running: false,
-      isPaused: false,
-      lastTime: 0,
-      isMuted: false,
-      player: { 
-                x: (canvas.width / 2) - 40, y: canvas.height - 80, w: 90, h: 70,
-                speed: 450,
-                cooldown: 0, 
-                lives: 3, 
-                invincible: 0,
-                animationFrame: 0,          // essas duas propriedades (AnimationFrame e lastAnimationFrameTime) são para atualizar os sprites da nave, p/ fazer a animação
-                lastAnimationFrameTime: 0
-              },
-      enemyBullets: [],
-      bullets: [],
-      wave: 1,
-      enemyFireRate: 0.0005,
-      enemies: (function spawn()  {
-                                    const cols = 12, rows = 4;
-                                    return Array.from({ length: cols * rows }, (_, i) =>
-                                      {
-                                        const row = Math.floor(i / cols);
-                                        // Mapeia cada linha para um tipo de inimigo (clássico)
-                                        const typeMapping = [3, 2, 2, 1]; // Topo: tipo 3, Meio: tipo 2, Baixo: tipo 1, DPS temos a função que da diferentes scores a cada tipo
-                                        const enemyType = typeMapping[row];
-    
-                                        return  {
-                                                  x: 300 + (i % cols) * 60,
-                                                  y: 40 + row * 40,
-                                                  w: 64, h: 64,
-                                                  alive: true,
-                                                  type: enemyType // Usa o tipo mapeado
-                                                };
-                                      });
-                                  })(),
-      enemyDir: 1, 
-      enemySpeed: 40, 
-      score: 0, 
-      audio:  {
-                ctx: null,
-                masterGain: null,
-                bgOscs: [],
-                tones: [65, 60, 55, 50], // notas do tema original (theu: "edu brabo, slk")
-                index: 0, lastTime: 0
-              },
-      base: (function spawn() {
-                                const cols = 3, rows = 1;
-                                return Array.from({ length: cols * rows }, (_, i) => 
-                                ({
-                                    x: 170 + (i % cols) * ((canvas.width - 80) / cols),
-                                    y: 500 + Math.floor(i / cols) * 40,
-                                    w: 100, 
-                                    h: 80, 
-                                    hp: 30, 
-                                    hpMax: 30, 
-                                    hit: 0, 
-                                    alive: true
-                                  }));
-                              })(),
-      enemyAnimationFrame: 0,          // essas duas propriedades (frame e lastFrameTime) são para atualizar os sprites dos bichins, p/ fazer a animação
-      lastEnemyFrameTime: 0 
+    running: false,
+    isPaused: false,
+    lastTime: 0,
+    isMuted: false,
+    player: { 
+              x: (canvas.width / 2) - 40, y: canvas.height - 80, w: 90, h: 70,
+              speed: 450,
+              cooldown: 0, 
+              lives: 3, 
+              invincible: 0,
+              animationFrame: 0,          // essas duas propriedades (AnimationFrame e lastAnimationFrameTime) são para atualizar os sprites da nave, p/ fazer a animação
+              lastAnimationFrameTime: 0
+            },
+    enemyBullets: [],
+    bullets: [],
+    wave: 1,
+    enemyFireRate: 0.0005,
+    enemies: (function spawn()  {
+        const cols = 12, rows = 4;
+        return Array.from({ length: cols * rows }, (_, i) =>
+          {
+            const row = Math.floor(i / cols);
+            // Mapeia cada linha para um tipo de inimigo (clássico)
+            const typeMapping = [3, 2, 2, 1]; // Topo: tipo 3, Meio: tipo 2, Baixo: tipo 1, DPS temos a função que da diferentes scores a cada tipo
+            const enemyType = typeMapping[row];
+
+            return  {
+                      x: 300 + (i % cols) * 60,
+                      y: 40 + row * 40,
+                      w: 64, h: 64,
+                      alive: true,
+                      type: enemyType // Usa o tipo mapeado
+                    };
+          });
+      })(),
+    enemyDir: 1, 
+    enemySpeed: 40, 
+    score: 0, 
+    audio:  {
+        ctx: null,
+        masterGain: null,
+        bgOscs: [],
+        tones: [65, 60, 55, 50], // notas do tema original (theu: "edu brabo, slk")
+        index: 0, lastTime: 0
+            },
+    base: (function spawn() {
+        const cols = 3, rows = 1;
+        return Array.from({ length: cols * rows }, (_, i) => 
+        ({
+            x: 170 + (i % cols) * ((canvas.width - 80) / cols),
+            y: 500 + Math.floor(i / cols) * 40,
+            w: 100, 
+            h: 80, 
+            hp: 30, 
+            hpMax: 30, 
+            hit: 0, 
+            alive: true
+          }));
+      })(),
+    enemyAnimationFrame: 0,          // essas duas propriedades (frame e lastFrameTime) são para atualizar os sprites dos bichins, p/ fazer a animação
+    lastEnemyFrameTime: 0 
 };
 
 // -----VIDA------
 // Função que recebe o número de vidas e devolve as imagens corretas
-const renderLives = (lives, maxLives = 3) => 
-  Array.from({ length: maxLives }, (_, i) =>
-    i < lives ? "assets/vida(192x192).png" : "assets/sem-vida(192x192).png");
+const renderLives = (lives, maxLives = 3) => Array.from({ length: maxLives }, (_, i) => i < lives ? "assets/vida(192x192).png" : "assets/sem-vida(192x192).png");
 
 // Função que transforma a lista de imagens em DOM (strings) HTML
-const livesToHTML = (lives) =>
-  renderLives(lives)
-    .map(src => `<img src="${src}" width="30" height="30" />`)
-    .join("");
+const livesToHTML = (lives) => renderLives(lives).map(src => `<img src="${src}" width="30" height="30" />`).join("");
 
 // Função que atualiza o DOM
 const updateLivesUI = (state) => {
-  const container = document.getElementById("lives-container");
-  container.innerHTML = livesToHTML(state.player.lives);
+      const container = document.getElementById("lives-container");
+      container.innerHTML = livesToHTML(state.player.lives);
 };
+
 
 // ------ KEYS (teclas ;) ) -----
 // Função que recebe os input da interação teclado do usuário e game
 const keys = {};
-document.addEventListener("keydown", e => { keys[e.code] = true;
-  if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) e.preventDefault(); });
-document.addEventListener("keyup", e => { keys[e.code] = false; });
-//Para evitar o bug clássico  de jogos de navegador (quando o foco do navegador muda e O script n reconhece a mudança e mantém pressionado a última tecla mesmo tendo a soltado)
-//Como o bug do mouse ou troca de janela, esse evento é registrado e as teclas congeladas simplesmente param
-  window.addEventListener("blur", () => {
-  // Reseta todas as teclas para 'false' se o jogador clicar fora da tela (aqui cabou-se o problema do botão direito do mouse ;) )  (theu: boaaa, edu!)
-  Object.keys(keys).forEach(key => {
-    keys[key] = false;
-  });
-});
+      document.addEventListener("keydown", e => { keys[e.code] = true;
+        if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) e.preventDefault(); });
+      document.addEventListener("keyup", e => { keys[e.code] = false; });
+      //Para evitar o bug clássico  de jogos de navegador (quando o foco do navegador muda e O script n reconhece a mudança e mantém pressionado a última tecla mesmo tendo a soltado)
+      //Como o bug do mouse ou troca de janela, esse evento é registrado e as teclas congeladas simplesmente param
+      window.addEventListener("blur", () => {
+      // Reseta todas as teclas para 'false' se o jogador clicar fora da tela (aqui cabou-se o problema do botão direito do mouse ;) )  (theu: boaaa, edu!)
+      Object.keys(keys).forEach(key => {
+        keys[key] = false;
+      });
+    });
 
 // --- Áudio (WebAudio), mecanica de audio exportada ---
 const ensureAudio = () => {
-  if (state.audio.ctx) return;
-  const AudioCtx = window.AudioContext || window.webkitAudioContext;
-  if (!AudioCtx) return;
-  const a = new AudioCtx();
-  state.audio.ctx = a;
-  state.audio.masterGain = a.createGain();
-  state.audio.masterGain.gain.value = 0.9; // volume geral (ajusta se quiser)
-  state.audio.masterGain.connect(a.destination);
+      if (state.audio.ctx) return;
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const a = new AudioCtx();
+      state.audio.ctx = a;
+      state.audio.masterGain = a.createGain();
+      state.audio.masterGain.gain.value = 0.9; // volume geral (ajusta se quiser)
+      state.audio.masterGain.connect(a.destination);
 };
 
 // Função para tocar o som do tiro. (para evitar reiniciar o audio, ela clona o audio sempre que o jogador atirar)
 const playAudioTiro = (audioElement) => {
-  const soundToPlay = audioElement.cloneNode();
-  soundToPlay.muted = audioElement.muted;
-  soundToPlay.volume = audioElement.volume;
-  soundToPlay.play().catch(e => console.error("Audio do Tiro Falhou:", e));
+      const soundToPlay = audioElement.cloneNode();
+      soundToPlay.muted = audioElement.muted;
+      soundToPlay.volume = audioElement.volume;
+      soundToPlay.play().catch(e => console.error("Audio do Tiro Falhou:", e));
 };
 
 // Função para fazer tocar um tom com frequência, duração e tipo especificados
 const playTone = (freq, duration = 0.08, type = "square", vol = 0.12, endFreq = null) => {
-  const a = state.audio.ctx;
-  if (!a) return;
-  const o = a.createOscillator();
-  const g = a.createGain();
-  o.type = type; o.frequency.value = freq;
-  g.gain.value = vol;
-  o.connect(g); g.connect(state.audio.masterGain);
-  o.start();
-  g.gain.setValueAtTime(vol, a.currentTime);
-  if (endFreq !== null) {
-    o.frequency.exponentialRampToValueAtTime(endFreq, a.currentTime + duration);
-  }
-  g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + duration);
-  o.stop(a.currentTime + duration + 0.02);
+      const a = state.audio.ctx;
+      if (!a) return;
+      const o = a.createOscillator();
+      const g = a.createGain();
+      o.type = type; o.frequency.value = freq;
+      g.gain.value = vol;
+      o.connect(g); g.connect(state.audio.masterGain);
+      o.start();
+      g.gain.setValueAtTime(vol, a.currentTime);
+      if (endFreq !== null) {
+        o.frequency.exponentialRampToValueAtTime(endFreq, a.currentTime + duration);
+      }
+      g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + duration);
+      o.stop(a.currentTime + duration + 0.02);
 };
+
 const playInvaderTone = () => {
-  const a = state.audio;
-  if (!a.ctx) return;
+      const a = state.audio;
+      if (!a.ctx) return;
 
-  const now = performance.now();
-  // Calcula o tempo entre as batidas. Fica mais rápido com menos inimigos vivos.
-  const timeBetweenBeats = Math.max(100, 550 - (state.enemies.filter(e => e.alive).length * 5));
+      const now = performance.now();
+      // Calcula o tempo entre as batidas. Fica mais rápido com menos inimigos vivos.
+      const timeBetweenBeats = Math.max(100, 550 - (state.enemies.filter(e => e.alive).length * 5));
 
-  if (now - a.lastTime < timeBetweenBeats) {
-    return; // Ainda não é hora de tocar (segura onda ai :) )
-  }
+      if (now - a.lastTime < timeBetweenBeats) {
+        return; // Ainda não é hora de tocar (segura onda ai :) )
+      }
 
-  // Pega a próxima nota da sequência
-  const noteToPlay = a.tones[a.index];
-  
-  // Usa a funç. 'playTone' já existente para tocar a nota
-  playTone(noteToPlay, 0.1, "square", 0.1);
+      // Pega a próxima nota da sequência
+      const noteToPlay = a.tones[a.index];
+      
+      // Usa a funç. 'playTone' já existente para tocar a nota
+      playTone(noteToPlay, 0.1, "square", 0.1);
 
-  // Avança para a próxima nota da sequência
-  a.index = (a.index + 1) % a.tones.length;
-  a.lastTime = now;
+      // Avança para a próxima nota da sequência
+      a.index = (a.index + 1) % a.tones.length;
+      a.lastTime = now;
 };
 
 // --- Ações do jogo ---
 const tiro = () => {
-  const p = state.player;
-  if (p.cooldown > 0) return;
-  p.cooldown = 0.420;
-  state.bullets.push({ x: p.x + p.w / 2 - 2, y: p.y - 6, w: 4, h: 8, dy: -420 });
-  playAudioTiro(playerShotSound);
+      const p = state.player;
+      if (p.cooldown > 0) return;
+      p.cooldown = 0.420;
+      state.bullets.push({ x: p.x + p.w / 2 - 2, y: p.y - 6, w: 4, h: 8, dy: -420 });
+      playAudioTiro(playerShotSound);
 };
 
 // Função para processar as colisões do tiro do jogador com a base
 function processPlayerBulletBase(bullet, base, idx) {
-  if (idx >= base.length) return;
-  const b = base[idx];
-  if (b.alive &&
-      bullet.x < b.x + b.w && bullet.x + bullet.w > b.x &&
-      bullet.y < b.y + b.h && bullet.y + bullet.h > b.y) {
-    bullet.y = -9999; // Remove o tiro do jogador
-    return;
-  }
-  processPlayerBulletBase(bullet, base, idx + 1);
+      if (idx >= base.length) return;
+      const b = base[idx];
+      if (b.alive &&
+          bullet.x < b.x + b.w && bullet.x + bullet.w > b.x &&
+          bullet.y < b.y + b.h && bullet.y + bullet.h > b.y)
+          {
+            bullet.y = -9999; // Remove o tiro do jogador
+            return;
+          }
+      processPlayerBulletBase(bullet, base, idx + 1);
 };
 
 // Função para processar colisões entre balas e inimigos
