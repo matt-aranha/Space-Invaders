@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head> 
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Space Invaders</title>
   <link rel="stylesheet" href="visualtop.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
       <div class="stars"></div>
@@ -15,14 +15,19 @@
             <button id="play-btn">▶ Play</button>
             <button id="retornar-btn">↩️ Retornar</button>
             <h2>Use o 'W','A','S' e 'D' para mover-se e 'ESPAÇO' para atirar</h2>
-            <h3>CUIDADO! Eles chegam de todo canto!</h3>
+            <h3>CUIDADO! Eles chegam por todos os lados!</h3>
             <img src="/modosobreviva/sprites/Caveira.png">
+
       </div>
-      <div style="position: relative; display: inline-block;">
-            <div id="lives-container"></div>
+
+      <div id="game-container" style="position: relative; display: inline-block;">
             <canvas id="ultimo-Sobrevivente" width="1200" height="720" style="display:none"></canvas>
-      </div> 
-      <button id="mute-btn">🔇 Mutar</button>
+            <button id="mute-btn" >Mutar Som</button>
+      </div>
+
+     
+      <audio id="bg-music" src="/modosobreviva/sons/musica.mp3" loop></audio>
+      
       <script src="codigoPrincipal.js"></script>
 </body>
 </html>
