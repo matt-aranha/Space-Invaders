@@ -381,23 +381,22 @@ const resetGame = () => {
 
 // Função para pausar/despausar o joguin
 const togglePause = () => {
-  if (!state.running) return; // Não permite pausar se o jogo já terminou
-
-  state.isPaused = !state.isPaused;
+      if (!state.running) return;             // Não permite pausar se o jogo já terminou
+      state.isPaused = !state.isPaused;
 };
 
 // Nova tecla, agora o 'P' pausa o jogo
 document.addEventListener("keydown", e => {
-  if (e.code === 'KeyP') {
-    togglePause();
-  }
+      if (e.code === 'KeyP') {
+        togglePause();
+      }
 });
 
 // Esc também pausa
 document.addEventListener("keydown", e => {
-  if (e.code === 'Escape') {
-    togglePause();
-  }
+      if (e.code === 'Escape') {
+        togglePause();
+      }
 });
 
 
