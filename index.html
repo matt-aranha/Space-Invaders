@@ -35,13 +35,15 @@
     </p>
   </footer>
   <audio id="bg-music" autoplay loop>
-    <source src="modosobreviva/sons/musica.mp3" type="audio/mpeg">
+    <source src="musica.mp3" type="audio/mpeg">
   </audio>
   <script>
-    const music = document.getElementById("bg-music");
-      music.volume = 0.07;
-      music.play();// Garante que música só toca após interação (exigência de navegadores)
-    { once: true };
+    // Garante que música só toca após interação (exigência de navegadores)
+    document.body.addEventListener("click", () => {
+      const music = document.getElementById("bg-music");
+      music.volume = 0.3;
+      music.play();
+    }, { once: true });
   </script>
 </body>
 </html>
