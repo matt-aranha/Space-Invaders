@@ -843,6 +843,5 @@ playBtn.addEventListener("click", () => {
 //Retornar ao menu
 // --- Botão Retornar das intruções ---
 retornarBtn.addEventListener("click", () => {
-  // Para o jogo
-  window.location.href = "../index.html";
+      window.location.href = "../index.html";     // para o jogo (theu: para o jogo? não seria para o menu? :o)
 });
