@@ -497,7 +497,7 @@ const render = () => {
     ctx.drawImage(currentPlayerImg, state.player.x, state.player.y, state.player.w, state.player.h);
   }
 
-  // Player lives (IN PORTUGUESE, please ;-; : vidas)
+  // Player lives (IN PORTUGUESE, please ;-; : vidas) (ih, foi mal)
   ctx.fillStyle = "#fff";
   ctx.font = "16px 'Press Start 2P'";
   ctx.fillText("Vidas: ", canvas.width - 150, 20);
