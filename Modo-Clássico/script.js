@@ -474,6 +474,15 @@ muteBtn.addEventListener("click", () => {
 
 // --- Render --- (mostrar,criar e desenhar na tela)
 const drawRect = (x, y, w, h, color) => { ctx.fillStyle = color; ctx.fillRect(x, y, w, h); };
+const drawGlowingRect = (x, y, w, h, color, glowColor, blurAmount) =>
+  {   // (Theu: testando uma organização diferente de função, talvez fique mais visualmente agradável :D)
+    ctx.save()  //salva o estado atual
+    ctx.shadowColor = glowColor;
+    ctx.shadowBlur = blurAmount;
+    drawRect(x, y, w, h, color); // reutiliza a função original
+    ctx.restore(); // remove o brilho
+  };
+
 const render = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   updateLivesUI(state);
@@ -495,7 +504,7 @@ const render = () => {
 
 
   // Bullets
-  state.bullets.forEach(b => drawRect(b.x, b.y, b.w, b.h+10, "#58a6ff"));
+  state.bullets.forEach(b => drawGlowingRect(b.x, b.y, b.w, b.h+10, "#58a6ff", "#a3d1ff", 15));
 
   // Escudos (base)
 state.base.forEach(b => {
@@ -515,7 +524,7 @@ state.base.forEach(b => {
 });
 
   // Enemy bullets
-  state.enemyBullets.forEach(b => drawRect(b.x, b.y, b.w, b.h+8, "#ff5470"));
+  state.enemyBullets.forEach(b => drawGlowingRect(b.x, b.y, b.w, b.h+8, "#ff5470", "#ff81a1", 15));
 
   // Enemies
   state.enemies.forEach(e => {
