@@ -369,7 +369,7 @@ const togglePause = () => {
 
 // Nova tecla, agora o 'P' pausa o jogo
 document.addEventListener("keydown", e => {
-  if (e.code === 'KeyP') {
+  if (e.code === 'KeyP' || 'KeyEsc') {
     togglePause();
   }
 });
