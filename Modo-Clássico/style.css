@@ -76,7 +76,7 @@ body {
     border: 2px solid #a7a7a7;
     padding: 8px 12px;
     width: 140px; /* Ajuste de largura para o novo texto */
-    box-shadow: 0 4px 0 #919191; /* Sombra 3D rosa escuro */
+    box-shadow: 0 4px 0 #919191; /* Sombra 3D */
     cursor: pointer;
     position: relative;
     transition: top 0.05s ease-in-out;
