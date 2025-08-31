@@ -504,7 +504,7 @@ const render = () => {
 
 
   // Bullets
-  state.bullets.forEach(b => drawGlowingRect(b.x, b.y, b.w, b.h+10, "#58a6ff", "#a3d1ff", 15));
+  state.bullets.forEach(b => drawGlowingRect(b.x, b.y, b.w, b.h+10, "#227dd8ff", "#58a6ff", 15));
 
   // Escudos (base)
 state.base.forEach(b => {
@@ -524,7 +524,7 @@ state.base.forEach(b => {
 });
 
   // Enemy bullets
-  state.enemyBullets.forEach(b => drawGlowingRect(b.x, b.y, b.w, b.h+8, "#ff5470", "#ff81a1", 15));
+  state.enemyBullets.forEach(b => drawGlowingRect(b.x, b.y, b.w, b.h+8, "#e00d0dff", "#ff5470", 15));
 
   // Enemies
   state.enemies.forEach(e => {
