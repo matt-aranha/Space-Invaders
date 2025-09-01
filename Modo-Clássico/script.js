@@ -5,12 +5,8 @@ const ctx = canvas.getContext("2d");
 const playBtn = document.querySelector("#play-btn");
 const retornarBtn = document.querySelector("#retornar-btn")
 const menu = document.querySelector("#menu");
-const muteBtn = Object.freeze(document.getElementById("mute-btn"));
-const rootState = {
-  current: Object.freeze({
-    game: initialState(canvas)
-  })
-};
+const muteBtn = document.querySelector("#mute-btn")
+const menuMusic = document.getElementById('bg-music');
 
 // arquivos dos jogadores e dos inimigos, suas respectivas bases, cenário... :D
 const playerImg = new Image();
@@ -232,6 +228,15 @@ const keys = {};
         keys[key] = false;
       });
     });
+    document.addEventListener("contextmenu", e => {
+    // Previne o menu padrão de aparecer
+    e.preventDefault(); 
+    
+    // Reseta todas as teclas, corrigindo o bug do movimento contínuo
+    Object.keys(keys).forEach(key => {
+        keys[key] = false;
+    });
+});
 
 // --- Áudio (WebAudio), mecanica de audio exportada ---
 const ensureAudio = () => {
@@ -952,52 +957,57 @@ canvas.addEventListener("click", function (e) {
 
 
 // --- Loop principal ---
-// loop funcional, recursivo, imutável
-// recebe estado anterior, timestamp anterior, teclas e canvas
-// retorna função que recebe timestamp atual
-// e chama requestAnimationFrame com ela mesma (recursão)
-const step = (prevState, prevTs, keys, canvas) => (ts) => {
-  const dt = Math.min(0.05, (ts - (prevTs ?? ts)) / 1000);
-
-  // consome ações pendentes (mute, etc.)
-  const actions = pendingActions.splice(0, pendingActions.length);
-  const sA = reduceActions(prevState, actions);
-
-  // aplica lógica pura do jogo
-  const sB = updateGame(sA, dt, canvas, keys);
-
-  // efeitos (sons/DOM) ficam fora: ex.: se houve mute, aplicar
-  // applyMuteEffect(sB);  // chame aqui quando necessário
-
-  // render com o estado atual
-  render(sB);
-
-  // continua se running
-  if (!sB.running) return;
-
-  // encadeia próximo frame passando novo estado congelado
-  requestAnimationFrame(step(Object.freeze({ ...sB, lastTime: ts }), ts, keys, canvas));
+const loop = (ts) => {
+    if (!state.running) return;
+    const dt = Math.min(0.05, (ts - (state.lastTime || ts)) / 1000);
+    state.lastTime = ts;
+    if (!state.isPaused) {
+        update(dt);
+    };
+    render();
+    requestAnimationFrame(loop);
 };
-// Fila de transformações puras de estado, usada pelos eventos do DOM
-const pendingActions = [];
-
-const reduceActions = (state, actions) =>
-  actions.reduce((s, fn) => fn(s), state);
 
 // --- Play button ---
 playBtn.addEventListener("click", () => {
-  applyMute(false); // sons começam ativos
-  menu.style.display = "none";
-  canvas.style.display = "block";
-  muteBtn.style.display = "block";
+    menuMusic.pause(); //pausa a música do menu
+    menuMusic.currentTime = 0;
+    ensureAudio();
+    if (state.audio.ctx && state.audio.ctx.state === "suspended") { state.audio.ctx.resume() }
 
-  const novoJogo = Object.freeze({
-    ...initialState(canvas),
-    running: true
-  });
+    // Toca e pausa o som para "desbloquear" a permissão de áudio do navegador
+      // Guarda os volumes originais
+    const originalPlayerVolume = playerShotSound.volume;
+    const originalExplosionVolume = baseDestroyedSound.volume;
 
-  rootState.current = Object.freeze({ game: novoJogo });
+      // Força o volume para 0 para não fazer barulho
+    playerShotSound.volume = 0;
+    baseDestroyedSound.volume = 0;
 
-  // inicia o loop: requestAnimationFrame recebe a função retornada por step(...)
-  requestAnimationFrame(step(novoJogo, 0, keys, canvas));
+      // Toca os sons (agora permitidos pelo clique)
+    playerShotSound.play().catch(() => {});
+    baseDestroyedSound.play().catch(() => {});
+
+      // Usa um pequeno timeout para pausar e restaurar os volumes originais
+    setTimeout(() => {
+        playerShotSound.pause();
+        playerShotSound.currentTime = 0;
+        playerShotSound.volume = originalPlayerVolume;
+
+        baseDestroyedSound.pause();
+        baseDestroyedSound.currentTime = 0;
+        baseDestroyedSound.volume = originalExplosionVolume;
+    }, 10); // Um atraso mínimo, apenas para garantir a execução
+
+    menu.style.display = "none";
+    canvas.style.display = "block";
+    muteBtn.style.display = 'block';
+
+    resetGame();    // reutiliza a função de reiniciar o jogo
+});
+
+//Retornar ao menu
+// --- Botão Retornar das intruções ---
+retornarBtn.addEventListener("click", () => {
+      window.location.href = "../index.html";     // para o jogo (theu: para o jogo? não seria para o menu? :o)
 });
