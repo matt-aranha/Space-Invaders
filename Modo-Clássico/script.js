@@ -395,13 +395,6 @@ const togglePause = () => {
       state.isPaused = !state.isPaused;
 };
 
-// Nova tecla, agora o 'P' pausa o jogo
-document.addEventListener("keydown", e => {
-      if (e.code === 'KeyP') {
-        togglePause();
-      }
-});
-
 // Esc também pausa
 document.addEventListener("keydown", e => {
       if (e.code === 'Escape') {
