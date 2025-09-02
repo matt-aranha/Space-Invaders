@@ -35,9 +35,9 @@
             </audio>
   
             <script>
-                  const music = document.getElementById("bg-music");
-                  music.volume = 0.2;
-                  music.play();
+                  const music = document.getElementById("bg-music"); //alguns navegadores modernos bloqueiam o autoplay, o que dá uma quebrada .-.
+                  music.volume = 0.2; // acaba que n tem muito o que fazer, teria que criar uma função que interagisse primeiro com a página e dps tocasse
+                  music.play(); // ou então algum botão de click play inicial antes de entrar na tela de menu para escolha dos modos
                   { once: true };
               </script>
       </body>
