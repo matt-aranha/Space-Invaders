@@ -7,6 +7,7 @@ const retornarBtn = document.querySelector("#retornar-btn")
 const menu = document.querySelector("#menu");
 const muteBtn = document.querySelector("#mute-btn")
 const menuMusic = document.getElementById('bg-music');
+const gameContainer = document.querySelector("#game-container");
 
 // arquivos dos jogadores e dos inimigos, suas respectivas bases, cenário... :D
 const playerImg = new Image();
@@ -842,9 +843,7 @@ playBtn.addEventListener("click", () => {
     }, 10); // Um atraso mínimo, apenas para garantir a execução
 
     menu.style.display = "none";
-    canvas.style.display = "block";
-    muteBtn.style.display = 'block';
-
+    gameContainer.style.display = "block";
     resetGame();    // reutiliza a função de reiniciar o jogo
 });
 
