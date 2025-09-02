@@ -141,10 +141,10 @@ const isMouseOverAnyGameOverButton = (mouseX, mouseY, canvas) => {
 
 // funções para tocar música e som de tiro
 const tocarMusica = () => {
-  if (musica.paused) {
-    musica.currentTime = 0;
-    musica.play();
-  }
+  if (rootState.current.game.isMuted) return; // Não toca se o jogo estiver mutado
+  musica.pause();
+  musica.currentTime = 0;
+  musica.play();
 };
 
 const pararMusica = () => {
@@ -225,11 +225,23 @@ const spawnEnemy = canvas => {
 };
 
 //função para pausar the game .-.
+// A função de pause agora também controla a música.
 const togglePause = () => {
   const currentGame = rootState.current.game;
   // Só permite pausar se o jogo estiver rodando
-  if (!currentGame.running) return; 
+  if (!currentGame.running) return;
 
+  const isNowPaused = !currentGame.isPaused;
+
+  // Pausa ou retoma a música de acordo com o novo estado
+  if (isNowPaused) {
+    musica.pause();
+  } else {
+    // Só toca se não estiver mutado
+    if (!rootState.current.game.isMuted) {
+        musica.play();
+    }
+  }
   const newGame = Object.freeze({
     ...currentGame,
     isPaused: !currentGame.isPaused // Inverte o valor de isPaused
@@ -466,6 +478,13 @@ muteBtn.addEventListener("click", () => {
   somTiro.muted = isMuted;
   somDano.muted = isMuted;
 
+  // Se o usuário desmutou o som e o jogo não está pausado, a música volta a tocar
+  if (!isMuted && !rootState.current.game.isPaused) {
+      musica.play();
+  } else if (isMuted) { // Se mutou, a música para imediatamente
+      musica.pause();
+  }
+
   muteBtn.textContent = isMuted ? "🔊 Desmutar" : "🔇 Mutar Som";
 });
 
@@ -595,7 +614,7 @@ if (state.isPaused) {
     // --- Subtexto de Instrução ---
     ctx.font = "14px 'Press Start 2P'";
     ctx.fillStyle = "#fff";
-    ctx.fillText("Clique no botão para reiniciar", canvas.width / 2, canvas.height / 2);
+    ctx.fillText(" ", canvas.width / 2, canvas.height / 2);
 
     const restartBtn = gameOverButton(canvas); // <-- Pega as coordenadas da função
     const scale = state.hoverRestart ? 1.1 : 1.0;
@@ -658,52 +677,50 @@ function drawRect(x, y, w, h, color) {
   ctx.fillRect(x, y, w, h);
 }
 
-// --- Loop funcional ---
+//essa é uma das paradas mais difíceis de deixar funcional Khalil... aqui foi dureza
 const loop = (rootState, ts) => {
   const { game, mouse } = rootState.current;
-  let newGame; // Usamos 'let' para poder reatribuir o estado
 
-  // CASO 1: O jogo está rodando e NÃO está pausado
-  if (game.running && !game.isPaused) {
-    const dt = Math.min(0.05, (ts - (game.lastTime || ts)) / 1000);
-    const nextGame = nextState(game, keys, dt, canvas, ts, mouse);
+  // A variável 'newGame' é uma constante. Seu valor é decidido por uma única expressão.
+  const newGame = (game.running && !game.isPaused)
+    // Caso VERDADEIRO (o jogo está rodando):
+    ? (() => {
+        const dt = Math.min(0.05, (ts - (game.lastTime || ts)) / 1000);
+        const nextGame = nextState(game, keys, dt, canvas, ts, mouse);
 
-    // Controle de som: só toca se mudar de estado
-    if (nextGame.foiAcertado && !game.ultimoDano) tocarDano();
-    if (nextGame.inimigoAcertado && !game.ultimoHitInimigo) tocarDano();
+        // Efeitos colaterais de áudio são tratados aqui dentro
+        if (!nextGame.running && game.running) pararMusica();
+        if (nextGame.foiAcertado && !game.ultimoDano) tocarDano();
+        if (nextGame.inimigoAcertado && !game.ultimoHitInimigo) tocarDano();
 
-    // Atualiza o estado com base no resultado da lógica do jogo
-    newGame = Object.freeze({
-      ...nextGame,
-      ultimoDano: nextGame.foiAcertado,
-      ultimoHitInimigo: nextGame.inimigoAcertado
-    });
+        // O valor retornado será atribuído a 'newGame'
+        return Object.freeze({
+          ...nextGame,
+          ultimoDano: nextGame.foiAcertado,
+          ultimoHitInimigo: nextGame.inimigoAcertado
+        });
+      })() //executada imediatamente com os '()' no final.
+    // Caso FALSO (o jogo está pausado ou em game over): a lógica é simples(.-., só qn).
+    : Object.freeze({
+        ...game,
+        lastTime: ts,
+        hoverRestart: !game.running && isMouseOverAnyGameOverButton(mouse.x, mouse.y, canvas)
+      });
 
-  // CASO 2: O jogo está PAUSADO ou em GAME OVER
-  } else {
-    // A única coisa que fazemos é atualizar o tempo e o estado do mouse sobre os botões
-    newGame = Object.freeze({
-      ...game,
-      lastTime: ts,
-      hoverRestart: !game.running && isMouseOverAnyGameOverButton(mouse.x, mouse.y, canvas)
-    });
-  }
-
-  // Atualiza o estado global com o novo estado do jogo
+  // O resto da função continua igual: aplica os efeitos colaterais de atualizar e renderizar.
   rootState.current = Object.freeze({
     ...rootState.current,
     game: newGame
   });
 
-  // Renderiza o estado atual (seja jogo, pause ou game over)
   render(rootState.current.game);
-  // Pede o próximo frame para continuar o loop
   requestAnimationFrame((ts2) => loop(rootState, ts2));
 };
 
 // --- Clique no botão de reiniciar ---
 const resetGame = () => {
-  tocarMusica(); // Garante que a música comece
+  pararMusica(); // Para a música atual, caso ainda esteja tocando por algum motivo
+  tocarMusica(); // Garante que a música comece do zero
   const novoJogo = Object.freeze({ ...initialState(), running: true });
   rootState.current = Object.freeze({
     ...rootState.current,
