@@ -1,3 +1,7 @@
+// feito por Renato Veloso (RenatoVPF)
+
+
+
 const canvas = document.querySelector("#ultimo-Sobrevivente");
 const ctx = canvas.getContext("2d");
 const playBtn = document.querySelector("#play-btn");
@@ -27,19 +31,23 @@ const musica = (() => {
 
 const somTiro = (() => {
   const audio = new Audio("sons/tiro.mp3");
-  audio.volume = 0.5;
+  audio.volume = 0.2;
   return audio;
 })();
 
 const somDano = (() => {
   const audio = new Audio("sons/dano.mp3");
-  audio.volume = 0.5;
+  audio.volume = 0.2;
   return audio;
 })();
 
 // Função auxiliar funcional para tocar qualquer som
 const tocarSom = (som) => {
+  if (rootState.current.game.isMuted) {
+    return; // Não faz nada se estiver mutado (essa sacada aqui é genial pq mesmo mutado os outros sons continuariam, pq estão sendo clonados cada novo frame)
+  }//(, carregando consigo o state de muted = false incial, agr isso n acontece mais)
   const clone = som.cloneNode();
+  clone.volume = som.volume;
   clone.play().catch(() => {});
 };
 
@@ -106,8 +114,6 @@ const ajustarCanvas = () => {
 };
 
 
-
-// DEBUG UI — cole logo após as declarações iniciais (const canvas/ctx/playBtn/...)
 const debugUI = (() => {
   const q = (s) => document.querySelector(s);
   const menuEl = q("#menu");
@@ -164,29 +170,6 @@ const degToRad = (deg) => (deg * Math.PI) / 180;
 // cria inimigo imutável
 const createEnemy = (x, y, w = 64, h = 64, type = 1) => freezeObj({ x, y, w, h, type, alive: true });
 
-// spawn em grid (imutável)
-// const spawnEnemiesWave = (canvas, cols = 8, rows = 3, startX = 60, startY = 40, spacingX = 80, spacingY = 70) => {
-//   const typeMapping = [3, 2, 1];
-//   const arr = Array.from({ length: cols * rows }, (_, i) => {
-//     const row = Math.floor(i / cols);
-//     const col = i % cols;
-//     const type = typeMapping[row] ?? 1;
-//     const x = startX + col * spacingX;
-//     const y = startY + row * spacingY;
-//     return createEnemy(x, y, 64, 64, type);
-//   });
-//   return freezeArray(arr);
-// };
-
-// spawn random (imutável)
-// const spawnEnemiesRandom = (canvas, count = 5) => {
-//   const arr = Array.from({ length: count }, () => {
-//     const x = Math.floor(Math.random() * Math.max(1, canvas.width - 64));
-//     const y = Math.floor(Math.random() * Math.max(1, Math.floor(canvas.height / 3)));
-//     return createEnemy(x, y, 64, 64, 1);
-//   });
-//   return freezeArray(arr);
-// };
 const spawnEnemyAtBorder = (canvas, w = 64, h = 64, type = 1) => {
   const side = Math.floor(Math.random() * 4); // 0=topo, 1=baixo, 2=esq, 3=dir
   const xInside = Math.random() * (canvas.width - w);
@@ -232,7 +215,7 @@ const initialGame = (canvas) =>
     enemyBullets: freezeArray([]),
     score: 0,
     running: false,
-    isPaused: false,
+    isPaused: false, // NOVO: Adicionado estado de pause
     lastTime: 0,
     hoverRestart: false,
     inimigoAcertado: false,
@@ -257,6 +240,16 @@ document.addEventListener("keyup", (e) => {
   keysCell.current = updateKeys(keysCell.current, e.code, false);
 });
 const setKeys = (game, keys) => freezeObj({ ...game, keys: freezeObj(keys) });
+
+// NOVO: Listener para a tecla 'Escape' para pausar o jogo
+document.addEventListener("keydown", e => {
+    if (e.code === 'Escape' && rootState.current.game.running) {
+        const currentGame = rootState.current.game;
+        const newGameState = freezeObj({ ...currentGame, isPaused: !currentGame.isPaused });
+        rootState.current = Object.freeze({ ...rootState.current, game: newGameState });
+    }
+});
+
 
 // update helpers
 const updatePlayer = (player, keys, dt, canvas) => {
@@ -540,17 +533,42 @@ const render = (state) => {
   ctx.fillText("Vidas: " + (state.player.lives || 0), 10, 20);
   ctx.fillText("Score: " + (state.score || 0), 10, 40);
 
-  // Pause menu
+  // NOVO: Menu de Pause
   if (state.isPaused) {
-    ctx.save();
-    ctx.fillStyle = "rgba(0,0,0,0.5)";
+    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.font = "48px 'Press Start 2P'";
     ctx.textAlign = "center";
     ctx.fillStyle = "#fff";
     ctx.fillText("PAUSADO", canvas.width / 2, canvas.height / 2 - 100);
-    // botões desenhados aqui...
-    ctx.restore();
+
+    const btnWidth = 320, btnHeight = 50;
+    const continueBtnY = canvas.height / 2 - 25;
+    ctx.fillStyle = "#232946";
+    ctx.fillRect(canvas.width / 2 - btnWidth / 2, continueBtnY, btnWidth, btnHeight);
+    ctx.font = "18px 'Press Start 2P'";
+    ctx.fillStyle = "#fff";
+    ctx.textBaseline = "middle";
+    ctx.fillText("Continuar", canvas.width / 2, continueBtnY + (btnHeight / 2));
+
+    const restartBtnY = canvas.height / 2 + 50;
+    ctx.fillStyle = "#232946";
+    ctx.fillRect(canvas.width / 2 - btnWidth / 2, restartBtnY, btnWidth, btnHeight);
+    ctx.font = "18px 'Press Start 2P'";
+    ctx.fillStyle = "#fff";
+    ctx.textBaseline = "middle";
+    ctx.fillText("Reiniciar", canvas.width / 2, restartBtnY + (btnHeight / 2));
+
+    const returnBtnY = canvas.height / 2 + 125;
+    ctx.fillStyle = "#232946";
+    ctx.fillRect(canvas.width / 2 - btnWidth / 2, returnBtnY, btnWidth, btnHeight);
+    ctx.font = "18px 'Press Start 2P'";
+    ctx.fillStyle = "#fff";
+    ctx.textBaseline = "middle";
+    ctx.fillText("Tela de Início", canvas.width / 2, returnBtnY + (btnHeight / 2));
+    
+    ctx.textAlign = "start";
+    ctx.textBaseline = "alphabetic";
   }
 
   // Game Over
@@ -564,7 +582,6 @@ const render = (state) => {
     ctx.fillStyle = "#ff1818";
     ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 50);
 
-    // Botões (reiniciar + retornar) já calculados por helpers
     const restartBtn = gameOverButton(canvas);
     const scale = state.hoverRestart ? 1.1 : 1.0;
     const centerX = restartBtn.x + restartBtn.w / 2;
@@ -596,7 +613,7 @@ const render = (state) => {
     ctx.fillRect(returnBtn.x, returnBtn.y - 5, returnBtn.w, returnBtn.h);
     ctx.font = "18px 'Press Start 2P'";
     ctx.fillStyle = "#fff";
-    ctx.fillText("Retornar", centerX2, returnBtn.y - 5 + returnBtn.h / 2);
+    ctx.fillText("Retornar", centerX2, returnBtn.y - 10 + returnBtn.h / 2+15);
     ctx.restore();
     ctx.textAlign = "start";
   }
@@ -615,7 +632,19 @@ const flushActions = () => freezeArray([]);
 // step (loop) funcional que recebe um snapshot e retorna a próxima frame
 const step = (state, lastTs, keysCellRef, canvasRef) => (ts) => {
   const dt = lastTs ? Math.min(0.05, (ts - lastTs) / 1000) : 0;
-  const reduced = flushActions().reduce((s, f) => f(s), state);
+
+  // CORREÇÃO: Sincroniza o estado de pause com o estado global antes de qualquer outra ação.
+  const syncedState = freezeObj({ ...state, isPaused: rootState.current.game.isPaused });
+
+  // Se o jogo estiver pausado, apenas renderize e continue o loop com o estado atualizado.
+  if (syncedState.isPaused) {
+    render(syncedState);
+    requestAnimationFrame(step(syncedState, ts, keysCellRef, canvasRef));
+    return;
+  }
+
+  // Se não estiver pausado, executa a lógica normal do jogo.
+  const reduced = flushActions().reduce((s, f) => f(s), syncedState);
   const stateWithKeys = setKeys(reduced, keysCellRef.current);
   const next = nextState(
     stateWithKeys,
@@ -625,10 +654,15 @@ const step = (state, lastTs, keysCellRef, canvasRef) => (ts) => {
     ts,
     (rootState.current && rootState.current.mouse) ? rootState.current.mouse : initialMouse
   );
+  
+  // Se o jogo estava rodando e no próximo estado não está mais (jogador morreu), pare a música.
+  if (syncedState.running && !next.running) {
+    pararMusica();
+  }
 
   // som de dano/inimigo apenas quando ocorrer transição
-  if (next.foiAcertado && !state.ultimoDano) tocarDanoSom();
-  if (next.inimigoAcertado && !state.ultimoHitInimigo) tocarDanoSom();
+  if (next.foiAcertado && !syncedState.ultimoDano) tocarDanoSom();
+  if (next.inimigoAcertado && !syncedState.ultimoHitInimigo) tocarDanoSom();
 
   render(next);
 
@@ -643,7 +677,7 @@ const step = (state, lastTs, keysCellRef, canvasRef) => (ts) => {
 // resetGame e startGame (imutáveis, criam novos snapshots)
 const resetGame = () => {
   tocarMusica();
-  const novoJogo = freezeObj({ ...initialGame(canvas), running: true });
+  const novoJogo = freezeObj({ ...initialGame(canvas), running: true, isPaused: false });
   rootState.current = Object.freeze({ ...rootState.current, game: novoJogo });
   requestAnimationFrame(step(novoJogo, 0, keysCell, canvas));
 };
@@ -665,25 +699,24 @@ canvas.addEventListener("click", (e) => {
   const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
 
   const currentGame = rootState.current.game;
-
+  
+  // NOVO: Lógica de clique para o menu de PAUSE
   if (currentGame.isPaused) {
-    const btnWidth = 320, btnHeight = 50;
-    const btnX = canvas.width / 2 - btnWidth / 2;
-    const continueBtnY = canvas.height / 2 - 25;
-    const restartBtnY = canvas.height / 2 + 50;
-    const returnBtnY = canvas.height / 2 + 125;
-    if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= continueBtnY && mouseY <= continueBtnY + btnHeight) {
-      // despausar
-      const ng = freezeObj({ ...currentGame, isPaused: false });
-      rootState.current = Object.freeze({ ...rootState.current, game: ng });
-      return;
-    } else if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= restartBtnY && mouseY <= restartBtnY + btnHeight) {
-      resetGame();
-      return;
-    } else if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= returnBtnY && mouseY <= returnBtnY + btnHeight) {
-      window.location.href = "../index.html";
-      return;
-    }
+      const btnWidth = 320, btnHeight = 50;
+      const btnX = canvas.width / 2 - btnWidth / 2;
+      const continueBtnY = canvas.height / 2 - 25;
+      const restartBtnY = canvas.height / 2 + 50;
+      const returnBtnY = canvas.height / 2 + 125;
+
+      if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= continueBtnY && mouseY <= continueBtnY + btnHeight) {
+          const ng = freezeObj({ ...currentGame, isPaused: false });
+          rootState.current = Object.freeze({ ...rootState.current, game: ng });
+      } else if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= restartBtnY && mouseY <= restartBtnY + btnHeight) {
+          resetGame();
+      } else if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= returnBtnY && mouseY <= returnBtnY + btnHeight) {
+          window.location.href = "../index.html";
+      }
+      return; // Impede que a lógica de game over execute ao mesmo tempo
   }
 
   if (!currentGame.running) {
@@ -700,18 +733,14 @@ canvas.addEventListener("click", (e) => {
 // play button
 if (playBtn) {
   playBtn.addEventListener("click", () => {
+     if (menuMusic) {
+      menuMusic.pause();
+      menuMusic.currentTime = 0;
+    }
   menu.style.display = "none";
   canvas.style.display = "block";
   
-  const novoEstado = freezeObj({ ...initialGame(canvas), running: true });
-  const withKeys = setKeys(novoEstado, keysCell.current);
-  rootState.current = Object.freeze({ ...rootState.current, game: withKeys });
-  
-  tocarMusica();
-  muteBtn.style.display = "block";
-  updateMuteBtnPosition();
-  
-  requestAnimationFrame(step(withKeys, 0, keysCell, canvas));
+  startGame();
 });
 }
 

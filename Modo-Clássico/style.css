@@ -64,13 +64,11 @@ body {
 }
 
 /* Estilo Retrô para o Botão de Mute */
-/* Estilo Retrô para o Botão de Mute */
+
 #mute-btn {
-  /* posicionamento será controlado por JS (fixed) */
-  position: fixed;
-  top: 36px;
-  right: 1210px;
-  display: none;        /* começa oculto (HTML faz o mesmo); JS mostrará quando preciso */
+  position: absolute; /* Mude de 'fixed' para 'absolute' */
+  top: 10px;          /* Distância do topo do container */
+  left: 10px;        /* Distância da direita do container */
   background: #232946;
   color: #fff;
   border: 2px solid #49dd1c;
@@ -78,13 +76,18 @@ body {
   font-size: 12px;
   padding: 6px 10px;
   cursor: pointer;
-  z-index: 9999;        /* garante ficar acima do canvas (canvas tem z-index:10) */
+  z-index: 101;       /* Aumentei para garantir que fique acima do #lives-container */
   border-radius: 6px;
   user-select: none;
 }
 
 #mute-btn:hover {
   background: #1cdd39;
+}
+
+#mute-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 #c44259;
 }
 
 /* Efeito de botão sendo pressionado */
@@ -149,32 +152,7 @@ canvas {
 #game-container {
   position: relative;
   display: inline-block; /* Ajusta o tamanho ao conteúdo */
-  box-shadow: 0 0 40px rgba(255, 84, 112, 0.5); /* Brilho neon opcional */
-}
-
-/* Efeito CRT (scanlines e vinheta) */
-#game-container::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background:
-    radial-gradient(ellipse at center, rgba(0,0,0,0) 30%, rgba(0,0,0,0.5) 100%),
-    repeating-linear-gradient(
-      rgba(0,0,0,0) 0px,
-      rgba(0,0,0,0) 1px,
-      rgba(0,0,0,0.3) 2px,
-      rgba(0,0,0,0.3) 3px
-    );
-  pointer-events: none; /* Permite que cliques atravessem o efeito */
-  border-radius: 15px; /* Simula a curvatura da tela */
-}
-
-/* Leve curvatura no canvas para completar o efeito */
-canvas {
-  border-radius: 15px;
+  box-shadow: 0 0 40px rgba(45, 44, 44, 0.5); /* Brilho neon opcional */
 }
 
 .stars {

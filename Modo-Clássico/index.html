@@ -8,35 +8,32 @@
             <link rel="icon" href="/Modo-Clássico/assets/icone(192x192).png">
             <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
       </head>
+     <body>
+    <div class="stars"></div>
 
-      <body>
-            <div class="stars"></div>
+    <div id="menu">
+        <h1>MODO <br>CLASSICO</h1>
+        <h2>Use o 'A' ou <kbd>&larr;</kbd>, 'D' ou <kbd>&rarr;</kbd>,  para mover-se e 'W' ou 'ESPAÇO' para atirar <br> (Use a tecla 'Esc' caso queira pausar o game) <br>
+        <br>CUIDADO! Não deixe os invasores chegarem até você!</h2> <br>
+        <button id="play-btn">▶ Play</button> <br> <br>
+        <button id="retornar-btn">↩ Retornar</button> <br> <br>
+        <img src="/Modo-Clássico/assets/Controle(192x192).png">
+    </div>
+       
+    <div id="game-container" style="position: relative; display: none;"> <div id="lives-container"></div>
+        <canvas id="space-invaders" width="1200" height="720"></canvas> <button id="mute-btn">🔇 Mutar</button>
+    </div> 
 
-            <div id="menu">
-                  <h1>MODO <br>CLASSICO</h1>
-                  <h2>Use o 'A' ou <kbd>&larr;</kbd>, 'D' ou <kbd>&rarr;</kbd>,  para mover-se e 'W' ou 'ESPAÇO' para atirar <br>Use a tecla 'Esc' caso queira pausar o game <br>
-                  <br>CUIDADO! Não deixe os invasores chegarem até você!</h2> <br>
-                  <button id="play-btn">▶ Play</button> <br> <br>
-                  <button id="retornar-btn">↩ Retornar</button> <br> <br>
-                  <img src="/Modo-Clássico/assets/Controle(192x192).png">
-            </div>
-            <div id="game-container">
-                  <div id="lives-container"></div>
-                  <button id="mute-btn">🔇 Mutar</button>
-                  <canvas id="space-invaders" width="1200" height="720" style="display:none"></canvas>
-            </div>
+    <audio id="bg-music" loop>
+        <source src="../modosobreviva/sons/music.mp3" type="audio/mpeg">
+    </audio>
 
-            <audio id="bg-music" loop>
-                  <source src="../modosobreviva/sons/music.mp3" type="audio/mpeg">
-            </audio>
+    <script>
+        const music = document.getElementById("bg-music");
+        music.volume = 0.15;
+        music.play(); 
+        { once: true };
+    </script>
 
-            <script>
-                  const music = document.getElementById("bg-music");
-                  music.volume = 0.1;
-                  music.play();
-                  { once: true };
-            </script>
-
-            <script src="script.js"></script>
-      </body>
-</html>
+    <script src="script.js"></script>
+</body>
