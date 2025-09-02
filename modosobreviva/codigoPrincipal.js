@@ -345,7 +345,7 @@ const processBullets = (bullets, enemies, score) => {
   };
 };
 
-// processPlayerHit
+// processPlayerHit serve para detectar colisões do player com balas inimigas
 const processPlayerHit = (player, enemyBullets, ts) => {
   if (ts < (player.invulneravelAte || 0)) {
     return { player, enemyBullets, foiAcertado: false };
