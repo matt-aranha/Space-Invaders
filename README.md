@@ -1,9 +1,12 @@
 # Space Invaders <img alt="Alien" heigth="32" width="32" src="/Modo-Clássico/assets/icone(192x192).png" style="border: none;">
 
- Esse projeto foi desenvolvido por **Mateus Aranha** (@matt_aranha), **Eduardo Guimarães** (@eduardoguimaraes-coder) e **Renato Veloso** (@RenatoVPF), ao longo da matéria de **Programação Funcional**, ministrada pelo **Prof. Dr. Kalil Bispo.**
+ ***English*** - This game was developed by **Mateus Aranha** (@matt_aranha), **Eduardo Guimarães** (@eduardoguimaraes-coder) and **Renato Veloso** (@RenatoVPF), throughout the academic subject ***"Functional Programming"***, taught by **Professor Ph.D Kalil Bispo** at the **Federal University of Sergipe - UFS** (Brazil).
+ 
+ ***Português*** - Esse projeto foi desenvolvido por **Mateus Aranha** (@matt_aranha), **Eduardo Guimarães** (@eduardoguimaraes-coder) e **Renato Veloso** (@RenatoVPF), ao longo da matéria de ***"Programação Funcional"***, ministrada pelo **Professor Dr. Kalil Bispo** na **Universidade Federal de Sergipe - UFS**
+ 
 <p align="center"> 
-    <img alt="Space-Invaders Logo" height="400" width="450" src="/Modo-Clássico/assets/Logo.png" style="border: none;">
+    <img alt="Space-Invaders Menu" height="650" width="800" src="/Modo-Clássico/assets/Home-Screen.png" style="border: none;">
 </p>
 
-## Divirta-se: https://spaceinvaderspfufs.netlify.app/
-#### **© 2025. Todos os direitos reservados. Universidade Federal de Sergipe.**
+## Enjoy It: https://spaceinvaderspfufs.netlify.app/
+#### **© 2025. All rights reserved. Federal University of Sergipe.**
