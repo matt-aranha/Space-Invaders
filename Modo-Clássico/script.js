@@ -724,7 +724,7 @@ const render = () => {
         // --- Botão de Retornar com Estilo Retrô ---
         const btWidth = 240, btHeight = 50;
         const btX = canvas.width / 2 - btWidth / 2;
-        const btY = canvas.height / 2 + 150;
+        const btY = canvas.height / 2 + 100;
         const shadowOfset = 5; // Tamanho da "sombra 3D"
 
         // Sombra do botão (desenhada primeiro, por baixo)
@@ -792,7 +792,7 @@ canvas.addEventListener("click", function (e) {
           // Checa clique no botão "Retornar" do Game Over
           const btWidth = 240, btHeight = 50;
           const btX = canvas.width / 2 - btWidth / 2;
-          const btY = canvas.height / 2 + 150;
+          const btY = canvas.height / 2 + 100;
           if (mouseX >= btX && mouseX <= btX + btWidth && mouseY >= btY && mouseY <= btY + btHeight) {
               window.location.href = "../index.html";
           }
