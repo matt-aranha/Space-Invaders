@@ -27,19 +27,23 @@ const musica = (() => {
 
 const somTiro = (() => {
   const audio = new Audio("sons/tiro.mp3");
-  audio.volume = 0.5;
+  audio.volume = 0.2;
   return audio;
 })();
 
 const somDano = (() => {
   const audio = new Audio("sons/dano.mp3");
-  audio.volume = 0.5;
+  audio.volume = 0.2;
   return audio;
 })();
 
 // Função auxiliar funcional para tocar qualquer som
 const tocarSom = (som) => {
+  if (rootState.current.game.isMuted) {
+    return; // Não faz nada se estiver mutado (essa sacada aqui é genial pq mesmo mutado os outros sons continuariam, pq estão sendo clonados cada novo frame)
+  }//(, carregando consigo o state de muted = false incial, agr isso n acontece mais)
   const clone = som.cloneNode();
+  clone.volume = som.volume;
   clone.play().catch(() => {});
 };
 
@@ -106,8 +110,6 @@ const ajustarCanvas = () => {
 };
 
 
-
-// DEBUG UI — cole logo após as declarações iniciais (const canvas/ctx/playBtn/...)
 const debugUI = (() => {
   const q = (s) => document.querySelector(s);
   const menuEl = q("#menu");
@@ -596,7 +598,7 @@ const render = (state) => {
     ctx.fillRect(returnBtn.x, returnBtn.y - 5, returnBtn.w, returnBtn.h);
     ctx.font = "18px 'Press Start 2P'";
     ctx.fillStyle = "#fff";
-    ctx.fillText("Retornar", centerX2, returnBtn.y - 5 + returnBtn.h / 2);
+    ctx.fillText("Retornar", centerX2, returnBtn.y - 10 + returnBtn.h / 2+15);
     ctx.restore();
     ctx.textAlign = "start";
   }
@@ -625,6 +627,11 @@ const step = (state, lastTs, keysCellRef, canvasRef) => (ts) => {
     ts,
     (rootState.current && rootState.current.mouse) ? rootState.current.mouse : initialMouse
   );
+  
+  // Se o jogo estava rodando e no próximo estado não está mais (jogador morreu), pare a música.
+  if (state.running && !next.running) {
+    pararMusica();
+  }
 
   // som de dano/inimigo apenas quando ocorrer transição
   if (next.foiAcertado && !state.ultimoDano) tocarDanoSom();
@@ -700,6 +707,10 @@ canvas.addEventListener("click", (e) => {
 // play button
 if (playBtn) {
   playBtn.addEventListener("click", () => {
+     if (menuMusic) {
+      menuMusic.pause();
+      menuMusic.currentTime = 0;
+    }
   menu.style.display = "none";
   canvas.style.display = "block";
   
@@ -707,7 +718,7 @@ if (playBtn) {
   const withKeys = setKeys(novoEstado, keysCell.current);
   rootState.current = Object.freeze({ ...rootState.current, game: withKeys });
   
-  tocarMusica();
+  tocarMusica(); // inicia a música del game .-.
   muteBtn.style.display = "block";
   updateMuteBtnPosition();
   
