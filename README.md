@@ -2,7 +2,7 @@
 
  Esse projeto foi desenvolvido por **Mateus Aranha** (@matt_aranha), **Eduardo Guimarães** (@eduardoguimaraes-coder) e **Renato Veloso** (@RenatoVPF), ao longo da matéria de **Programação Funcional**, ministrada pelo **Prof. Dr. Kalil Bispo.**
 <p align="center"> 
-    <img alt="Space-Invaders Menu" height="400" width="450" src="/Modo-Clássico/assets/HomeScreen.png" style="border: none;">
+    <img alt="Space-Invaders Menu" height="400" width="450" src="/Modo-Clássico/assets/homeScreen.png" style="border: none;">
 </p>
 
 ## Divirta-se: https://spaceinvaderspfufs.netlify.app/
