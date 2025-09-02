@@ -1,3 +1,7 @@
+// feito por Renato Veloso (RenatoVPF)
+
+
+
 const canvas = document.querySelector("#ultimo-Sobrevivente");
 const ctx = canvas.getContext("2d");
 const playBtn = document.querySelector("#play-btn");

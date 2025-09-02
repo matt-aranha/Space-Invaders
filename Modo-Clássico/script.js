@@ -1,4 +1,31 @@
-//SCRIPT DO MODO CLÁSSICO DO JOGO SPACE INVADERS, vulgo THE BEST GAME ;)
+/*                                                          © 2025. All rights reserved. Federal University of Sergipe.
+
+=====================================================================================================================================================================================
+
+English:
+This script, referring to the classic game mode, was developed by Eduardo Guimarães (@eduardoguimaraes-coder) and Mateus Aranha (@matt-aranha).
+Computer Engineering students at the Federal University of Sergipe (UFS).
+
+In it, we used the knowledge acquired during the "Functional Programming" subject — along with knowledge acquired throughout the project — to create
+our version of the historic game "Space Invaders", released in the 1980s for the Atari 2600 console.
+
+The professor responsible for the course and, consequently, for enabling the development of this game is Professor Ph.D Kalil Bispo.
+
+=====================================================================================================================================================================================
+
+Português:
+Esse Script, referente ao modo de jogo clássico, foi desenvolvido por Eduardo Guimarães (@eduardoguimaraes-coder) e Mateus Aranha (@matt-aranha).
+Alunos do curso de Engenharia de Computação da Universidade Federal de Sergipe - UFS.
+
+Nele, nós utilizamos o conhecimento adquirido durante a matéria "Programação Funcional" em - conjunto com conhecimentos prévios e adquiridos ao
+decorrer do projeto - para fazer a nossa versão do jogo histórico "Space Invaders", lançado na década de 80 para o console Atari 2600.
+
+O professor responsável pela matéria e, consequentemente, por proporcionar o desenvolvimento desse jogo é o Professor Dr. Kalil Bispo.
+
+=====================================================================================================================================================================================
+*/
+
+
 //inports brabos ;)
 const canvas = document.querySelector("#space-invaders");
 const ctx = canvas.getContext("2d");
