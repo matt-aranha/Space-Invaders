@@ -8,5 +8,5 @@
     <img alt="Space-Invaders Menu" height="650" width="800" src="/Modo-Clássico/assets/Home-Screen.png" style="border: none;">
 </p>
 
-## Divirta-se: https://spaceinvaderspfufs.netlify.app/
-#### **© 2025. Todos os direitos reservados. Universidade Federal de Sergipe.**
+## Enjoy It: https://spaceinvaderspfufs.netlify.app/
+#### **© 2025. All rights reserved. Federal University of Sergipe.**
