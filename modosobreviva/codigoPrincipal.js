@@ -245,6 +245,13 @@ const setKeys = (game, keys) => freezeObj({ ...game, keys: freezeObj(keys) });
 document.addEventListener("keydown", e => {
     if (e.code === 'Escape' && rootState.current.game.running) {
         const currentGame = rootState.current.game;
+         if (!currentGame.isPaused) {
+            // Se o jogo NÃO ESTÁ pausado, ele vai pausar agora.
+            musica.pause(); 
+        } else {
+            // Se o jogo JÁ ESTÁ pausado, ele vai voltar a tocar.
+            musica.play().catch(() => {});
+        }
         const newGameState = freezeObj({ ...currentGame, isPaused: !currentGame.isPaused });
         rootState.current = Object.freeze({ ...rootState.current, game: newGameState });
     }
@@ -293,7 +300,7 @@ const enemyShoot = (enemies, player, enemyBullets) =>
   freezeArray(
     enemies.reduce((acc, enemy) => {
       const distancia = Math.hypot(player.x - enemy.x, player.y - enemy.y);
-      if (enemy.alive && distancia < 300 && Math.random() < 0.008) {
+      if (enemy.alive && distancia < 300 && Math.random() < 0.002) {
         // toca som do tiro do inimigo
         tocarTiro();
         return acc.concat([aimedShot(enemy, player)]);
@@ -709,6 +716,7 @@ canvas.addEventListener("click", (e) => {
       const returnBtnY = canvas.height / 2 + 125;
 
       if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= continueBtnY && mouseY <= continueBtnY + btnHeight) {
+          musica.play().catch(() => {});
           const ng = freezeObj({ ...currentGame, isPaused: false });
           rootState.current = Object.freeze({ ...rootState.current, game: ng });
       } else if (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= restartBtnY && mouseY <= restartBtnY + btnHeight) {

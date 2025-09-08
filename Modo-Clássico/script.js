@@ -15,10 +15,10 @@ The professor responsible for the course and, consequently, for enabling the dev
 
 Português:
 Esse Script, referente ao modo de jogo clássico, foi desenvolvido por Eduardo Guimarães (@eduardoguimaraes-coder) e Mateus Aranha (@matt-aranha).
-Alunos do curso de Engenharia de Computação da Universidade Federal de Sergipe - UFS.
+Alunos do curso de Engenharia de Computação da Universidade Federal de Sergipe (UFS).
 
-Nele, nós utilizamos o conhecimento adquirido durante a matéria "Programação Funcional" em - conjunto com conhecimentos prévios e adquiridos ao
-decorrer do projeto - para fazer a nossa versão do jogo histórico "Space Invaders", lançado na década de 80 para o console Atari 2600.
+Nele, nós utilizamos o conhecimento adquirido durante a matéria "Programação Funcional" – em conjunto com conhecimentos adquiridos ao
+decorrer do projeto – para criar a nossa versão do jogo histórico "Space Invaders", lançado na década de 80 para o console Atari 2600.
 
 O professor responsável pela matéria e, consequentemente, por proporcionar o desenvolvimento desse jogo é o Professor Dr. Kalil Bispo.
 
