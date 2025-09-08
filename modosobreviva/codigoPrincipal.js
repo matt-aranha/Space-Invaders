@@ -63,10 +63,19 @@ const pararMusica = () => {
   musica.currentTime = 0;
 };
 
+// som de power-up (efeito opcional)
+const somPowerUp = (() => {
+  const audio = new Audio("sons/powerup.mp3"); // adicione o arquivo quando puder
+  audio.volume = 0.35;
+  return audio;
+})();
+
+
+
 // Sons específicos
 const tocarTiro = () => tocarSom(somTiro);
 const tocarDanoSom = () => tocarSom(somDano);
-
+const tocarPowerUp = () => tocarSom(somPowerUp);
 
 const updateMuteBtnPosition = () => {
   if (!muteBtn || !canvas) return;
@@ -153,6 +162,8 @@ const applyMuteBtnCoords = (btnElement, coords) => {
 
 
 
+
+
 // botões Game Over
 const gameOverButton = (canvas) => ({ x: canvas.width / 2 - 120, y: canvas.height / 2 + 30, w: 240, h: 50 });
 const gameOverReturnButton = (canvas) => ({ x: canvas.width / 2 - 120, y: canvas.height / 2 + 110, w: 240, h: 50 });
@@ -192,6 +203,69 @@ const spawnEnemiesAtBorders = (canvas, count = 12) =>
 const createBullet = (x, y, dx, dy, w = 6, h = 6) => freezeObj({ x, y, dx, dy, w, h });
 const pushBullet = (bullets, bullet) => freezeArray(bullets.concat([freezeObj(bullet)]));
 
+// ---------- POWER-UPS (modelo + spawn) ----------
+const POWERUP_DURATION = 10000; // 10s (ms)
+const POWERUP_SHAPES = freezeArray(["circle", "square"]);
+const POWERUP_TYPES  = freezeArray(["vida", "tiro", "invencivel"]); // ❤️ ⚡ 🛡
+const POWERUP_COLORS = Object.freeze({
+  vida: Object.freeze({
+    core: "#19f362ff",          // verde vivo (núcleo)
+    glow: "rgba(13, 247, 103, 0.53)" // verde translúcido (brilho)
+  }),
+  tiro: Object.freeze({
+    core: "#1d81f3ff",             // azul vivo
+    glow: "rgba(88, 255, 247, 0.58)" // azul translúcido
+  }),
+  invencivel: Object.freeze({
+    core: "#f1b72dff",              // amarelo vivo
+    glow: "rgba(252, 205, 52, 0.55)" // amarelo translúcido
+  }),
+});
+
+const POWERUP_COLORS_DEFAULT = Object.freeze({
+  core: "#ffffff",
+  glow: "rgba(255,255,255,0.4)"
+});
+
+const createPowerUp = (x, y, type, shape = "circle") =>
+  freezeObj({ x, y, w: 22, h: 22, type, shape });
+
+const randomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const randomPowerUpType  = () => randomItem(POWERUP_TYPES);
+const randomPowerUpShape = () => randomItem(POWERUP_SHAPES);
+
+// spawna dentro da tela, com margem
+const spawnOnePowerUp = (canvas) => {
+  const margin = 30;
+  const w = 22, h = 22;
+  const x = margin + Math.random() * (canvas.width  - 2 * margin - w);
+  const y = margin + Math.random() * (canvas.height - 2 * margin - h);
+  return createPowerUp(x, y, randomPowerUpType(), randomPowerUpShape());
+};
+
+// aplica os efeitos coletados (puro)
+const applyPowerUpEffects = (player, bulletBoostUntil, collected, nowTs) =>
+  collected.reduce(
+    (acc, p) => {
+      if (p.type === "vida") {
+        const lives = (acc.player.lives || 0) + 1;
+        return { ...acc, player: freezeObj({ ...acc.player, lives }), got: true };
+      }
+      if (p.type === "tiro") {
+        // estende o boost atual para +10s a partir de agora
+        const until = Math.max(acc.bulletBoostUntil || 0, nowTs) + POWERUP_DURATION;
+        return { ...acc, bulletBoostUntil: until, got: true };
+      }
+      if (p.type === "invencivel") {
+        const inv = Math.max(acc.player.invulneravelAte || 0, nowTs) + POWERUP_DURATION;
+        return { ...acc, player: freezeObj({ ...acc.player, invulneravelAte: inv }), got: true };
+      }
+      return acc;
+    },
+    { player, bulletBoostUntil, got: false }
+  );
+
+
 // estado inicial do jogador e do jogo
 const initialPlayer = (canvas) =>
   freezeObj({
@@ -222,7 +296,11 @@ const initialGame = (canvas) =>
     foiAcertado: false,
     isMuted: false,
     ultimoDano: false,
-    ultimoHitInimigo: false
+    ultimoHitInimigo: false,
+    powerUps: freezeArray([]),              // pickups na tela
+    nextPowerUpAt: 0,                      // agenda do próximo spawn (ms)
+    bulletBoostUntil: 0,                   // fim do boost de tiro (ms)
+    ultimoPowerUpSfx: false
   });
 
 // rootState snapshot (a referência em si é const, mas a propriedade .current será trocada por um novo objeto congelado)
@@ -378,11 +456,21 @@ const processPlayerHit = (player, enemyBullets, ts) => {
 };
 
 // tiro do jogador (imutável)
-const tiro = (state) => {
+// ANTES:
+// const tiro = (state) => { ... Math.cos(rad) * 400 ... }
+
+// DEPOIS:
+const tiro = (state, bulletSpeed) => {
   if ((state.player.cooldown || 0) > 0) return { state, atirou: false };
   const rad = degToRad(state.player.angle);
-  const bullet = createBullet(state.player.x + Math.cos(rad) * 30, state.player.y + Math.sin(rad) * 30, Math.cos(rad) * 400, Math.sin(rad) * 400, 6, 6);
-  // tocar som já aqui
+  const speed = bulletSpeed; // injetado
+  const bullet = createBullet(
+    state.player.x + Math.cos(rad) * 30,
+    state.player.y + Math.sin(rad) * 30,
+    Math.cos(rad) * speed,
+    Math.sin(rad) * speed,
+    6, 6
+  );
   tocarTiro();
   const newState = freezeObj({
     ...state,
@@ -406,9 +494,18 @@ const nextState = (state, keys, dt, canvas, ts, mouse) => {
   const enemies = freezeArray(state.enemies.filter((e) => e.alive).concat(novosInimigos));
   
   const playerAtualizado = updatePlayer(state.player, keys || {}, dt, canvas);
+  // bullet speed efetiva (1.0 normal, 1.8 com boost)
+  const hasBoost = (state.bulletBoostUntil || 0) > ts;
+  const bulletSpeedMult = hasBoost ? 1.8 : 1.0;
+  const baseBulletSpeed = 400;
+  const effectiveBulletSpeed = baseBulletSpeed * bulletSpeedMult;
+
 
   const podeAtirar = (keys || {})["Space"] && (playerAtualizado.cooldown === 0);
-  const stateAfterTiro = podeAtirar ? tiro(freezeObj({ ...state, player: playerAtualizado, bullets: state.bullets })).state : freezeObj({ ...state, player: playerAtualizado, bullets: state.bullets });
+  const stateAfterTiro = podeAtirar
+  ? tiro(freezeObj({ ...state, player: playerAtualizado, bullets: state.bullets }), effectiveBulletSpeed).state
+  : freezeObj({ ...state, player: playerAtualizado, bullets: state.bullets });
+
   const enemiesMoved = updateEnemies(enemies, stateAfterTiro.player, dt);
   const bullets = updateBullets(stateAfterTiro.bullets, dt, canvas);
   const enemyBullets = updateBullets(stateAfterTiro.enemyBullets || [], dt, canvas);
@@ -422,9 +519,52 @@ const nextState = (state, keys, dt, canvas, ts, mouse) => {
 
   const hoverRestart = !running && isMouseOverAnyGameOverButton((mouse && mouse.x) || -1, (mouse && mouse.y) || -1, canvas);
 
+  // ---------- spawn de power-ups (tempo) ----------
+  const maxPowerUps = 2;
+  const nextAt = state.nextPowerUpAt || 0;
+  const shouldInitSchedule = nextAt === 0;
+  const scheduleInit = shouldInitSchedule ? (ts + 4000 + Math.random() * 4000) : nextAt;
+
+  const canSpawn = ts >= scheduleInit && (state.powerUps || []).length < maxPowerUps;
+  const spawned = canSpawn ? spawnOnePowerUp(canvas) : null;
+  const powerUpsStep1 = canSpawn
+    ? freezeArray((state.powerUps || []).concat([spawned]))
+    : (state.powerUps || []);
+  const nextSchedule = canSpawn ? (ts + 8000 + Math.random() * 9000) : scheduleInit;
+
+  // ---------- coleta (player x powerUps) ----------
+  const hx = playerHitResult.player.x - playerHitResult.player.w / 2;
+  const hy = playerHitResult.player.y - playerHitResult.player.h / 2;
+  const hw = playerHitResult.player.w, hh = playerHitResult.player.h;
+
+  const collect = powerUpsStep1.reduce(
+    (acc, p) => {
+      const colide =
+        p.x < hx + hw && p.x + p.w > hx &&
+        p.y < hy + hh && p.y + p.h > hy;
+      return colide
+        ? { collected: acc.collected.concat([p]), remaining: acc.remaining }
+        : { collected: acc.collected,         remaining: acc.remaining.concat([p]) };
+    },
+    { collected: [], remaining: [] }
+  );
+
+  // aplica efeitos
+  const eff = applyPowerUpEffects(
+    playerHitResult.player,
+    state.bulletBoostUntil || 0,
+    collect.collected,
+    ts
+  );
+
+  const powerUpsFinal = freezeArray(collect.remaining);
+  const bulletBoostUntilFinal = eff.bulletBoostUntil || 0;
+  const gotPowerUp = eff.got === true;
+
+
   const newState = freezeObj({
     ...state,
-    player: playerHitResult.player,
+    player: eff.player,                        // player após efeitos
     bullets: bulletResult.bullets,
     enemies: bulletResult.enemies,
     enemyBullets: playerHitResult.enemyBullets,
@@ -435,10 +575,15 @@ const nextState = (state, keys, dt, canvas, ts, mouse) => {
     inimigoAcertado: bulletResult.inimigoAcertado,
     inimigosAtiraram: (enemyBulletsShot.length > (state.enemyBullets ? state.enemyBullets.length : 0)),
     hoverRestart,
-    // controle de som por transição
     ultimoDano: playerHitResult.foiAcertado,
-    ultimoHitInimigo: bulletResult.inimigoAcertado
+    ultimoHitInimigo: bulletResult.inimigoAcertado,
+    // ---- NOVOS ----
+    powerUps: powerUpsFinal,
+    nextPowerUpAt: nextSchedule,
+    bulletBoostUntil: bulletBoostUntilFinal,
+    ultimoPowerUpSfx: gotPowerUp
   });
+
 
   return newState;
 };
@@ -449,9 +594,8 @@ if (muteBtn) {
     const isMuted = !rootState.current.game.isMuted;
     const newGame = freezeObj({ ...rootState.current.game, isMuted });
     rootState.current = Object.freeze({ ...rootState.current, game: newGame });
-    musica.muted = isMuted;
-    somTiro.muted = isMuted;
-    somDano.muted = isMuted;
+    musica.muted = isMuted; somTiro.muted = isMuted; somDano.muted = isMuted; somPowerUp.muted = isMuted;
+
     muteBtn.textContent = isMuted ? "🔊 Desmutar" : "🔇 Mutar Som";
   });
 }
@@ -534,11 +678,82 @@ const render = (state) => {
     }
   });
 
+  // POWER-UPS (duas camadas: glow + núcleo)
+  (state.powerUps || []).forEach((p) => {
+    const { core, glow } = POWERUP_COLORS[p.type] || POWERUP_COLORS_DEFAULT;
+
+    // --- 1) CAMADA: brilho/blur (um pouco maior) ---
+    const grow = 1; // halo 25% maior
+    const gx = p.x - (p.w * (grow - 1)) / 2;
+    const gy = p.y - (p.h * (grow - 1)) / 2;
+    const gw = p.w * grow;
+    const gh = p.h * grow;
+
+    if (p.shape === "circle") {
+      const cx = p.x + p.w / 2;
+      const cy = p.y + p.h / 2;
+      const rGlow = (Math.min(p.w, p.h) / 2) * grow;
+
+      ctx.save();
+      ctx.shadowColor = glow;
+      ctx.shadowBlur  = 30;     // intensidade do blur (pode ajustar)
+      ctx.fillStyle   = glow;
+      // opcional: deixar o brilho mais “vivo”
+      // ctx.globalCompositeOperation = "lighter";
+      ctx.beginPath();
+      ctx.arc(cx, cy, rGlow, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    } else {
+      ctx.save();
+      ctx.shadowColor = glow;
+      ctx.shadowBlur  = 30;
+      ctx.fillStyle   = glow;
+      // ctx.globalCompositeOperation = "lighter"; // opcional
+      ctx.fillRect(gx, gy, gw, gh);
+      ctx.restore();
+    }
+
+    // --- 2) CAMADA: núcleo nítido (sem blur) ---
+    if (p.shape === "circle") {
+      const cx = p.x + p.w / 2;
+      const cy = p.y + p.h / 2;
+      const rCore = Math.min(p.w, p.h) / 2;
+
+      ctx.save();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle  = core;
+      ctx.beginPath();
+      ctx.arc(cx, cy, rCore, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    } else {
+      ctx.save();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle  = core;
+      ctx.fillRect(p.x, p.y, p.w, p.h);
+      ctx.restore();
+    }
+  });
+
+
+
   // HUD
   ctx.fillStyle = "#fff";
   ctx.font = "16px 'Press Start 2P'";
   ctx.fillText("Vidas: " + (state.player.lives || 0), 10, 20);
   ctx.fillText("Score: " + (state.score || 0), 10, 40);
+
+  // Timers dos efeitos (segundos restantes)
+  const invLeftMs  = Math.max(0, (state.player.invulneravelAte || 0) - (state.lastTime || 0));
+  const boostLeftMs = Math.max(0, (state.bulletBoostUntil || 0) - (state.lastTime || 0));
+
+  ctx.font = "14px 'Press Start 2P'";
+  ctx.fillStyle = "#ffd166";
+  if (invLeftMs > 0)  ctx.fillText("🛡 " + (invLeftMs/1000).toFixed(1) + "s", 10, 64);
+  ctx.fillStyle = "#58a6ff";
+  if (boostLeftMs > 0) ctx.fillText("⚡ x1.8 " + (boostLeftMs/1000).toFixed(1) + "s", 10, 84);
+
 
   // NOVO: Menu de Pause
   if (state.isPaused) {
@@ -670,6 +885,7 @@ const step = (state, lastTs, keysCellRef, canvasRef) => (ts) => {
   // som de dano/inimigo apenas quando ocorrer transição
   if (next.foiAcertado && !syncedState.ultimoDano) tocarDanoSom();
   if (next.inimigoAcertado && !syncedState.ultimoHitInimigo) tocarDanoSom();
+  if (next.ultimoPowerUpSfx && !syncedState.ultimoPowerUpSfx) tocarPowerUp();
 
   render(next);
 
